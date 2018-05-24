@@ -1,4 +1,6 @@
 from django.contrib.auth.backends import RemoteUserBackend
+from django.core.exceptions import PermissionDenied
+
 
 class CustomRemoteUserBackend(RemoteUserBackend):
     # Suffix used for Andrew emails
@@ -6,6 +8,7 @@ class CustomRemoteUserBackend(RemoteUserBackend):
 
     # Let any Andrew ID log in and have a database entry created
     create_unknown_user = True
+
 
     def clean_username(self, username):
         """
@@ -16,21 +19,19 @@ class CustomRemoteUserBackend(RemoteUserBackend):
         Returns the extracted Andrew ID, or raises a ValueError if the
         username was invalid.
         """
-
         # Extract Andrew ID
-        if username.endswith(ANDREW_EMAIL_SUFFIX):
-            return username[:-len(ANDREW_EMAIL_SUFFIX)]
+        if username.endswith(self.ANDREW_EMAIL_SUFFIX):
+            return username[:-len(self.ANDREW_EMAIL_SUFFIX)]
 
-        # TODO: figure out what to do with this
-        raise ValueError("Email must end with @andrew.cmu.edu")
+        raise PermissionDenied("Only andrew.cmu.edu users are permitted")
 
 
-    def configure_user(user):
+    def configure_user(self, user):
         """
         Configure user after creation by updating email address and
         password fields accordingly. Returns the updated user.
         """
-        user.email = user.username + ANDREW_EMAIL_SUFFIX
+        user.email = user.username + self.ANDREW_EMAIL_SUFFIX
         user.set_unusable_password()
 
         # TODO: use info from CMU LDAP.
