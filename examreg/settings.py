@@ -71,6 +71,10 @@ TEMPLATES = [
 WSGI_APPLICATION = 'examreg.wsgi.application'
 
 
+# Custom User model
+AUTH_USER_MODEL = 'registration.User'
+
+
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
 
