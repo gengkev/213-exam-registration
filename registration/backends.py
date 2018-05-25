@@ -33,6 +33,7 @@ class CustomRemoteUserBackend(RemoteUserBackend):
         """
         user.email = user.username + self.ANDREW_EMAIL_SUFFIX
         user.set_unusable_password()
+        user.save()
 
         # TODO: use info from CMU LDAP.
         # https://github.com/ScottyLabs/directory-api/blob/master/server.js

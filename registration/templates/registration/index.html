@@ -1,0 +1,34 @@
+{% extends "base_generic.html" %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<h1>Exam Registration System</h1>
+
+<h2>Courses</h2>
+
+{# Loop through each course this user is in #}
+{% for course_user in course_user_list %}
+<h3>
+  {{ course_user.course.name }}
+  <small class="text-muted">{{ course_user.course.code }}</small>
+</h3>
+
+<p>User type: {{ course_user.user_type }}</p>
+<p>Lecture: {{ course_user.lecture }}</p>
+<p>Section: {{ course_user.section }}</p>
+<p>Dropped: {{ course_user.dropped }}</p>
+
+hi {{ course_user.exam_registration_soet }} hi
+<ul>
+  {# For each course, loop through each exam this user is in #}
+  {% for exam_reg in course_user.exam_registration_set.all %}
+  <li>
+    <p>Exam: {{ exam_reg.exam.name }}</p>
+    <p>Time slot: {{ exam_reg.time_slot }}</p>
+  </li>
+  {% endfor %}
+</ul>
+
+{% endfor %}
+
+{% endblock %}

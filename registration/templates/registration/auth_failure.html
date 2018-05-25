@@ -1,0 +1,13 @@
+{% extends "base_generic.html" %}
+{% block title %}Authentication failure{% endblock %}
+
+{% block content %}
+<p>
+  This system only recognizes <tt>andrew.cmu.edu</tt> identities.
+  {% if remote_user %}
+  However, your current identity is <tt>{{ remote_user }}</tt>.
+  {% else %}
+  However, your session is not associated with an identity.
+  {% endif %}
+  Please try logging in with your <tt>andrew.cmu.edu</tt> identity.</p>
+{% endblock %}

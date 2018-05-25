@@ -33,8 +33,12 @@ class Course(models.Model):
 
 
 class CourseUser(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    user = models.ForeignKey(User,
+        on_delete=models.CASCADE,
+    )
+    course = models.ForeignKey(Course,
+        on_delete=models.CASCADE,
+    )
 
     # Type of account in this course
     INSTRUCTOR = 'i'
@@ -61,7 +65,9 @@ class CourseUser(models.Model):
 
 
 class Room(models.Model):
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course,
+        on_delete=models.CASCADE,
+    )
     name = models.CharField(max_length=200)
     capacity = models.PositiveIntegerField()
 
@@ -70,7 +76,9 @@ class Room(models.Model):
 
 
 class Exam(models.Model):
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course,
+        on_delete=models.CASCADE,
+    )
     name = models.CharField(max_length=200)
     registrations = models.ManyToManyField(CourseUser,
         through='ExamRegistration',
@@ -81,19 +89,30 @@ class Exam(models.Model):
 
 
 class TimeSlot(models.Model):
-    exam = models.ForeignKey(Exam, on_delete=models.CASCADE)
+    exam = models.ForeignKey(Exam,
+        on_delete=models.CASCADE,
+        related_name='time_slot_set',
+    )
     start = models.DateTimeField()
     end = models.DateTimeField()
-    rooms = models.ManyToManyField(Room)
+    rooms = models.ManyToManyField(Room, blank=True)
     capacity = models.PositiveIntegerField()
 
 
 class ExamRegistration(models.Model):
-    # Assume exam.course == user.course
-    exam = models.ForeignKey(Exam, on_delete=models.CASCADE)
-    course_user = models.ForeignKey(CourseUser, on_delete=models.CASCADE)
+    # Assume exam.course == course_user.course
+    # Assume exam == time_slot.exam
+    exam = models.ForeignKey(Exam,
+        on_delete=models.CASCADE,
+        related_name='exam_registration_set',
+    )
+    course_user = models.ForeignKey(CourseUser,
+        on_delete=models.CASCADE,
+        related_name='exam_registration_set',
+    )
     time_slot = models.ForeignKey(TimeSlot,
         on_delete=models.SET_NULL,
+        related_name='exam_registrations',
         null=True,
         blank=True,
     )
