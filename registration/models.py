@@ -16,7 +16,7 @@ class User(AbstractUser):
 class Course(models.Model):
     code = models.CharField(
         max_length=32,
-        primary_key=True,
+        unique=True,
         help_text='Unique identifier for the course, e.g. 15213-m18.',
     )
     name = models.CharField(
