@@ -7,33 +7,19 @@
 <h2>Courses</h2>
 
 {# Loop through each course this user is in #}
-{% for course_user in course_user_list %}
-{% with course_user.course as course %}
-<h3>
-  {{ course.name }}
-  <small class="text-muted">{{ course.code }}</small>
-</h3>
-
-<p>User type: {{ course_user.user_type }}</p>
-<p>Lecture: {{ course_user.lecture }}</p>
-<p>Section: {{ course_user.section }}</p>
-<p>Dropped: {{ course_user.dropped }}</p>
-
 <ul>
-  {# For each course, loop through each exam this user is in #}
-  {% for exam_reg in course_user.exam_registration_set.all %}
-  {% with exam_reg.exam as exam %}
+  {% for course_user in course_user_list %}
+  {% with course_user.course as course %}
   <li>
-    <a href="{% url 'registration:exam-detail' exam.id %}">
-      <p>Exam: {{ exam.name }}</p>
-      <p>Time slot: {{ time_slot }}</p>
+    <a href="{% url 'registration:course-detail' course.code %}">
+      {{ course.name }}
+      <small class="text-muted">{{ course.code }}</small>
     </a>
   </li>
+
+
   {% endwith %}
   {% endfor %}
 </ul>
-
-{% endwith %}
-{% endfor %}
 
 {% endblock %}

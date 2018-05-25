@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404, render
 from django.views import generic
-from .models import CourseUser, Exam, ExamRegistration
+from .models import Course, CourseUser, Exam, ExamRegistration
 
 
 def index(request):
@@ -21,9 +21,22 @@ def index(request):
         })
 
 
-# TODO: Require authentication
-def exam_detail(request, exam_id):
-    exam = get_object_or_404(Exam, pk=exam_id)
+# TODO: Require login
+def course_detail(request, course_code):
+    course = get_object_or_404(Course,
+            code=course_code)
+    course_user = get_object_or_404(CourseUser,
+            user=request.user.id, course=course)
+    return render(request, 'registration/course_detail.html', {
+        'course': course,
+        'course_user': course_user,
+    })
+
+
+# TODO: Require login
+def exam_detail(request, course_code, exam_id):
+    exam = get_object_or_404(Exam,
+            pk=exam_id, course__code=course_code)
     exam_reg = get_object_or_404(ExamRegistration,
             course_user__user=request.user.id, exam=exam)
 
