@@ -1,7 +1,19 @@
 main {
-  padding-top: 2rem;
+  padding-top: 1rem;
 }
 .course-card .card-body {
   display: block;
   text-decoration: none;
+}
+.my-breadcrumb {
+  margin-left: -0.5em;
+}
+.my-breadcrumb .nav-item .nav-link {
+  padding-left: 0;
+}
+.my-breadcrumb .nav-item .nav-link::before {
+  display: inline-block;
+  padding-right: .5em;
+  color: #6c757d;
+  content: "/";
 }

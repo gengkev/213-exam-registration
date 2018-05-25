@@ -20,7 +20,14 @@
 <body>
 
   <nav class="navbar navbar-expand navbar-dark bg-dark">
-    <a class="navbar-brand" href="#">Exam Registration System</a>
+    <a class="navbar-brand" href="/">Exam Registration System</a>
+
+    <!-- Left-aligned breadcrumbs -->
+    <ol class="navbar-nav mr-auto my-breadcrumb" aria-label="breadcrumb">
+      {% block breadcrumb %}{% endblock %}
+    </ol>
+
+    <!-- Right-aligned account items -->
     <ul class="navbar-nav ml-auto">
       <li class="nav-item">
         <a class="nav-link">
@@ -32,6 +39,7 @@
           {% endif %}
         </a>
       </li>
+
       <li class="nav-item">
         <a class="nav-link">
           <i class="fa fa-sign-out" aria-hidden="true"></i>
@@ -39,9 +47,11 @@
         </a>
       </li>
     </ul>
+
   </nav>
 
   <main role="main" class="container">
+
     {% block content %}{% endblock %}
   </div>
 
