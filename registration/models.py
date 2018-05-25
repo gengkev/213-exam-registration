@@ -28,6 +28,9 @@ class Course(models.Model):
         help_text='Accounts enrolled in this course',
     )
 
+    def __str__(self):
+        return self.code
+
 
 class CourseUser(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -50,36 +53,50 @@ class CourseUser(models.Model):
     section = models.CharField(max_length=32, blank=True)
     dropped = models.BooleanField()
 
+    def __str__(self):
+        return '%s (%s), %s' % (self.user, self.course, self.user_type)
+
+    class Meta:
+        unique_together = (('user', 'course'),)
+
 
 class Room(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
     capacity = models.PositiveIntegerField()
 
+    def __str__(self):
+        return '%s (%s)' % (self.name, self.course)
+
 
 class Exam(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
-    registrations = models.ManyToManyField(User,
+    registrations = models.ManyToManyField(CourseUser,
         through='ExamRegistration',
     )
+
+    def __str__(self):
+        return '%s (%s)' % (self.name, self.course)
 
 
 class TimeSlot(models.Model):
     exam = models.ForeignKey(Exam, on_delete=models.CASCADE)
-    start = models.DateField()
-    end = models.DateField()
+    start = models.DateTimeField()
+    end = models.DateTimeField()
     rooms = models.ManyToManyField(Room)
+    capacity = models.PositiveIntegerField()
 
 
 class ExamRegistration(models.Model):
+    # Assume exam.course == user.course
     exam = models.ForeignKey(Exam, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    course_user = models.ForeignKey(CourseUser, on_delete=models.CASCADE)
     time_slot = models.ForeignKey(TimeSlot,
         on_delete=models.SET_NULL,
         null=True,
+        blank=True,
     )
-    room = models.ForeignKey(Room,
-        on_delete=models.SET_NULL,
-        null=True,
-    )
+
+    class Meta:
+        unique_together = (('exam', 'course_user'),)
