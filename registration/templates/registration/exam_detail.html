@@ -1,0 +1,23 @@
+{% extends "base_generic.html" %}
+{% block title %}{{ exam.name }}{% endblock %}
+{% block content %}
+<h1>
+  {{ exam.name }}
+  <small class="text-muted">{{ exam.course.code }}</small>
+</h1>
+
+<h2>Your registration</h2>
+<p>Object: {{ exam_reg }}</p>
+<p>Time slot: {{ exam_reg.time_slot }}</p>
+
+<h2>Time slots</h2>
+<ul>
+  {% for slot in exam.time_slot_set.all %}
+  <li>
+    <p>Start: {{ slot.start }}, End: {{ slot.end }}</p>
+    <p>Rooms: {{ slot.rooms.all }}</p>
+    <p>Capacity: {{ slot.capacity }}</p>
+  </li>
+  {% endfor %}
+
+{% endblock %}
