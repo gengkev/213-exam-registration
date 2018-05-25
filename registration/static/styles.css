@@ -1,0 +1,7 @@
+main {
+  padding-top: 2rem;
+}
+.course-card .card-body {
+  display: block;
+  text-decoration: none;
+}

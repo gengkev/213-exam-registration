@@ -2,24 +2,34 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
-<h1>Exam Registration System</h1>
-
 <h2>Courses</h2>
 
 {# Loop through each course this user is in #}
-<ul>
+<div class="card-deck">
+
   {% for course_user in course_user_list %}
   {% with course_user.course as course %}
-  <li>
-    <a href="{% url 'registration:course-detail' course.code %}">
-      {{ course.name }}
-      <small class="text-muted">{{ course.code }}</small>
-    </a>
-  </li>
 
+  <div class="card course-card text-white bg-info">
+    <a class="card-body text-white" href="{% url 'registration:course-detail' course.code %}">
+      <h5 class="card-title">{{ course.name }}</h5>
+      <h6 class="card-subtitle text-white-50">{{ course.code }}</h6>
+    </a>
+
+    <div class="list-group list-group-flush">
+      {% for exam_reg in course_user.exam_registration_set.all %}
+      {% with exam_reg.exam as exam %}
+      <a href="{% url 'registration:exam-detail' course.code exam.id %}"
+          class="list-group-item list-group-item-action">
+        {{ exam.name }}
+      </a>
+      {% endwith %}
+      {% endfor %} {# exam_reg #}
+    </div>
+  </div>
 
   {% endwith %}
-  {% endfor %}
-</ul>
+  {% endfor %} {# course_user #}
+</div>
 
 {% endblock %}
