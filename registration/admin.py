@@ -1,7 +1,8 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import User, Course, CourseUser, Room, Exam, TimeSlot, \
-        ExamRegistration
+from .models import (
+    User, Course, CourseUser, Room, Exam, TimeSlot, ExamRegistration,
+)
 
 
 # Use default UserAdmin for User
@@ -14,17 +15,21 @@ class CourseUsersInstanceInline(admin.TabularInline):
     model = CourseUser
     extra = 0
 
+
 class ExamsInstanceInline(admin.TabularInline):
     model = Exam
     extra = 0
+
 
 class ExamRegistrationsInstanceInline(admin.TabularInline):
     model = ExamRegistration
     extra = 0
 
+
 class TimeSlotsInstanceInline(admin.TabularInline):
     model = TimeSlot
     extra = 0
+
 
 class RoomsInstanceInline(admin.TabularInline):
     model = Room
@@ -42,6 +47,7 @@ class CourseAdmin(admin.ModelAdmin):
         CourseUsersInstanceInline,
     ]
 
+
 @admin.register(CourseUser)
 class CourseUserAdmin(admin.ModelAdmin):
     list_display = (
@@ -51,6 +57,7 @@ class CourseUserAdmin(admin.ModelAdmin):
     inlines = [
         ExamRegistrationsInstanceInline,
     ]
+
 
 @admin.register(Exam)
 class ExamAdmin(admin.ModelAdmin):
