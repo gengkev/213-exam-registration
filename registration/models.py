@@ -1,6 +1,6 @@
-from django.db import models
-
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
+from django.db import models
 
 class User(AbstractUser):
     """
@@ -58,12 +58,17 @@ class CourseUser(models.Model):
     dropped = models.BooleanField()
 
     def __str__(self):
-        return '%s (%s), %s' % (self.user, self.course, self.user_type)
+        return '{} ({}) [{}]'.format(
+            self.user,
+            dict(self.USER_TYPE)[self.user_type],
+            self.course.code,
+        )
 
     class Meta:
         unique_together = (('user', 'course'),)
 
 
+# TODO: consider changing to per-exam, or global
 class Room(models.Model):
     course = models.ForeignKey(Course,
         on_delete=models.CASCADE,
@@ -72,7 +77,7 @@ class Room(models.Model):
     capacity = models.PositiveIntegerField()
 
     def __str__(self):
-        return '%s (%s)' % (self.name, self.course)
+        return f'{self.name} [{self.course.code}]'
 
 
 class Exam(models.Model):
@@ -85,7 +90,7 @@ class Exam(models.Model):
     )
 
     def __str__(self):
-        return '%s (%s)' % (self.name, self.course)
+        return f'{self.name} [{self.course.code}]'
 
 
 class TimeSlot(models.Model):
@@ -98,10 +103,17 @@ class TimeSlot(models.Model):
     rooms = models.ManyToManyField(Room, blank=True)
     capacity = models.PositiveIntegerField()
 
+    def __str__(self):
+        return '{} [{}]'.format(
+            self.start.strftime("%Y-%m-%d at %H:%M"),
+            self.exam,
+        )
+
+    class Meta:
+        unique_together = (('exam', 'start'),)
+
 
 class ExamRegistration(models.Model):
-    # Assume exam.course == course_user.course
-    # Assume exam == time_slot.exam
     exam = models.ForeignKey(Exam,
         on_delete=models.CASCADE,
         related_name='exam_registration_set',
@@ -116,6 +128,22 @@ class ExamRegistration(models.Model):
         null=True,
         blank=True,
     )
+
+    def clean(self, *args, **kwargs):
+        """Validates consistency of ExamRegistration objects"""
+        if self.time_slot and self.time_slot.exam != self.exam:
+            raise ValidationError(
+                'Selected TimeSlot does not belong to the same Exam that '
+                'this ExamRegistration belongs to.'
+            )
+        if self.exam.course != self.course_user.course:
+            raise ValidationError(
+                'Exam and CourseUser do not belong to the same Course'
+            )
+        super(ExamRegistration, self).clean(*args, **kwargs)
+
+    def __str__(self):
+        return f'{self.course_user.user} for {self.exam.name}'
 
     class Meta:
         unique_together = (('exam', 'course_user'),)
