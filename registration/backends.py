@@ -23,7 +23,9 @@ class CustomRemoteUserBackend(RemoteUserBackend):
         if username.endswith(self.ANDREW_EMAIL_SUFFIX):
             return username[:-len(self.ANDREW_EMAIL_SUFFIX)]
 
-        raise PermissionDenied("Only andrew.cmu.edu users are permitted")
+        raise PermissionDenied(
+            "Only andrew.cmu.edu identities are permitted"
+        )
 
 
     def configure_user(self, user):
@@ -37,3 +39,5 @@ class CustomRemoteUserBackend(RemoteUserBackend):
 
         # TODO: use info from CMU LDAP.
         # https://github.com/ScottyLabs/directory-api/blob/master/server.js
+
+        return user
