@@ -1,6 +1,12 @@
 main {
   padding-top: 1rem;
 }
+.course-card {
+  width: 18rem;
+  margin-right: 2rem;
+  margin-bottom: 1rem;
+  float: left;
+}
 .course-card .card-body {
   display: block;
   text-decoration: none;
