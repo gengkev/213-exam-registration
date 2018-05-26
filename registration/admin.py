@@ -5,10 +5,6 @@ from .models import (
 )
 
 
-# Use default UserAdmin for User
-admin.site.register(User, UserAdmin)
-
-
 # Declare inlines for later use
 
 class CourseUsersInstanceInline(admin.TabularInline):
@@ -37,6 +33,16 @@ class RoomsInstanceInline(admin.TabularInline):
 
 
 # Declare custom admins
+
+@admin.register(User)
+class MyUserAdmin(UserAdmin):
+    model = User
+    fieldsets = UserAdmin.fieldsets + (
+        ('Custom options', {
+            'fields': ('timezone',),
+        }),
+    )
+
 
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):

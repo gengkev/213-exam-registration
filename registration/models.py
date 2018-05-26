@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.db import models
+import pytz
 
 class User(AbstractUser):
     """
@@ -10,22 +11,34 @@ class User(AbstractUser):
     # username: equal to Andrew ID
     # email: <andrew-id>@andrew.cmu.edu
     # password: should never be set
-    pass
+
+    timezone = models.CharField(
+        max_length=32,
+        default='America/New_York',
+        help_text="Current time zone of the user.",
+    )
+
+    def clean(self, *args, **kwargs):
+        """Validates custom attributes in the User model."""
+        try:
+            pytz.timezone(self.timezone)
+        except pytz.exceptions.UnknownTimeZoneError:
+            raise ValidationError(dict(timezone="Timezone is invalid."))
 
 
 class Course(models.Model):
     code = models.CharField(
         max_length=32,
         unique=True,
-        help_text='Unique identifier for the course, e.g. 15213-m18.',
+        help_text="Unique identifier for the course, e.g. 15213-m18.",
     )
     name = models.CharField(
         max_length=200,
-        help_text='A human-readable identifier for the course.',
+        help_text="A human-readable identifier for the course.",
     )
     users = models.ManyToManyField(User,
         through='CourseUser',
-        help_text='Accounts enrolled in this course',
+        help_text="Accounts enrolled in this course",
     )
 
     def __str__(self):
@@ -44,8 +57,8 @@ class CourseUser(models.Model):
     INSTRUCTOR = 'i'
     STUDENT = 's'
     USER_TYPE = (
-        (INSTRUCTOR, 'Instructor'),
-        (STUDENT, 'Student'),
+        (INSTRUCTOR, "Instructor"),
+        (STUDENT, "Student"),
     )
     user_type = models.CharField(
         max_length=1,
@@ -77,7 +90,7 @@ class Room(models.Model):
     capacity = models.PositiveIntegerField()
 
     def __str__(self):
-        return f'{self.name} [{self.course.code}]'
+        return f"{self.name} [{self.course.code}]"
 
 
 class Exam(models.Model):
@@ -90,7 +103,7 @@ class Exam(models.Model):
     )
 
     def __str__(self):
-        return f'{self.name} [{self.course.code}]'
+        return f"{self.name} [{self.course.code}]"
 
 
 class TimeSlot(models.Model):
@@ -104,7 +117,7 @@ class TimeSlot(models.Model):
     capacity = models.PositiveIntegerField()
 
     def __str__(self):
-        return '{} [{}]'.format(
+        return "{} [{}]".format(
             self.start.strftime("%Y-%m-%d at %H:%M"),
             self.exam,
         )
@@ -130,20 +143,20 @@ class ExamRegistration(models.Model):
     )
 
     def clean(self, *args, **kwargs):
-        """Validates consistency of ExamRegistration objects"""
+        """Validates consistency of ExamRegistration objects."""
         if self.time_slot and self.time_slot.exam != self.exam:
-            raise ValidationError(
-                'Selected TimeSlot does not belong to the same Exam that '
-                'this ExamRegistration belongs to.'
-            )
+            raise ValidationError(dict(time_slot=(
+                "Selected time slot does not belong to the "
+                "same exam that this registration belongs to."
+            )))
         if self.exam.course != self.course_user.course:
-            raise ValidationError(
-                'Exam and CourseUser do not belong to the same Course'
-            )
+            raise ValidationError(dict(course_user=(
+                "Exam and course user do not belong to the same course."
+            )))
         super(ExamRegistration, self).clean(*args, **kwargs)
 
     def __str__(self):
-        return f'{self.course_user.user} for {self.exam.name}'
+        return f"{self.course_user.user} for {self.exam.name}"
 
     class Meta:
         unique_together = (('exam', 'course_user'),)
