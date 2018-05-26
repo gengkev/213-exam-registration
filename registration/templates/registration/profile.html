@@ -11,6 +11,13 @@
 {% block content %}
 <p>Current user: {{ request.user }}</p>
 <p>Authenticated: {{ request.user.is_authenticated }}</p>
-<p>User timezone: {{ request.user.timezone }}</p>
 <p>Current timezone: {{ current_timezone }}</p>
+
+<form action="" method="POST">
+  {% csrf_token %}
+  <table>
+    {{ form }}
+  </table>
+  <input type="submit" value="Submit">
+</form>
 {% endblock %}

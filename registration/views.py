@@ -1,7 +1,10 @@
-from django.shortcuts import get_object_or_404, render
+from django.http import HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render, reverse
 from django.utils import timezone
 from django.views import generic
-from .models import Course, CourseUser, Exam, ExamRegistration
+
+from .forms import ProfileForm
+from .models import Course, CourseUser, Exam, ExamRegistration, User
 
 
 def index(request):
@@ -22,8 +25,25 @@ def index(request):
         })
 
 
+# TODO: require login
 def profile(request):
+    user = get_object_or_404(User, pk=request.user.id)
+
+    if request.method == 'POST':
+        # Populate form with request data
+        form = ProfileForm(request.POST, instance=user)
+
+        # Check for validity
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('registration:profile'))
+
+    else:
+        # Create default form
+        form = ProfileForm(instance=user)
+
     return render(request, 'registration/profile.html', {
+        'form': form,
         'current_timezone': timezone.get_current_timezone_name(),
     })
 
