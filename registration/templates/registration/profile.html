@@ -1,0 +1,16 @@
+{% extends "base_generic.html" %}
+
+{% block title %}Profile{% endblock %}
+
+{% block breadcrumb %}
+<li class="nav-item active" aria-current="page">
+  <span class="nav-link">Profile</span>
+</li>
+{% endblock %}
+
+{% block content %}
+<p>Current user: {{ request.user }}</p>
+<p>Authenticated: {{ request.user.is_authenticated }}</p>
+<p>User timezone: {{ request.user.timezone }}</p>
+<p>Current timezone: {{ current_timezone }}</p>
+{% endblock %}

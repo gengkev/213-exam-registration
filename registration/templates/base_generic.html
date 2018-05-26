@@ -30,7 +30,7 @@
     <!-- Right-aligned account items -->
     <ul class="navbar-nav ml-auto">
       <li class="nav-item">
-        <a class="nav-link">
+        <a class="nav-link" href="{% url 'registration:profile' %}">
           <i class="fa fa-user" aria-hidden="true"></i>
           {% if user.is_authenticated %}
           {{ user.get_username }}

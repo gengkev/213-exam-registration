@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404, render
+from django.utils import timezone
 from django.views import generic
 from .models import Course, CourseUser, Exam, ExamRegistration
 
@@ -19,6 +20,12 @@ def index(request):
         return render(request, 'registration/auth_failure.html', {
             'remote_user': request.META.get('REMOTE_USER', None),
         })
+
+
+def profile(request):
+    return render(request, 'registration/profile.html', {
+        'current_timezone': timezone.get_current_timezone_name(),
+    })
 
 
 # TODO: Require login

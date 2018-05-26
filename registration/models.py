@@ -1,7 +1,8 @@
+import pytz
+
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.db import models
-import pytz
 
 class User(AbstractUser):
     """
@@ -118,7 +119,7 @@ class TimeSlot(models.Model):
 
     def __str__(self):
         return "{} [{}]".format(
-            self.start.strftime("%Y-%m-%d at %H:%M"),
+            self.start.isoformat(timespec='minutes'),
             self.exam,
         )
 
