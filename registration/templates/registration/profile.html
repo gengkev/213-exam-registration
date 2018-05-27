@@ -12,6 +12,7 @@
 <p>Current user: {{ request.user }}</p>
 <p>Authenticated: {{ request.user.is_authenticated }}</p>
 <p>Current timezone: {{ current_timezone }}</p>
+<p>Current local time: {% now "DATETIME_FORMAT" %}</p>
 
 <form action="" method="POST">
   {% csrf_token %}
