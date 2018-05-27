@@ -3,7 +3,7 @@
 {% block title %}{{ exam.name }}{% endblock %}
 
 {% block breadcrumb %}
-<li class="nav-item">
+<li class="nav-item active">
   <a class="nav-link" href="{% url 'registration:course-detail' exam.course.code %}">{{ exam.course.code }}</a>
 </li>
 <li class="nav-item active" aria-current="page">

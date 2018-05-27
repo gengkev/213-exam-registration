@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render, reverse
 from django.utils import timezone
@@ -7,25 +8,20 @@ from .forms import ProfileForm
 from .models import Course, CourseUser, Exam, ExamRegistration, User
 
 
+@login_required
 def index(request):
     """
     Displays the home page, with all courses the user is enrolled in. If
     the user is not authenticated, displays an error message.
     """
-    if request.user.is_authenticated:
-        course_user_list = CourseUser.objects.filter(
-                user=request.user.id)
-        return render(request, 'registration/index.html', {
-            'course_user_list': course_user_list,
-        })
-
-    else:
-        return render(request, 'registration/auth_failure.html', {
-            'remote_user': request.META.get('REMOTE_USER', None),
-        })
+    course_user_list = CourseUser.objects.filter(
+            user=request.user.id)
+    return render(request, 'registration/index.html', {
+        'course_user_list': course_user_list,
+    })
 
 
-# TODO: require login
+@login_required
 def profile(request):
     user = get_object_or_404(User, pk=request.user.id)
 
@@ -48,7 +44,7 @@ def profile(request):
     })
 
 
-# TODO: Require login
+@login_required
 def course_detail(request, course_code):
     course = get_object_or_404(Course,
             code=course_code)
@@ -60,7 +56,7 @@ def course_detail(request, course_code):
     })
 
 
-# TODO: Require login
+@login_required
 def exam_detail(request, course_code, exam_id):
     exam = get_object_or_404(Exam,
             pk=exam_id, course__code=course_code)

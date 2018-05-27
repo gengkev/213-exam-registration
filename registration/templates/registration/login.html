@@ -1,0 +1,39 @@
+{% extends "base_generic.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block breadcrumb %}
+<li class="nav-item active" aria-current="page">
+  <span class="nav-link">Login</span>
+</li>
+{% endblock %}
+
+{% block content %}
+
+{% if request.user.is_authenticated %}
+
+<p>
+  You're already logged in. Your username is
+  <tt>{{ request.user.username }}</tt>,
+  and your identity provided by the authentication server is
+  <tt>{{ request.META.REMOTE_USER }}</tt>.
+</p>
+
+{% else %}
+
+<p>
+  This system only recognizes <tt>andrew.cmu.edu</tt> identities.
+  {% if request.META.REMOTE_USER %}
+  However, your current identity provided by the authentication server is
+  <tt>{{ request.META.REMOTE_USER }}</tt>.
+  {% else %}
+  However, your session is not associated with an identity.
+  {% endif %}
+</p>
+<p>
+  To continue, please try logging in again with your <tt>andrew.cmu.edu</tt> identity, if you have one. If you continue to encounter problems logging in, please contact the website administrators or your course instructor.
+</p>
+
+{% endif %}
+
+{% endblock %}
