@@ -11,23 +11,30 @@
 {% block content %}
 <h1>{{ course.name }}</h1>
 
-<p>User type: {{ course_user.user_type }}</p>
-<p>Lecture: {{ course_user.lecture }}</p>
-<p>Section: {{ course_user.section }}</p>
-<p>Dropped: {{ course_user.dropped }}</p>
+<h2>Your info</h2>
+<p>
+  <em>User type:</em> {{ course_user.user_type }}<br>
+  <em>Lecture:</em> {{ course_user.lecture }}<br>
+  <em>Section:</em> {{ course_user.section }}<br>
+  <em>Dropped:</em> {{ course_user.dropped }}
+</p>
 
-<ul>
+<h2>Exams</h2>
+<div class="list-group">
+
   {# For each course, loop through each exam this user is in #}
   {% for exam_reg in course_user.exam_registration_set.all %}
   {% with exam_reg.exam as exam %}
-  <li>
-    <a href="{% url 'registration:exam-detail' course.code exam.id %}">
-      <p>Exam: {{ exam.name }}</p>
-      <p>Time slot: {{ time_slot }}</p>
-    </a>
-  </li>
+
+  <a href="{% url 'registration:exam-detail' course.code exam.id %}"
+      class="list-group-item list-group-item-action flex-column align-items-start">
+    <h5 class="mb-1">{{ exam.name }}</h5>
+    <p>Current time slot: {{ exam_reg.time_slot.start }}</p>
+  </a>
+
   {% endwith %}
   {% endfor %}
-</ul>
+</div>
+
 
 {% endblock %}
