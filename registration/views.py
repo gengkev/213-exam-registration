@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render, reverse
@@ -43,9 +45,22 @@ def profile(request):
         # Create default form
         form = ProfileForm(instance=user)
 
+    # Get current local time and timezone
+    now = timezone.localtime()
+
+    # Format UTC offset
+    def format_seconds(n):
+        hours, minutes = divmod(n // 60, 60)
+        return f"{hours:02}:{minutes:02}"
+
+    offset = now.utcoffset()
+    stroffset = ('-' if offset < timedelta(0) else '+')
+    stroffset += format_seconds(abs(offset).seconds)
+
+    # Render template
     return render(request, 'registration/profile.html', {
         'form': form,
-        'current_timezone': timezone.get_current_timezone_name(),
+        'current_timezone': f"{now.tzinfo} ({now.tzname()}, UTC{stroffset})"
     })
 
 
