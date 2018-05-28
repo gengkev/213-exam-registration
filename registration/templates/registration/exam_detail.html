@@ -17,17 +17,18 @@
   <small class="text-muted">{{ exam.course.code }}</small>
 </h1>
 
+<p>
+  {{ exam.details | linebreaks }}
+</p>
+
+
+<h2>Time slots</h2>
 <div class="alert alert-warning" role="alert">
   All human-readable times are displayed in your current timezone,
   <tt>{{ request.user.timezone }}</tt>.
   You can change this setting in your
   <a href="{% url 'registration:profile' %}">profile</a>.
 </div>
-
-<h2>Your registration</h2>
-<p>Current time slot: {{ exam_reg.time_slot.start }}</p>
-
-<h2>Time slots</h2>
 <ul>
   {% for slot in exam.time_slot_set.all %}
   <li>
@@ -46,6 +47,7 @@
 
 
 <h2>Time slot selection</h2>
+<p>Your current time slot: {{ exam_reg.time_slot.start }}</p>
 <form action="" method="POST">
   {% csrf_token %}
   <table>

@@ -102,6 +102,7 @@ class Exam(models.Model):
     registrations = models.ManyToManyField(CourseUser,
         through='ExamRegistration',
     )
+    details = models.TextField(blank=True)
 
     def __str__(self):
         return f"{self.name} [{self.course.code}]"
