@@ -117,6 +117,23 @@ class TimeSlot(models.Model):
     rooms = models.ManyToManyField(Room, blank=True)
     capacity = models.PositiveIntegerField()
 
+    def count_registered(self):
+        """Counts the number of users registered for this slot."""
+        return self.exam_registration_set.count()
+
+    def count_overlapping(self):
+        """
+        Counts the number of users registered for a slot that overlaps
+        this one in time. The value of this field should never be greater
+        than the capacity of this time slot.
+        """
+        q = (TimeSlot.objects
+                .filter(start__lt=self.end, end__gt=self.start)
+                .annotate(reg_count=models.Count('exam_registration_set'))
+                .aggregate(overlap_count=models.Sum('reg_count'))
+        )
+        return q['overlap_count']
+
     def __str__(self):
         return "{} [{}]".format(
             self.start.isoformat(timespec='minutes'),
@@ -125,6 +142,7 @@ class TimeSlot(models.Model):
 
     class Meta:
         unique_together = (('exam', 'start'),)
+        ordering = ['exam', 'start']
 
 
 class ExamRegistration(models.Model):
@@ -138,7 +156,7 @@ class ExamRegistration(models.Model):
     )
     time_slot = models.ForeignKey(TimeSlot,
         on_delete=models.SET_NULL,
-        related_name='exam_registrations',
+        related_name='exam_registration_set',
         null=True,
         blank=True,
     )

@@ -36,7 +36,9 @@
       <em>Start:</em> {{ slot.start }}<br>
       <em>End:</em> {{ slot.end }}<br>
       <em>Rooms:</em> {{ slot.rooms.all }}<br>
-      <em>Capacity:</em> {{ slot.capacity }}
+      <em>Capacity:</em> {{ slot.capacity }}<br>
+      <em>Registered:</em> {{ slot.count_registered }}<br>
+      <em>Overlapping registrations:</em> {{ slot.count_overlapping }}</br>
     </p>
   </li>
   {% endfor %}
