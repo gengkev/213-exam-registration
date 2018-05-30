@@ -113,37 +113,81 @@ class TimeSlot(models.Model):
         on_delete=models.CASCADE,
         related_name='time_slot_set',
     )
-    start = models.DateTimeField()
-    end = models.DateTimeField()
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
     rooms = models.ManyToManyField(Room, blank=True)
     capacity = models.PositiveIntegerField()
 
-    def count_registered(self):
-        """Counts the number of users registered for this slot."""
-        return self.exam_registration_set.count()
-
-    def count_overlapping(self):
+    def count_registrations(self):
         """
-        Counts the number of users registered for a slot that overlaps
-        this one in time. The value of this field should never be greater
-        than the capacity of this time slot.
+        Counts the number of users registered for an exam that takes place
+        during this slot. The value of this field should not be greater
+        than the capacity of this time slot, unless overridden manually.
         """
-        q = (TimeSlot.objects
-                .filter(start__lt=self.end, end__gt=self.start)
+        q = (self.exam_slot_set
                 .annotate(reg_count=models.Count('exam_registration_set'))
                 .aggregate(overlap_count=models.Sum('reg_count'))
         )
         return q['overlap_count']
 
+    def clean(self, *args, **kwargs):
+        """Validates consistency of TimeSlot objects."""
+        q = TimeSlot.objects.exclude(pk=self.pk).filter(
+            exam=self.exam,
+            start_time__lt=self.end_time,
+            end_time__gt=self.start_time,
+        )
+        if q.exists():
+            raise ValidationError(dict(start_time=(
+                "The selected start and end times overlap with one or "
+                "more existing time slots for this exam."
+            )))
+        super(TimeSlot, self).clean(*args, **kwargs)
+
     def __str__(self):
-        return "{} [{}]".format(
-            self.start.isoformat(timespec='minutes'),
+        return "TimeSlot {} [{}]".format(
+            self.start_time.isoformat(timespec='minutes'),
             self.exam,
         )
 
     class Meta:
-        unique_together = (('exam', 'start'),)
-        ordering = ['exam', 'start']
+        unique_together = (('exam', 'start_time'),)
+        ordering = ['exam', 'start_time']
+
+
+class ExamSlot(models.Model):
+    exam = models.ForeignKey(Exam,
+        on_delete=models.CASCADE,
+        related_name='exam_slot_set',
+    )
+    start_time_slot = models.OneToOneField(TimeSlot,
+        on_delete=models.CASCADE,
+        related_name='exam_slot',
+    )
+    time_slots = models.ManyToManyField(TimeSlot,
+        related_name='exam_slot_set',
+    )
+
+    def count_registered(self):
+        """Counts the number of users registered for this slot."""
+        return self.exam_registration_set.count()
+
+    def clean(self, *args, **kwargs):
+        """Validates consistency of ExamSlot objects."""
+        if self.start_time_slot.exam != self.exam:
+            raise ValidationError(dict(start_time_slot=(
+                "Selected start time slot does not belong to the "
+                "same exam that this exam slot belongs to."
+            )))
+        super(ExamSlot, self).clean(*args, **kwargs)
+
+    def __str__(self):
+        return "ExamSlot [{}]".format(
+            self.start_time_slot,
+        )
+
+    class Meta:
+        ordering = ['exam', 'start_time_slot']
 
 
 class ExamRegistration(models.Model):
@@ -155,7 +199,7 @@ class ExamRegistration(models.Model):
         on_delete=models.CASCADE,
         related_name='exam_registration_set',
     )
-    time_slot = models.ForeignKey(TimeSlot,
+    exam_slot = models.ForeignKey(ExamSlot,
         on_delete=models.SET_NULL,
         related_name='exam_registration_set',
         null=True,
@@ -164,9 +208,9 @@ class ExamRegistration(models.Model):
 
     def clean(self, *args, **kwargs):
         """Validates consistency of ExamRegistration objects."""
-        if self.time_slot and self.time_slot.exam != self.exam:
-            raise ValidationError(dict(time_slot=(
-                "Selected time slot does not belong to the "
+        if self.exam_slot and self.exam_slot.exam != self.exam:
+            raise ValidationError(dict(exam_slot=(
+                "Selected exam slot does not belong to the "
                 "same exam that this registration belongs to."
             )))
         if self.exam.course != self.course_user.course:

@@ -1,8 +1,51 @@
+from django import forms
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import (
-    User, Course, CourseUser, Room, Exam, TimeSlot, ExamRegistration,
+    User, Course, CourseUser, Room, Exam, TimeSlot, ExamSlot,
+    ExamRegistration,
 )
+
+
+# Declare forms for use in inlines
+
+class ExamRegistrationsInstanceForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        exam_reg = self.instance
+        if exam_reg.pk:
+            # Filter selectable exams by course
+            course_exams = Exam.objects.filter(
+                course=exam_reg.course_user.course)
+            self.fields['exam'].queryset = course_exams
+            # Filter selectable users by course
+            course_users = CourseUser.objects.filter(
+                course=exam_reg.exam.course)
+            self.fields['course_user'].queryset = course_users
+            # Filter selectable exam slots by exam
+            exam_slots = ExamSlot.objects.filter(exam=exam_reg.exam)
+            self.fields['exam_slot'].queryset = exam_slots
+
+
+class TimeSlotsInstanceForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        time_slot = self.instance
+        if time_slot.pk:
+            # Filter selectable rooms by course
+            course_rooms = Room.objects.filter(course=time_slot.exam.course)
+            self.fields['rooms'].queryset = course_rooms
+
+
+class ExamSlotsInstanceForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        exam_slot = self.instance
+        if exam_slot.pk:
+            # Filter selectable time slots by exam
+            exam_timeslots = TimeSlot.objects.filter(exam=exam_slot.exam)
+            self.fields['start_time_slot'].queryset = exam_timeslots
+            self.fields['time_slots'].queryset = exam_timeslots
 
 
 # Declare inlines for later use
@@ -19,11 +62,19 @@ class ExamsInstanceInline(admin.TabularInline):
 
 class ExamRegistrationsInstanceInline(admin.TabularInline):
     model = ExamRegistration
+    form = ExamRegistrationsInstanceForm
     extra = 0
 
 
 class TimeSlotsInstanceInline(admin.TabularInline):
     model = TimeSlot
+    form = TimeSlotsInstanceForm
+    extra = 0
+
+
+class ExamSlotsInstanceInline(admin.TabularInline):
+    model = ExamSlot
+    form = ExamSlotsInstanceForm
     extra = 0
 
 
@@ -67,9 +118,10 @@ class CourseUserAdmin(admin.ModelAdmin):
 
 @admin.register(Exam)
 class ExamAdmin(admin.ModelAdmin):
-    list_display = ('course', 'name')
+    list_display = ('name', 'course')
     list_filter = ('course',)
     inlines = [
         TimeSlotsInstanceInline,
+        ExamSlotsInstanceInline,
         ExamRegistrationsInstanceInline,
     ]

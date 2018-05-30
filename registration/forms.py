@@ -2,7 +2,7 @@ import pytz
 
 from django import forms
 
-from .models import User, ExamRegistration, TimeSlot
+from .models import User, ExamRegistration, ExamSlot
 
 
 class ProfileForm(forms.ModelForm):
@@ -39,7 +39,7 @@ class ProfileForm(forms.ModelForm):
 
 
 class ExamRegistrationForm(forms.ModelForm):
-    time_slot = forms.ModelChoiceField(
+    exam_slot = forms.ModelChoiceField(
         queryset=None,
         required=False,
         widget=forms.RadioSelect,
@@ -51,9 +51,9 @@ class ExamRegistrationForm(forms.ModelForm):
 
         # Filter possible time slots by exam
         exam_reg = kwargs['instance']
-        self.fields['time_slot'].queryset = \
-            TimeSlot.objects.filter(exam=exam_reg.exam)
+        self.fields['exam_slot'].queryset = \
+            ExamSlot.objects.filter(exam=exam_reg.exam)
 
     class Meta:
         model = ExamRegistration
-        fields = ['time_slot']
+        fields = ['exam_slot']

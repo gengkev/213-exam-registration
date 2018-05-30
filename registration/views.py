@@ -21,7 +21,8 @@ def index(request):
     the user is not authenticated, displays an error message.
     """
     course_user_list = CourseUser.objects.filter(
-            user=request.user.id)
+        user=request.user.id,
+    )
     return render(request, 'registration/index.html', {
         'course_user_list': course_user_list,
     })

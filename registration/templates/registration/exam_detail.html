@@ -34,20 +34,33 @@
   <li>
     <p>
       <strong>{{ slot }}</strong><br>
-      <em>Start:</em> {{ slot.start }}<br>
-      <em>End:</em> {{ slot.end }}<br>
+      <em>Start:</em> {{ slot.start_time }}<br>
+      <em>End:</em> {{ slot.end_time }}<br>
       <em>Rooms:</em> {{ slot.rooms.all }}<br>
       <em>Capacity:</em> {{ slot.capacity }}<br>
-      <em>Registered:</em> {{ slot.count_registered }}<br>
-      <em>Overlapping registrations:</em> {{ slot.count_overlapping }}</br>
+      <em>Registrations:</em> {{ slot.count_registrations }}<br>
     </p>
   </li>
   {% endfor %}
 </ul>
 
 
-<h2>Time slot selection</h2>
-<p>Your current time slot: {{ exam_reg.time_slot.start }}</p>
+<h2>Exam slots</h2>
+<ul>
+  {% for slot in exam.exam_slot_set.all %}
+  <li>
+    <p>
+      <strong>{{ slot }}</strong><br>
+      <em>Start:</em> {{ slot.start_time_slot }}<br>
+      <em>All slots:</em> {{ slot.time_slots.all }}<br>
+      <em>Registrations:</em> {{ slot.exam_registration_set.count }}<br>
+    </p>
+  </li>
+  {% endfor %}
+</ul>
+
+<h2>Exam slot selection</h2>
+<p>Your current exam slot: {{ exam_reg.exam_slot }}</p>
 <form action="" method="POST">
   {% csrf_token %}
   <table>
