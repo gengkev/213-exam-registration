@@ -1,0 +1,30 @@
+<nav class="navbar navbar-expand navbar-dark bg-dark">
+  <a class="navbar-brand" href="/">Exam Registration System</a>
+
+  <!-- Left-aligned breadcrumbs -->
+  <ol class="navbar-nav mr-auto my-breadcrumb" aria-label="breadcrumb">
+    {% block breadcrumb %}{% endblock %}
+  </ol>
+
+  <!-- Right-aligned account items -->
+  <ul class="navbar-nav ml-auto">
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'registration:profile' %}">
+        <i class="fa fa-user" aria-hidden="true"></i>
+        {% if user.is_authenticated %}
+        {{ user.get_username }}
+        {% else %}
+        Not logged in
+        {% endif %}
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link">
+        <i class="fa fa-sign-out" aria-hidden="true"></i>
+        Logout
+      </a>
+    </li>
+  </ul>
+
+</nav>
