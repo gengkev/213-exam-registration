@@ -38,7 +38,7 @@
       <em>End:</em> {{ slot.end_time }}<br>
       <em>Rooms:</em> {{ slot.rooms.all }}<br>
       <em>Capacity:</em> {{ slot.capacity }}<br>
-      <em>Registrations:</em> {{ slot.count_registrations }}<br>
+      <em>Registrations:</em> {{ slot.count_num_registered }}
     </p>
   </li>
   {% endfor %}
@@ -54,6 +54,7 @@
       <em>Start:</em> {{ slot.start_time_slot }}<br>
       <em>All slots:</em> {{ slot.time_slots.all }}<br>
       <em>Registrations:</em> {{ slot.exam_registration_set.count }}<br>
+      <em>Slots left:</em> {{ slot.count_slots_left }}
     </p>
   </li>
   {% endfor %}

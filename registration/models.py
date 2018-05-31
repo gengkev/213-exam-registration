@@ -2,7 +2,7 @@ import pytz
 
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.db import models, transaction, IntegrityError
 
 class User(AbstractUser):
     """
@@ -118,20 +118,20 @@ class TimeSlot(models.Model):
     rooms = models.ManyToManyField(Room, blank=True)
     capacity = models.PositiveIntegerField()
 
-    def count_registrations(self):
+    def count_num_registered(self):
         """
         Counts the number of users registered for an exam that takes place
         during this slot. The value of this field should not be greater
         than the capacity of this time slot, unless overridden manually.
         """
-        q = (self.exam_slot_set
-                .annotate(reg_count=models.Count('exam_registration_set'))
-                .aggregate(overlap_count=models.Sum('reg_count'))
-        )
+        q = self.exam_slot_set \
+            .annotate(reg_count=models.Count('exam_registration_set')) \
+            .aggregate(overlap_count=models.Sum('reg_count'))
         return q['overlap_count']
 
     def clean(self, *args, **kwargs):
         """Validates consistency of TimeSlot objects."""
+        # Ensure no overlapping time slots
         q = TimeSlot.objects.exclude(pk=self.pk).filter(
             exam=self.exam,
             start_time__lt=self.end_time,
@@ -142,6 +142,7 @@ class TimeSlot(models.Model):
                 "The selected start and end times overlap with one or "
                 "more existing time slots for this exam."
             )))
+
         super(TimeSlot, self).clean(*args, **kwargs)
 
     def __str__(self):
@@ -168,9 +169,16 @@ class ExamSlot(models.Model):
         related_name='exam_slot_set',
     )
 
-    def count_registered(self):
+    def count_num_registered(self):
         """Counts the number of users registered for this slot."""
         return self.exam_registration_set.count()
+
+    def count_slots_left(self):
+        """Counts the number of remaining slots for this exam slot."""
+        return min(
+            time_slot.capacity - time_slot.count_num_registered()
+            for time_slot in self.time_slots.all()
+        )
 
     def clean(self, *args, **kwargs):
         """Validates consistency of ExamSlot objects."""
@@ -224,3 +232,25 @@ class ExamRegistration(models.Model):
 
     class Meta:
         unique_together = (('exam', 'course_user'),)
+
+    @classmethod
+    def update_slot(cls, exam_reg_pk, exam_slot_pk):
+        with transaction.atomic():
+            exam_reg = ExamRegistration.objects \
+                .select_for_update() \
+                .get(pk=exam_reg_pk)
+
+            # Get new exam slot, time slot list
+            exam_slot = ExamSlot.objects \
+                .get(pk=exam_slot_pk)
+            time_slot_list = exam_slot.time_slots \
+                .select_for_update()
+
+            # Check that all time slots have seats
+            for time_slot in time_slot_list:
+                if time_slot.count_num_registered() >= time_slot.capacity:
+                    raise IntegrityError("Not enough seats left")
+
+            # Update the exam registration
+            exam_reg.exam_slot = exam_slot
+            exam_reg.save(update_fields=['exam_slot'])
