@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render, reverse
@@ -40,7 +41,15 @@ def profile(request):
         # Check for validity
         if form.is_valid():
             form.save()
+            messages.success(request,
+                "Your profile was updated successfully.",
+            )
             return HttpResponseRedirect(reverse('registration:profile'))
+
+        else:
+            messages.error(request,
+                "Please correct the error below.",
+            )
 
     else:
         # Create default form
@@ -96,10 +105,18 @@ def exam_detail(request, course_code, exam_id):
         # Check for validity
         if form.is_valid():
             form.save()
+            messages.success(request,
+                "Your exam registration was updated successfully.",
+            )
             return HttpResponseRedirect(reverse(
                 'registration:exam-detail',
                 args=[exam_reg.exam.course.code, exam_reg.exam.id],
             ))
+
+        else:
+            messages.error(request,
+                "Please correct the error below.",
+            )
 
     else:
         # Create default form

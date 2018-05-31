@@ -50,7 +50,7 @@ class ExamRegistrationForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         # Filter possible time slots by exam
-        exam_reg = kwargs['instance']
+        exam_reg = self.instance
         self.fields['exam_slot'].queryset = \
             ExamSlot.objects.filter(exam=exam_reg.exam)
 

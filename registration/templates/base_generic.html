@@ -51,8 +51,9 @@
   </nav>
 
   <main role="main" class="container">
-
-    {% block content %}{% endblock %}
+    {% include 'partials/messages.html' %}
+    {% block content %}
+    {% endblock %}
   </div>
 
 </body>
