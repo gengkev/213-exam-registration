@@ -10,30 +10,47 @@
 
 {% block content %}
 
-{% if request.user.is_authenticated %}
+<div class="row">
+  <div class="col-md-8">
+    <h2>Login</h2>
 
-<p>
-  You're already logged in. Your username is
-  <tt>{{ request.user.username }}</tt>,
-  and your identity provided by the authentication server is
-  <tt>{{ request.META.REMOTE_USER }}</tt>.
-</p>
+    {% if request.user.is_authenticated %}
 
-{% else %}
+    <p>
+      You're already logged in. Your username is
+      <tt>{{ request.user.username }}</tt>,
+      and your identity provided by the authentication server is
+      <tt>{{ request.META.REMOTE_USER }}</tt>.
+    </p>
 
-<p>
-  This system only recognizes <tt>andrew.cmu.edu</tt> identities.
-  {% if request.META.REMOTE_USER %}
-  However, your current identity provided by the authentication server is
-  <tt>{{ request.META.REMOTE_USER }}</tt>.
-  {% else %}
-  However, your session is not associated with an identity.
-  {% endif %}
-</p>
-<p>
-  To continue, please try logging in again with your <tt>andrew.cmu.edu</tt> identity, if you have one. If you continue to encounter problems logging in, please contact the website administrators or your course instructor.
-</p>
+    <p>
+      <a href="{% url 'registration:index' %}">
+        Continue to the home page
+      </a>
+    </p>
 
-{% endif %}
+    {% else %}
+
+    <p>
+      This system only recognizes <tt>andrew.cmu.edu</tt> identities.
+      {% if request.META.REMOTE_USER %}
+      However, your current identity provided by the authentication server
+      is <tt>{{ request.META.REMOTE_USER }}</tt>.
+      {% else %}
+      However, your session is not associated with an identity.
+      {% endif %}
+    </p>
+
+    <p>
+      To continue, please try logging in again with your
+      <tt>andrew.cmu.edu</tt> identity. If you continue to have
+      problems logging in, please contact the website
+      administrator or your course instructor.
+    </p>
+
+    {% endif %}
+
+  </div>
+</div>
 
 {% endblock %}

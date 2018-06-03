@@ -9,6 +9,7 @@
 {% endblock %}
 
 {% block content %}
+<h2>Profile</h2>
 <p>Current user: {{ request.user }}</p>
 <p>Authenticated: {{ request.user.is_authenticated }}</p>
 <p>Current timezone: {{ current_timezone }}</p>

@@ -5,10 +5,11 @@
 {% endblock %}
 
 {% block content %}
-<h2>Courses</h2>
 
 {# Loop through each course this user is in #}
+{% if course_user_list %}
 <div>
+  <h2>Courses</h2>
 
   {% for course_user in course_user_list %}
   {% with course_user.course as course %}
@@ -34,5 +35,18 @@
   {% endwith %}
   {% endfor %} {# course_user #}
 </div>
+
+{% else %}
+<div class="row">
+  <div class="col-md-8">
+  <h2>Courses</h2>
+  <p>
+    <em>You are not enrolled in any courses.</em>
+    If you believe you should be enrolled in a course on this site, please
+    contact your course instructor for assistance.
+  </p>
+  </div>
+</div>
+{% endif %}
 
 {% endblock %}
