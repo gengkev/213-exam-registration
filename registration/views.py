@@ -3,6 +3,7 @@ from datetime import timedelta
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction, IntegrityError
+from django.db.models.functions import TruncDay
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render, reverse
 from django.utils import timezone
@@ -98,6 +99,13 @@ def exam_detail(request, course_code, exam_id):
         exam=exam_id,
         exam__course__code=course_code
     )
+    exam = exam_reg.exam
+    time_slots = exam.time_slot_set.annotate(
+        day=TruncDay('start_time'),
+    )
+    exam_slots = exam.exam_slot_set.annotate(
+        day=TruncDay('start_time_slot__start_time'),
+    )
 
     if request.method == 'POST':
         # Populate form with request data
@@ -135,6 +143,8 @@ def exam_detail(request, course_code, exam_id):
 
     return render(request, 'registration/exam_detail.html', {
         'form': form,
-        'exam': exam_reg.exam,
+        'exam': exam,
         'exam_reg': exam_reg,
+        'time_slots': time_slots,
+        'exam_slots': exam_slots,
     })

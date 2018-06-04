@@ -91,7 +91,12 @@ class Room(models.Model):
     capacity = models.PositiveIntegerField()
 
     def __str__(self):
-        return f"{self.name} [{self.course.code}]"
+        return self.name
+
+    def __repr__(self):
+        return "<Room: {} [{}]>".format(
+            self.name, self.course.code,
+        )
 
 
 class Exam(models.Model):
@@ -105,7 +110,12 @@ class Exam(models.Model):
     details = models.TextField(blank=True)
 
     def __str__(self):
-        return f"{self.name} [{self.course.code}]"
+        return self.name
+
+    def __repr__(self):
+        return "<Exam: {} [{}]>".format(
+            self.name, self.course.code,
+        )
 
 
 class TimeSlot(models.Model):
@@ -146,9 +156,13 @@ class TimeSlot(models.Model):
         super(TimeSlot, self).clean(*args, **kwargs)
 
     def __str__(self):
-        return "TimeSlot {} [{}]".format(
-            self.start_time.isoformat(timespec='minutes'),
-            self.exam,
+        return self.start_time \
+            .isoformat(timespec='minutes') \
+            .replace('+00:00', 'Z')
+
+    def __repr__(self):
+        return "<TimeSlot: {} [{}]>".format(
+            str(self), str(self.exam),
         )
 
     class Meta:
@@ -168,6 +182,18 @@ class ExamSlot(models.Model):
     time_slots = models.ManyToManyField(TimeSlot,
         related_name='exam_slot_set',
     )
+
+    def get_start_time(self):
+        """Returns the start time of this exam slot."""
+        return self.start_time_slot.start_time
+
+    def get_end_time(self):
+        """Returns the end time of this exam slot."""
+        q = self.time_slots \
+            .order_by('-end_time') \
+            .values('end_time') \
+            .first()
+        return q['end_time']
 
     def count_num_registered(self):
         """Counts the number of users registered for this slot."""
@@ -190,8 +216,18 @@ class ExamSlot(models.Model):
         super(ExamSlot, self).clean(*args, **kwargs)
 
     def __str__(self):
-        return "ExamSlot [{}]".format(
-            self.start_time_slot,
+        return "{} \u2013 {}".format(
+            self.get_start_time() \
+                .isoformat(timespec='minutes') \
+                .replace('+00:00', 'Z'),
+            self.get_end_time() \
+                .isoformat(timespec='minutes') \
+                .replace('+00:00', 'Z'),
+        )
+
+    def __repr__(self):
+        return "<ExamSlot: {} [{}]>".format(
+            str(self.start_time_slot), str(self.exam),
         )
 
     class Meta:
