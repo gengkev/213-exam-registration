@@ -141,6 +141,13 @@ class TimeSlot(models.Model):
 
     def clean(self, *args, **kwargs):
         """Validates consistency of TimeSlot objects."""
+
+        # Ensure end time is not before start time
+        if self.start_time > self.end_time:
+            raise ValidationError(dict(end_time=(
+                "The selected end time is before the selected start time."
+            )))
+
         # Ensure no overlapping time slots
         q = TimeSlot.objects.exclude(pk=self.pk).filter(
             exam=self.exam,
