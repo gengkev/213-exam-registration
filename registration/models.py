@@ -69,7 +69,7 @@ class CourseUser(models.Model):
     # Attributes from Autolab export
     lecture = models.CharField(max_length=32, blank=True)
     section = models.CharField(max_length=32, blank=True)
-    dropped = models.BooleanField()
+    dropped = models.BooleanField(default=False)
 
     def __str__(self):
         return '{} ({}) [{}]'.format(
