@@ -13,15 +13,18 @@ class ExamRegistrationsInstanceForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         exam_reg = self.instance
+
         if exam_reg.pk:
             # Filter selectable exams by course
             course_exams = Exam.objects.filter(
                 course=exam_reg.course_user.course)
             self.fields['exam'].queryset = course_exams
+
             # Filter selectable users by course
             course_users = CourseUser.objects.filter(
                 course=exam_reg.exam.course)
             self.fields['course_user'].queryset = course_users
+
             # Filter selectable exam slots by exam
             exam_slots = ExamSlot.objects.filter(exam=exam_reg.exam)
             self.fields['exam_slot'].queryset = exam_slots
@@ -31,6 +34,8 @@ class TimeSlotsInstanceForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         time_slot = self.instance
+
+        # TODO: filter if no object (new entries)
         if time_slot.pk:
             # Filter selectable rooms by course
             course_rooms = Room.objects.filter(course=time_slot.exam.course)
@@ -41,11 +46,24 @@ class ExamSlotsInstanceForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         exam_slot = self.instance
+
         if exam_slot.pk:
             # Filter selectable time slots by exam
             exam_timeslots = TimeSlot.objects.filter(exam=exam_slot.exam)
             self.fields['start_time_slot'].queryset = exam_timeslots
             self.fields['time_slots'].queryset = exam_timeslots
+
+        # Make start_time_slot optional
+        self.fields['start_time_slot'].required = False
+
+    def clean(self):
+        super().clean()
+
+        # Set start_time_slot correctly
+        self.cleaned_data['start_time_slot'] = \
+            self.cleaned_data['time_slots'] \
+                .order_by('start_time') \
+                .first()
 
 
 # Declare inlines for later use
