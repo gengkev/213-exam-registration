@@ -276,17 +276,27 @@ class ExamRegistration(models.Model):
                 .select_for_update() \
                 .get(pk=exam_reg_pk)
 
-            # Get new exam slot, time slot list
-            exam_slot = ExamSlot.objects \
-                .get(pk=exam_slot_pk)
-            time_slot_list = exam_slot.time_slots \
-                .select_for_update()
-
-            # Check that all time slots have seats
-            for time_slot in time_slot_list:
-                if time_slot.count_num_registered() >= time_slot.capacity:
-                    raise IntegrityError("Not enough seats left")
-
-            # Update the exam registration
-            exam_reg.exam_slot = exam_slot
+            # Clear exam slot (in transaction)
+            # This is so when counting registered in time slots below,
+            # we don't include ourselves in the count
+            exam_reg.exam_slot = None
             exam_reg.save(update_fields=['exam_slot'])
+
+            # Try to update the slot
+            if exam_slot_pk is not None:
+
+                # Get new exam slot, time slot list
+                exam_slot = ExamSlot.objects \
+                    .get(pk=exam_slot_pk)
+                time_slot_list = exam_slot.time_slots \
+                    .select_for_update()
+
+                # Check that all time slots have seats
+                for time_slot in time_slot_list:
+                    if (time_slot.count_num_registered() >=
+                            time_slot.capacity):
+                        raise IntegrityError("Not enough seats left")
+
+                # Update the exam registration
+                exam_reg.exam_slot = exam_slot
+                exam_reg.save(update_fields=['exam_slot'])

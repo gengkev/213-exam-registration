@@ -115,9 +115,10 @@ def exam_detail(request, course_code, exam_id):
         if form.is_valid():
             exam_reg = form.save(commit=False)
             exam_slot = exam_reg.exam_slot
+            exam_slot_pk = exam_slot.pk if exam_slot is not None else None
 
             try:
-                ExamRegistration.update_slot(exam_reg.pk, exam_slot.pk)
+                ExamRegistration.update_slot(exam_reg.pk, exam_slot_pk)
             except IntegrityError as e:
                 messages.error(request,
                     "Error while updating database. Your registration "
