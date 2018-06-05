@@ -87,11 +87,11 @@ class IndexViewTests(TestCase):
         self.client.defaults['REMOTE_USER'] = 'tester@andrew.cmu.edu'
 
         course1 = Course.objects.create(
-            code='15213-m18',
+            code='15101-m18',
             name='Introduction to Computer Systems (Summer 2018)',
         )
         course2 = Course.objects.create(
-            code='15150-s18',
+            code='15123-s18',
             name='Principles of Functional Programming (Spring 2018)',
         )
 
@@ -102,12 +102,20 @@ class IndexViewTests(TestCase):
         """
         response = self.client.get(reverse('registration:index'))
         self.assertEqual(response.status_code, 200)
+
+        # Check response queryset
         self.assertQuerysetEqual(
             response.context['course_user_list'],
             []
         )
-        #self.assertContains(response,
-        #    "You are not enrolled in any courses.")
+
+        # Check response body
+        self.assertContains(response,
+            "You are not enrolled in any courses.")
+        self.assertNotContains(response,
+            "Principles of Functional Programming (Spring 2018)")
+        self.assertNotContains(response,
+            "Introduction to Computer Systems (Summer 2018)")
 
     def test_student_courses(self):
         """
@@ -116,26 +124,35 @@ class IndexViewTests(TestCase):
         """
         course_user_1 = CourseUser.objects.create(
             user=User.objects.get(username='tester'),
-            course=Course.objects.get(code='15213-m18'),
+            course=Course.objects.get(code='15101-m18'),
             user_type=CourseUser.STUDENT,
             dropped=False,
         )
         course_user_2 = CourseUser.objects.create(
             user=User.objects.get(username='tester'),
-            course=Course.objects.get(code='15150-s18'),
+            course=Course.objects.get(code='15123-s18'),
             user_type=CourseUser.STUDENT,
             dropped=False,
         )
 
         response = self.client.get(reverse('registration:index'))
         self.assertEqual(response.status_code, 200)
+
+        # Check response queryset
         self.assertQuerysetEqual(
             response.context['course_user_list'],
             [
-                'tester (Student) [15213-m18]',
-                'tester (Student) [15150-s18]',
+                '<CourseUser: tester (Student) [15101-m18]>',
+                '<CourseUser: tester (Student) [15123-s18]>',
             ],
-            transform=str,
             ordered=False,
         )
+
+        # Check response body
+        self.assertNotContains(response,
+            "You are not enrolled in any courses.")
+        self.assertContains(response,
+            "Principles of Functional Programming (Spring 2018)")
+        self.assertContains(response,
+            "Introduction to Computer Systems (Summer 2018)")
 
