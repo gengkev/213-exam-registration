@@ -99,13 +99,6 @@ def exam_detail(request, course_code, exam_id):
         exam=exam_id,
         exam__course__code=course_code
     )
-    exam = exam_reg.exam
-    time_slots = exam.time_slot_set.annotate(
-        day=TruncDay('start_time'),
-    )
-    exam_slots = exam.exam_slot_set.annotate(
-        day=TruncDay('start_time_slot__start_time'),
-    )
 
     if request.method == 'POST':
         # Populate form with request data
@@ -141,6 +134,17 @@ def exam_detail(request, course_code, exam_id):
     else:
         # Create default form
         form = ExamRegistrationForm(instance=exam_reg)
+
+
+    # Reload exam_reg and related items
+    exam_reg.refresh_from_db()
+    exam = exam_reg.exam
+    time_slots = exam.time_slot_set.annotate(
+        day=TruncDay('start_time'),
+    )
+    exam_slots = exam.exam_slot_set.annotate(
+        day=TruncDay('start_time_slot__start_time'),
+    )
 
     return render(request, 'registration/exam_detail.html', {
         'form': form,

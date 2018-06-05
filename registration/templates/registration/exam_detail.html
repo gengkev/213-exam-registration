@@ -98,16 +98,21 @@
   {% with form.exam_slot as field %}
   <div class="list-group exam-slot-group">
     {% for radio in field %}
-    <div class="">
-      <input class="" type="radio"
+    <div>
+
+      <input type="radio" {% if radio.data.selected %}checked{% endif %}
           id="{{ radio.id_for_label }}"
-          {% if radio.data.selected %}checked{% endif %}
           name="{{ radio.data.name }}"
           value="{{ radio.data.value }}">
+
       <label class="list-group-item list-group-item-action"
           for="{{ radio.id_for_label }}">
         {{ radio.choice_label }}
+        {% if radio.data.value == exam_reg.exam_slot.pk or radio.data.value == '' and exam_reg.exam_slot is None %}
+        <span class="badge badge-info float-right">Current registration</span>
+        {% endif %}
       </label>
+
     </div>
     {% endfor %}
 

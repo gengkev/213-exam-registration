@@ -41,9 +41,13 @@ main {
 }
 .exam-slot-group input[type="radio"]:checked + .list-group-item {
   z-index: 2;
+  /*
   color: #fff;
   background-color: #007bff;
   border-color: #007bff;
+  */
+  color: #212529;
+  background-color: #e9ecef;
 }
 .exam-slot-group input[type="radio"] + .list-group-item:before {
   content: "\2713";
@@ -52,5 +56,5 @@ main {
   margin-right: 1em;
 }
 .exam-slot-group input[type="radio"]:checked + .list-group-item:before {
-  color: #fff;
+  color: #000;
 }
