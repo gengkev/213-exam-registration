@@ -49,9 +49,11 @@ class Course(models.Model):
 class CourseUser(models.Model):
     user = models.ForeignKey(User,
         on_delete=models.CASCADE,
+        related_name='course_user_set',
     )
     course = models.ForeignKey(Course,
         on_delete=models.CASCADE,
+        related_name='course_user_set',
     )
 
     # Type of account in this course

@@ -23,9 +23,7 @@ def index(request):
     Displays the home page, with all courses the user is enrolled in. If
     the user is not authenticated, displays an error message.
     """
-    course_user_list = CourseUser.objects.filter(
-        user=request.user.id,
-    )
+    course_user_list = request.user.course_user_set.all()
     return render(request, 'registration/index.html', {
         'course_user_list': course_user_list,
     })
@@ -86,7 +84,8 @@ def course_detail(request, course_code):
     )
     return render(request, 'registration/course_detail.html', {
         'course': course_user.course,
-        'course_user': course_user,
+        'my_course_user': course_user,
+        'is_instructor': course_user.user_type == CourseUser.INSTRUCTOR,
     })
 
 

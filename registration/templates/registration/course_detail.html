@@ -13,28 +13,83 @@
 
 <h2>Your info</h2>
 <p>
-  <em>User type:</em> {{ course_user.user_type }}<br>
-  <em>Lecture:</em> {{ course_user.lecture }}<br>
-  <em>Section:</em> {{ course_user.section }}<br>
-  <em>Dropped:</em> {{ course_user.dropped }}
+  <em>User type:</em> {{ my_course_user.user_type }}<br>
+  <em>Lecture:</em> {{ my_course_user.lecture }}<br>
+  <em>Section:</em> {{ my_course_user.section }}<br>
+  <em>Dropped:</em> {{ my_course_user.dropped }}
 </p>
 
-<h2>Exams</h2>
+<h2>My exams</h2>
 <div class="list-group">
 
   {# For each course, loop through each exam this user is in #}
-  {% for exam_reg in course_user.exam_registration_set.all %}
+  {% for exam_reg in my_course_user.exam_registration_set.all %}
   {% with exam_reg.exam as exam %}
 
   <a href="{% url 'registration:exam-detail' course.code exam.id %}"
       class="list-group-item list-group-item-action flex-column align-items-start">
     <h5 class="mb-1">{{ exam.name }}</h5>
-    <p>Current time slot: {{ exam_reg.time_slot.start }}</p>
+    Current time slot: {{ exam_reg.time_slot.start }}
   </a>
 
   {% endwith %}
   {% endfor %}
 </div>
 
+
+{% if is_instructor %}
+<h1>Instructor things&trade;</h1>
+<p>
+  You are an instructor for this course, so you get to see instructor
+  things&trade;.
+</p>
+
+<h2>All users</h2>
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Username</th>
+      <th scope="col">First name</th>
+      <th scope="col">Last name</th>
+      <th scope="col">User type</th>
+      <th scope="col">Lecture</th>
+      <th scope="col">Section</th>
+      <th scope="col">Dropped</th>
+    </tr>
+  </thead>
+
+  {% for course_user in course.course_user_set.all %}
+  <tr>
+    <td>{{ course_user.user.username }}</td>
+    <td>{{ course_user.user.first_name }}</td>
+    <td>{{ course_user.user.last_name }}</td>
+    <td>
+      {% if course_user.user_type == 's' %}
+      student
+      {% else %}
+      instructor
+      {% endif %}
+    </td>
+    <td>{{ course_user.lecture }}</td>
+    <td>{{ course_user.section }}</td>
+    <td>{{ course_user.dropped }}</td>
+  </tr>
+  {% endfor %}
+</table>
+
+<h2>All exams</h2>
+<div class="list-group">
+  {% for exam in course.exam_set.all %}
+
+  <a href="{% url 'registration:exam-detail' course.code exam.id %}"
+      class="list-group-item list-group-item-action flex-column align-items-start">
+    <h5 class="mb-1">{{ exam.name }}</h5>
+  </a>
+
+  {% endfor %}
+</div>
+
+
+{% endif %}
 
 {% endblock %}
