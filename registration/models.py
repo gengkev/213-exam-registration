@@ -214,7 +214,13 @@ class ExamSlot(models.Model):
         )
 
     def clean(self, *args, **kwargs):
-        """Validates consistency of ExamSlot objects."""
+        """Validates consistency of ExamSlot objects.
+
+        Note that we can't test whether each of the TimeSlot objects in
+        time_slots belong to the correct exam, because Django doesn't let us
+        access those fields before saving. So forms must restrict this
+        separately.
+        """
         if self.start_time_slot.exam != self.exam:
             raise ValidationError(dict(start_time_slot=(
                 "Selected start time slot does not belong to the "

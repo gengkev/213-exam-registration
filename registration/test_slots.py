@@ -73,12 +73,40 @@ def make_exam_slots(self):
     self.exam_slots[2].time_slots.add(self.time_slots[2])
 
 
+def make_registered_users(self):
+    # Create some users
+    self.users = [
+        User.objects.create(username='aaa'),
+        User.objects.create(username='bbb'),
+        User.objects.create(username='ccc'),
+    ]
+
+    # Enroll the users in the course
+    self.course_users = [
+        CourseUser.objects.create(
+            user=user,
+            course=self.course,
+            user_type=CourseUser.STUDENT,
+        )
+        for user in self.users
+    ]
+
+    # Register the users for the exam
+    self.exam_registrations = [
+        ExamRegistration.objects.create(
+            exam=self.exam,
+            course_user=course_user,
+        )
+        for course_user in self.course_users
+    ]
+
+
 class TimeSlotModelTests(TestCase):
     def setUp(self):
         make_exam(self)
         make_time_slots(self)
 
-    def test_db_prohibits_duplicate_start_time(self):
+    def test_db_rejects_duplicate_start_time(self):
         """
         Checks that within the same exam, a time slot with a duplicate
         start time is disallowed by a database constraint.
@@ -91,7 +119,7 @@ class TimeSlotModelTests(TestCase):
                 end_time=self.times[0] + datetime.timedelta(minutes=30),
             )
 
-    def test_clean_prohibits_overlapping_time_slot(self):
+    def test_clean_rejects_overlapping_time_slot(self):
         """
         Checks that within the same exam, partially overlapping time
         slots are disallowed by the clean() method.
@@ -105,7 +133,7 @@ class TimeSlotModelTests(TestCase):
         with self.assertRaises(ValidationError):
             new_time_slot.clean()
 
-    def test_clean_prohibits_containing_time_slot(self):
+    def test_clean_rejects_containing_time_slot(self):
         """
         Checks that within the same exam, a time slot that completely
         contain another is disallowed by the clean() method.
@@ -119,7 +147,7 @@ class TimeSlotModelTests(TestCase):
         with self.assertRaises(ValidationError):
             new_time_slot.clean()
 
-    def test_clean_prohibits_end_time_before_start_time(self):
+    def test_clean_rejects_end_time_before_start_time(self):
         """
         Checks that the end time of a time slot cannot be before the
         start time of that time slot.
@@ -132,6 +160,14 @@ class TimeSlotModelTests(TestCase):
         )
         with self.assertRaises(ValidationError):
             new_time_slot.clean()
+
+    def test_clean_allows_simple_time_slots(self):
+        """
+        Checks that simple valid time slots, such as the ones made
+        for this test, are allowed by the clean() method.
+        """
+        for time_slot in self.time_slots:
+            time_slot.clean()
 
     def test_clean_allows_same_start_and_end_times(self):
         """
@@ -161,6 +197,7 @@ class TimeSlotModelTests(TestCase):
             start_time=self.times[0],
             end_time=self.times[2] + datetime.timedelta(minutes=30),
         )
+        new_time_slot.clean()
 
 
 class ExamSlotModelTests(TestCase):
@@ -186,7 +223,15 @@ class ExamSlotModelTests(TestCase):
         for exam_slot, end_time in zip(self.exam_slots, end_times):
             self.assertEqual(exam_slot.get_end_time(), end_time)
 
-    def test_clean_rejects_inconsistent_exam(self):
+    def test_clean_allows_simple_exam_slots(self):
+        """
+        Checks that simple valid exam slots, such as the ones made
+        for this test, are allowed by the clean() method.
+        """
+        for exam_slot in self.exam_slots:
+            exam_slot.clean()
+
+    def test_clean_rejects_exam_slot_with_different_exam(self):
         """
         Checks that an exam slot whose exam differs from the exam of its
         start_time_slot is rejected by the clean() method.
@@ -196,6 +241,7 @@ class ExamSlotModelTests(TestCase):
             name="Midterm Exam",
         )
         self.exam_slots[0].exam = new_exam
+
         with self.assertRaises(ValidationError):
             self.exam_slots[0].clean()
 
@@ -212,39 +258,62 @@ class ExamSlotModelTests(TestCase):
             )
 
 
+class ExamRegistrationModelTests(TestCase):
+    def setUp(self):
+        make_exam(self)
+        make_time_slots(self)
+        make_exam_slots(self)
+        make_registered_users(self)
+
+    def test_clean_allows_empty_exam_slot(self):
+        """
+        Checks that the clean() method accepts an empty exam slot.
+        """
+        for exam_reg in self.exam_registrations:
+            exam_reg.clean()
+
+    def test_clean_rejects_exam_slot_with_different_exam(self):
+        """
+        Checks that the clean() method rejects an ExamRegistration whose
+        exam_slot is not from the same Exam that the registration is from.
+        """
+        new_exam = Exam.objects.create(
+            course=self.course,
+            name="Midterm Exam",
+        )
+        self.exam_registrations[0].exam = new_exam
+        self.exam_registrations[0].exam_slot = self.exam_slots[0]
+
+        with self.assertRaises(ValidationError):
+            self.exam_registrations[0].clean()
+
+    def test_clean_rejects_course_user_with_different_course(self):
+        """
+        Checks that the clean() method rejects an ExamRegistration whose
+        course_user is not from the same Course that the exam is from.
+        """
+        new_course = Course.objects.create(
+            code='15123-s18',
+            name='Principles of Functional Programming (Spring 2018)',
+        )
+        new_course_user = CourseUser.objects.create(
+            user=self.users[0],
+            course=new_course,
+        )
+        self.exam_registrations[0].course_user = new_course_user
+
+        with self.assertRaises(ValidationError):
+            self.exam_registrations[0].clean()
+
+
 class SlotCountingTests(TestCase):
     def setUp(self):
         make_exam(self)
         make_time_slots(self)
         make_exam_slots(self)
+        make_registered_users(self)
 
-        # Create some users
-        self.users = [
-            User.objects.create(username='aaa'),
-            User.objects.create(username='bbb'),
-            User.objects.create(username='ccc'),
-        ]
-
-        # Enroll the users in the course
-        self.course_users = [
-            CourseUser.objects.create(
-                user=user,
-                course=self.course,
-                user_type=CourseUser.STUDENT,
-            )
-            for user in self.users
-        ]
-
-        # Register the users for the exam
-        self.exam_registrations = [
-            ExamRegistration.objects.create(
-                exam=self.exam,
-                course_user=course_user
-            )
-            for course_user in self.course_users
-        ]
-
-    def test_accessors_with_no_registrations(self):
+    def test_counts_with_no_registrations(self):
         """
         Tests the results of the accessor methods in TimeSlot and ExamSlot
         when there is one registration.
@@ -261,7 +330,7 @@ class SlotCountingTests(TestCase):
         self.assertEqual(self.exam_slots[1].count_slots_left(), 2)
         self.assertEqual(self.exam_slots[2].count_slots_left(), 2)
 
-    def test_accessors_with_one_registration(self):
+    def test_counts_with_one_registration(self):
         """
         Tests the results of the accessor methods in TimeSlot and ExamSlot
         when there is one registration.
@@ -282,7 +351,7 @@ class SlotCountingTests(TestCase):
         self.assertEqual(self.exam_slots[1].count_slots_left(), 1)
         self.assertEqual(self.exam_slots[2].count_slots_left(), 1)
 
-    def test_accessors_with_two_same_registrations(self):
+    def test_counts_with_two_same_registrations(self):
         """
         Tests the results of the accessor methods in TimeSlot and ExamSlot
         when there are two registrations in the same exam slot.
@@ -307,7 +376,7 @@ class SlotCountingTests(TestCase):
         self.assertEqual(self.exam_slots[1].count_slots_left(), 0)
         self.assertEqual(self.exam_slots[2].count_slots_left(), 2)
 
-    def test_accessors_with_three_different_registrations(self):
+    def test_counts_with_three_different_registrations(self):
         """
         Tests the results of the accessor methods in TimeSlot and ExamSlot
         when there are three registrations in different exam slots.
