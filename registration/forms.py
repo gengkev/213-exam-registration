@@ -2,7 +2,7 @@ import pytz
 
 from django import forms
 
-from .models import User, ExamRegistration, ExamSlot
+from .models import User, ExamRegistration, ExamSlot, Course
 
 
 class ProfileForm(forms.ModelForm):
@@ -36,6 +36,12 @@ class ProfileForm(forms.ModelForm):
         widgets = {
             'timezone': forms.Select(),
         }
+
+
+class CourseEditForm(forms.ModelForm):
+    class Meta:
+        model = Course
+        fields = ['name', 'code']
 
 
 class ExamRegistrationForm(forms.ModelForm):

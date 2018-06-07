@@ -9,87 +9,97 @@
 {% endblock %}
 
 {% block content %}
-<h1>{{ course.name }}</h1>
-
-<h2>Your info</h2>
-<p>
-  <em>User type:</em> {{ my_course_user.user_type }}<br>
-  <em>Lecture:</em> {{ my_course_user.lecture }}<br>
-  <em>Section:</em> {{ my_course_user.section }}<br>
-  <em>Dropped:</em> {{ my_course_user.dropped }}
-</p>
-
-<h2>My exams</h2>
-<div class="list-group">
-
-  {# For each course, loop through each exam this user is in #}
-  {% for exam_reg in my_course_user.exam_registration_set.all %}
-  {% with exam_reg.exam as exam %}
-
-  <a href="{% url 'registration:exam-detail' course.code exam.id %}"
-      class="list-group-item list-group-item-action flex-column align-items-start">
-    <h5 class="mb-1">{{ exam.name }}</h5>
-    Current time slot: {{ exam_reg.time_slot.start }}
-  </a>
-
-  {% endwith %}
-  {% endfor %}
-</div>
-
+<h1>
+  {{ course.name }}
+  <small class="text-muted">{{ course.code }}</small>
+</h1>
 
 {% if is_instructor %}
-<h1>Instructor things&trade;</h1>
-<p>
-  You are an instructor for this course, so you get to see instructor
-  things&trade;.
-</p>
-
-<h2>All users</h2>
-<table class="table">
-  <thead>
-    <tr>
-      <th scope="col">Username</th>
-      <th scope="col">First name</th>
-      <th scope="col">Last name</th>
-      <th scope="col">User type</th>
-      <th scope="col">Lecture</th>
-      <th scope="col">Section</th>
-      <th scope="col">Dropped</th>
-    </tr>
-  </thead>
-
-  {% for course_user in course.course_user_set.all %}
-  <tr>
-    <td>{{ course_user.user.username }}</td>
-    <td>{{ course_user.user.first_name }}</td>
-    <td>{{ course_user.user.last_name }}</td>
-    <td>
-      {% if course_user.user_type == 's' %}
-      student
-      {% else %}
-      instructor
-      {% endif %}
-    </td>
-    <td>{{ course_user.lecture }}</td>
-    <td>{{ course_user.section }}</td>
-    <td>{{ course_user.dropped }}</td>
-  </tr>
-  {% endfor %}
-</table>
-
-<h2>All exams</h2>
-<div class="list-group">
-  {% for exam in course.exam_set.all %}
-
-  <a href="{% url 'registration:exam-detail' course.code exam.id %}"
-      class="list-group-item list-group-item-action flex-column align-items-start">
-    <h5 class="mb-1">{{ exam.name }}</h5>
-  </a>
-
-  {% endfor %}
-</div>
-
-
+<a href="{% url 'registration:course-manage' course.code %}"
+   class="btn btn-primary">
+  Manage course
+</a>
 {% endif %}
+
+<div class="row">
+  <div class="col-lg-6">
+    <h2>Exams</h2>
+    <div class="list-group mb-4">
+
+      {% if my_course_user.exam_registration_set.all %}
+
+      {# For each course, loop through each exam this user is in #}
+      {% for exam_reg in my_course_user.exam_registration_set.all %}
+      {% with exam_reg.exam as exam %}
+
+      <a href="{% url 'registration:exam-detail' course.code exam.id %}"
+          class="list-group-item list-group-item-action list-group-item-primary flex-column align-items-start">
+        <div class="d-flex w-100 justify-content-between">
+          <h5 class="mb-1">{{ exam.name }}</h5>
+          <!--<small>In X weeks</small>-->
+        </div>
+        <div>
+          {% if exam_reg.time_slot %}
+          {{ exam_reg.time_slot.start }}
+          {% else %}
+          Not registered
+          {% endif %}
+        </div>
+      </a>
+
+      {% endwith %}
+      {% endfor %}
+
+      {% else %}
+      <p class="lead">
+        You aren't registered for any exams in this course.
+      </p>
+      <p>
+        If you believe this is a mistake, please contact your course
+        instructor for help. They will be able to allow you to register
+        for an exam, if appropriate.
+      </p>
+      {% endif %}
+
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <h2>Enrollment info</h2>
+
+    <div class="border border-light p-4 bg-light rounded">
+
+      <dl class="row mb-0">
+        <dt class="col-sm-3">User type</dt>
+        <dd class="col-sm-9">
+        {% if my_course_user.user_type == 'i' %}
+        Instructor
+        {% elif my_course_user.user_type == 's' %}
+        Student
+        {% else %}
+        Unknown ({{ my_course_user.user_type }})
+        {% endif %}
+        </dd>
+
+        <dt class="col-sm-3">Lecture</dt>
+        <dd class="col-sm-9">
+        {{ my_course_user.lecture|default:"(none)" }}
+        </dt>
+
+        <dt class="col-sm-3">Section</dt>
+        <dd class="col-sm-9">
+        {{ my_course_user.section|default:"(none)" }}
+        </dt>
+
+        <dt class="col-sm-3">Dropped</dt>
+        <dd class="col-sm-9">
+        {{ my_course_user.dropped|yesno:"yes,no" }}
+        </dt>
+      </dl>
+
+    </div>
+  </div>
+
+</div>
 
 {% endblock %}

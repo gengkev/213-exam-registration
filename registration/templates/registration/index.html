@@ -9,7 +9,7 @@
 {# Loop through each course this user is in #}
 {% if course_user_list %}
 <div>
-  <h2>Courses</h2>
+  <h1>Courses</h1>
 
   {% for course_user in course_user_list %}
   {% with course_user.course as course %}
@@ -40,10 +40,13 @@
 <div class="row">
   <div class="col-md-8">
   <h2>Courses</h2>
+  <p class="lead">
+    You are not enrolled in any courses.
+  </p>
   <p>
-    <em>You are not enrolled in any courses.</em>
-    If you believe you should be enrolled in a course on this site, please
-    contact your course instructor for assistance.
+    If you believe you should be enrolled in a course, please contact the
+    instructor of the appropriate course for assistance. If you'd like to
+    create a course, please contact the developers.
   </p>
   </div>
 </div>

@@ -1,0 +1,70 @@
+{% extends "base_generic.html" %}
+
+{% block title %}Manage users &mdash; {{ course.name }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="nav-item active">
+  <a class="nav-link" href="{% url 'registration:course-detail' course.code %}">{{ course.code }}</a>
+</li>
+<li class="nav-item active" aria-current="page">
+  <a class="nav-link" href="{% url 'registration:course-manage' course.code %}">Manage</a>
+</li>
+<li class="nav-item active" aria-current="page">
+  <span class="nav-link">Users</span>
+</li>
+{% endblock %}
+
+{% block content %}
+
+<h1>
+  Manage users
+  <small class="text-muted">{{ course.code }}</small>
+</h1>
+
+<div class="table-responsive-md">
+  <table class="table table-sm table-hover">
+    <thead class="thead-light">
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Username</th>
+        <th scope="col">First name</th>
+        <th scope="col">Last name</th>
+        <th scope="col">User type</th>
+        <th scope="col">Lecture</th>
+        <th scope="col">Section</th>
+        <th scope="col">Dropped</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for course_user in course.course_user_set.all %}
+      <tr>
+        <th scope="row">{{ forloop.counter }}</td>
+        <td>{{ course_user.user.username }}</td>
+        <td>{{ course_user.user.first_name }}</td>
+        <td>{{ course_user.user.last_name }}</td>
+        <td>
+          {% if course_user.user_type == 'i' %}
+          Instructor
+          {% elif course_user.user_type == 's' %}
+          Student
+          {% else %}
+          Unknown ({{ course_user.user_type }})
+          {% endif %}
+        </td>
+        <td>
+          {{ course_user.lecture }}
+        </td>
+        <td>
+          {{ course_user.section }}
+        </td>
+        <td>
+          {{ course_user.dropped|yesno:"yes,no" }}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

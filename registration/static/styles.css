@@ -1,7 +1,11 @@
 /* General styles */
 main {
-  padding-top: 2rem;
+  padding-top: 1rem;
   padding-bottom: 4rem;
+}
+
+h1, h2 {
+  margin-top: 2rem;
 }
 
 /* Course list */
