@@ -14,12 +14,44 @@
   <small class="text-muted">{{ course.code }}</small>
 </h1>
 
+
 {% if is_instructor %}
-<a href="{% url 'registration:course-manage' course.code %}"
-   class="btn btn-primary">
-  Manage course
-</a>
+<div class="border border-dark shadow px-4 py-2 my-4 rounded">
+ <div>
+    <h2>Course management</h2>
+
+    <div>
+      <a class="btn btn-lg btn-success" role="button" href="{% url 'registration:course-users' course.code %}">
+        <i class="fa fa-users" aria-hidden="true"></i>
+        &nbsp;Manage users
+      </a>
+
+      <a class="btn btn-lg btn-primary" role="button" href="{% url 'registration:course-edit' course.code %}">
+        <i class="fa fa-cog" aria-hidden="true"></i>
+        &nbsp;Course settings
+      </a>
+
+      <a class="btn btn-lg btn-warning" role="button" href="">
+        <i class="fa fa-user-secret" aria-hidden="true"></i>
+        &nbsp;Act as user
+      </a>
+    </div>
+  </div>
+
+  <div class="list-group mt-4 mb-4">
+    {% for exam in course.exam_set.all %}
+
+    <a href="{% url 'registration:exam-detail' course.code exam.id %}"
+       class="list-group-item list-group-item-action flex-column align-items-start">
+      <h5 class="mb-1">{{ exam.name }}</h5>
+    </a>
+
+    {% endfor %}
+  </div>
+
+</div>
 {% endif %}
+
 
 <div class="row">
   <div class="col-lg-6">
@@ -32,8 +64,7 @@
       {% for exam_reg in my_course_user.exam_registration_set.all %}
       {% with exam_reg.exam as exam %}
 
-      <a href="{% url 'registration:exam-detail' course.code exam.id %}"
-          class="list-group-item list-group-item-action list-group-item-primary flex-column align-items-start">
+      <a href="{% url 'registration:exam-detail' course.code exam.id %}" class="list-group-item list-group-item-action exam-item-outline flex-column align-items-start">
         <div class="d-flex w-100 justify-content-between">
           <h5 class="mb-1">{{ exam.name }}</h5>
           <!--<small>In X weeks</small>-->
@@ -101,5 +132,6 @@
   </div>
 
 </div>
+
 
 {% endblock %}

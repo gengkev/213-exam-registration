@@ -98,26 +98,9 @@ def course_detail(request, course_code):
     })
 
 
-@require_safe
-@login_required
-def course_manage(request, course_code):
-    course_user = get_object_or_404(
-        CourseUser,
-        user=request.user.id,
-        user_type=CourseUser.INSTRUCTOR,
-        course__code=course_code,
-    )
-    course = course_user.course
-
-    return render(request, 'registration/course_manage.html', {
-        'course': course,
-        'my_course_user': course_user,
-    })
-
-
 @require_http_methods(['GET', 'HEAD', 'POST'])
 @login_required
-def course_manage_edit(request, course_code):
+def course_edit(request, course_code):
     course = get_object_or_404(Course, code=course_code)
     course_user = get_object_or_404(
         CourseUser,
@@ -137,7 +120,7 @@ def course_manage_edit(request, course_code):
                 "The course was updated successfully.",
             )
             return HttpResponseRedirect(reverse(
-                'registration:course-manage',
+                'registration:course-detail',
                 args=[course.code],
             ))
 
@@ -150,7 +133,7 @@ def course_manage_edit(request, course_code):
         # Create default form
         form = CourseEditForm(instance=course)
 
-    return render(request, 'registration/course_manage_edit.html', {
+    return render(request, 'registration/course_edit.html', {
         'course': course,
         'my_course_user': course_user,
         'form': form,

@@ -8,10 +8,8 @@ urlpatterns = [
     path('profile/', views.profile, name='profile'),
     path('courses/<course_code>/',
         views.course_detail, name='course-detail'),
-    path('courses/<course_code>/manage/',
-        views.course_manage, name='course-manage'),
-    path('courses/<course_code>/manage/edit/',
-        views.course_manage_edit, name='course-manage-edit'),
+    path('courses/<course_code>/edit/',
+        views.course_edit, name='course-edit'),
 
     # Course users
     path('courses/<course_code>/users/',

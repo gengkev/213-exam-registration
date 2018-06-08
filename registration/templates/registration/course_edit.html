@@ -7,9 +7,6 @@
   <a class="nav-link" href="{% url 'registration:course-detail' course.code %}">{{ course.code }}</a>
 </li>
 <li class="nav-item active" aria-current="page">
-  <a class="nav-link" href="{% url 'registration:course-manage' course.code %}">Manage</a>
-</li>
-<li class="nav-item active" aria-current="page">
   <span class="nav-link">Edit</span>
 </li>
 {% endblock %}
