@@ -88,6 +88,10 @@ class CourseUser(models.Model):
         ),
     )
 
+    def is_instructor(self):
+        """Returns whether this course user is an instructor."""
+        return self.user_type == CourseUser.INSTRUCTOR
+
     def __str__(self):
         return '{} ({}) [{}]'.format(
             self.user,

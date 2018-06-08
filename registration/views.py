@@ -2,6 +2,7 @@ from datetime import timedelta
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 from django.db import transaction, IntegrityError
 from django.db.models.functions import TruncDay
 from django.http import HttpResponseRedirect
@@ -19,6 +20,45 @@ from .forms import (
 from .models import (
     Course, CourseUser, Exam, ExamRegistration, User
 )
+
+
+def course_auth(request, course_code):
+    """
+    Checks whether a user is enrolled in the course. If so, a 2-tuple
+    (course, course_user) is returned, and otherwise, a PermissionDenied
+    exception is raised. If the course doesn't exist, Http404 is raised.
+    """
+    course = get_object_or_404(Course, code=course_code)
+
+    try:
+        course_user = CourseUser.objects.get(
+            course=course,
+            user=request.user.id,
+        )
+    except CourseUser.DoesNotExist:
+        raise PermissionDenied("You are not enrolled in this course.")
+
+    return course, course_user
+
+
+def course_auth_instructor(request, course_code):
+    """
+    Checks whether a user is an instructor in the course. If so, a 2-tuple
+    (course, course_user) is returned, and otherwise, a PermissionDenied
+    exception is raised. If the course doesn't exist, Http404 is raised.
+    """
+    course = get_object_or_404(Course, code=course_code)
+
+    try:
+        course_user = CourseUser.objects.get(
+            course=course,
+            user=request.user.id,
+            user_type=CourseUser.INSTRUCTOR,
+        )
+    except CourseUser.DoesNotExist:
+        raise PermissionDenied("You are not an instructor in this course.")
+
+    return course, course_user
 
 
 @require_safe
@@ -84,30 +124,18 @@ def profile(request):
 @require_safe
 @login_required
 def course_detail(request, course_code):
-    course_user = get_object_or_404(
-        CourseUser,
-        user=request.user.id,
-        course__code=course_code,
-    )
-    course = course_user.course
+    course, my_course_user = course_auth(request, course_code)
 
     return render(request, 'registration/course_detail.html', {
         'course': course,
-        'my_course_user': course_user,
-        'is_instructor': course_user.user_type == CourseUser.INSTRUCTOR,
+        'my_course_user': my_course_user,
     })
 
 
 @require_http_methods(['GET', 'HEAD', 'POST'])
 @login_required
 def course_edit(request, course_code):
-    course = get_object_or_404(Course, code=course_code)
-    course_user = get_object_or_404(
-        CourseUser,
-        user=request.user.id,
-        user_type=CourseUser.INSTRUCTOR,
-        course=course,
-    )
+    course, _ = course_auth_instructor(request, course_code)
 
     if request.method == 'POST':
         # Populate form with request data
@@ -135,7 +163,6 @@ def course_edit(request, course_code):
 
     return render(request, 'registration/course_edit.html', {
         'course': course,
-        'my_course_user': course_user,
         'form': form,
     })
 
@@ -143,30 +170,17 @@ def course_edit(request, course_code):
 @require_safe
 @login_required
 def course_users(request, course_code):
-    course = get_object_or_404(Course, code=course_code)
-    my_course_user = get_object_or_404(
-        CourseUser,
-        user=request.user.id,
-        user_type=CourseUser.INSTRUCTOR,
-        course=course,
-    )
+    course, _ = course_auth_instructor(request, course_code)
 
     return render(request, 'registration/course_users.html', {
         'course': course,
-        'my_course_user': my_course_user,
     })
 
 
 @require_http_methods(['GET', 'HEAD', 'POST'])
 @login_required
 def course_users_create(request, course_code):
-    course = get_object_or_404(Course, code=course_code)
-    my_course_user = get_object_or_404(
-        CourseUser,
-        user=request.user.id,
-        user_type=CourseUser.INSTRUCTOR,
-        course=course,
-    )
+    course, _ = course_auth_instructor(request, course_code)
 
     if request.method == 'POST':
         # Populate form with request data
@@ -205,13 +219,7 @@ def course_users_create(request, course_code):
 @require_http_methods(['GET', 'HEAD', 'POST'])
 @login_required
 def course_users_edit(request, course_code, course_user_id):
-    course = get_object_or_404(Course, code=course_code)
-    my_course_user = get_object_or_404(
-        CourseUser,
-        user=request.user.id,
-        user_type=CourseUser.INSTRUCTOR,
-        course=course,
-    )
+    course, _ = course_auth_instructor(request, course_code)
 
     # Find user in question
     course_user = get_object_or_404(
@@ -246,7 +254,6 @@ def course_users_edit(request, course_code, course_user_id):
 
     return render(request, 'registration/course_users_edit.html', {
         'course': course,
-        'my_course_user': my_course_user,
         'course_user': course_user,
         'form': form,
     })
@@ -255,14 +262,15 @@ def course_users_edit(request, course_code, course_user_id):
 @require_http_methods(['GET', 'HEAD', 'POST'])
 @login_required
 def exam_detail(request, course_code, exam_id):
+    course, my_course_user = course_auth(request, course_code)
     exam = get_object_or_404(
         Exam,
         pk=exam_id,
-        course__code=course_code,
+        course=course,
     )
     exam_reg = get_object_or_404(
         ExamRegistration,
-        course_user__user=request.user.id,
+        course_user=my_course_user,
         exam=exam,
     )
 
