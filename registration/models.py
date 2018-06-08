@@ -69,9 +69,24 @@ class CourseUser(models.Model):
     )
 
     # Attributes from Autolab export
-    lecture = models.CharField(max_length=32, blank=True)
-    section = models.CharField(max_length=32, blank=True)
-    dropped = models.BooleanField(default=False)
+    lecture = models.CharField(
+        max_length=32,
+        blank=True,
+        help_text="The student's lecture number",
+    )
+    section = models.CharField(
+        max_length=32,
+        blank=True,
+        help_text="The student's section number",
+    )
+    dropped = models.BooleanField(
+        default=False,
+        help_text=(
+            "Whether the student has dropped this course. This prevents "
+            "the student from updating any information related to this "
+            "course, although they can continue to log in."
+        ),
+    )
 
     def __str__(self):
         return '{} ({}) [{}]'.format(

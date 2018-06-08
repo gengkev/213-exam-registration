@@ -1,0 +1,57 @@
+{% extends "base_generic.html" %}
+
+{% block title %}Edit course user &langle;{{ course_user.user.username }}&rangle; &mdash; {{ course.name }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="nav-item active">
+  <a class="nav-link" href="{% url 'registration:course-detail' course.code %}">{{ course.code }}</a>
+</li>
+<li class="nav-item active" aria-current="page">
+  <a class="nav-link" href="{% url 'registration:course-users' course.code %}">Users</a>
+</li>
+<li class="nav-item active" aria-current="page">
+  <span class="nav-link">{{ course_user.user.username }}</span>
+</li>
+{% endblock %}
+
+{% block content %}
+
+<h1>
+  Edit course user &langle;{{ course_user.user.username }}&rangle;
+  <small class="text-muted">{{ course.code }}</small>
+</h1>
+
+<h2>User data</h2>
+<div class="border border-light p-4 bg-light rounded">
+
+  <dl class="row mb-0">
+    <dt class="col-sm-3">Username</dt>
+    <dd class="col-sm-9">{{ course_user.user.username }}</dd>
+
+    <dt class="col-sm-3">Email</dt>
+    <dd class="col-sm-9">{{ course_user.user.email }}</dd>
+
+    <dt class="col-sm-3">First name</dt>
+    <dd class="col-sm-9">{{ course_user.user.first_name }}</dd>
+
+    <dt class="col-sm-3">Last name</dt>
+    <dd class="col-sm-9">{{ course_user.user.last_name }}</dd>
+
+    <dt class="col-sm-3">Timezone</dt>
+    <dd class="col-sm-9">{{ course_user.user.timezone }}</dd>
+  </dl>
+
+</div>
+
+<h2>Course data</h2>
+<form action="" method="POST">
+  {% csrf_token %}
+
+  <table>
+    {{ form }}
+  </table>
+
+  <input type="submit" value="Submit">
+</form>
+
+{% endblock %}

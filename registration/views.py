@@ -13,7 +13,8 @@ from django.views.decorators.http import (
 )
 
 from .forms import (
-    ProfileForm, ExamRegistrationForm, CourseEditForm
+    ProfileForm, ExamRegistrationForm, CourseEditForm, CourseUserEditForm,
+    CourseUserCreateForm
 )
 from .models import (
     Course, CourseUser, Exam, ExamRegistration, User
@@ -114,33 +115,16 @@ def course_manage(request, course_code):
     })
 
 
-@require_safe
-@login_required
-def course_manage_users(request, course_code):
-    course_user = get_object_or_404(
-        CourseUser,
-        user=request.user.id,
-        user_type=CourseUser.INSTRUCTOR,
-        course__code=course_code,
-    )
-    course = course_user.course
-
-    return render(request, 'registration/course_manage_users.html', {
-        'course': course,
-        'my_course_user': course_user,
-    })
-
-
 @require_http_methods(['GET', 'HEAD', 'POST'])
 @login_required
 def course_manage_edit(request, course_code):
+    course = get_object_or_404(Course, code=course_code)
     course_user = get_object_or_404(
         CourseUser,
         user=request.user.id,
         user_type=CourseUser.INSTRUCTOR,
-        course__code=course_code,
+        course=course,
     )
-    course = course_user.course
 
     if request.method == 'POST':
         # Populate form with request data
@@ -173,14 +157,130 @@ def course_manage_edit(request, course_code):
     })
 
 
+@require_safe
+@login_required
+def course_users(request, course_code):
+    course = get_object_or_404(Course, code=course_code)
+    my_course_user = get_object_or_404(
+        CourseUser,
+        user=request.user.id,
+        user_type=CourseUser.INSTRUCTOR,
+        course=course,
+    )
+
+    return render(request, 'registration/course_users.html', {
+        'course': course,
+        'my_course_user': my_course_user,
+    })
+
+
+@require_http_methods(['GET', 'HEAD', 'POST'])
+@login_required
+def course_users_create(request, course_code):
+    course = get_object_or_404(Course, code=course_code)
+    my_course_user = get_object_or_404(
+        CourseUser,
+        user=request.user.id,
+        user_type=CourseUser.INSTRUCTOR,
+        course=course,
+    )
+
+    if request.method == 'POST':
+        # Populate form with request data
+        form = CourseUserCreateForm(request.POST)
+
+        # Check for validity
+        if form.is_valid():
+            course_user = form.save(commit=False)
+            course_user.course = course
+            course_user.save()
+
+            messages.success(request,
+                "The course user was updated successfully.",
+            )
+            return HttpResponseRedirect(reverse(
+                'registration:course-users',
+                args=[course.code],
+            ))
+
+        else:
+            messages.error(request,
+                "Please correct the error below.",
+            )
+
+    else:
+        # Create default form
+        form = CourseUserCreateForm()
+
+    return render(request, 'registration/course_users_create.html', {
+        'course': course,
+        'my_course_user': my_course_user,
+        'form': form,
+    })
+
+
+@require_http_methods(['GET', 'HEAD', 'POST'])
+@login_required
+def course_users_edit(request, course_code, course_user_id):
+    course = get_object_or_404(Course, code=course_code)
+    my_course_user = get_object_or_404(
+        CourseUser,
+        user=request.user.id,
+        user_type=CourseUser.INSTRUCTOR,
+        course=course,
+    )
+
+    # Find user in question
+    course_user = get_object_or_404(
+        CourseUser,
+        pk=course_user_id,
+        course=course,
+    )
+
+    if request.method == 'POST':
+        # Populate form with request data
+        form = CourseUserEditForm(request.POST, instance=course_user)
+
+        # Check for validity
+        if form.is_valid():
+            course_user = form.save()
+            messages.success(request,
+                "The course user was updated successfully.",
+            )
+            return HttpResponseRedirect(reverse(
+                'registration:course-users',
+                args=[course.code],
+            ))
+
+        else:
+            messages.error(request,
+                "Please correct the error below.",
+            )
+
+    else:
+        # Create default form
+        form = CourseUserEditForm(instance=course_user)
+
+    return render(request, 'registration/course_users_edit.html', {
+        'course': course,
+        'my_course_user': my_course_user,
+        'course_user': course_user,
+        'form': form,
+    })
+
+
 @require_http_methods(['GET', 'HEAD', 'POST'])
 @login_required
 def exam_detail(request, course_code, exam_id):
+    exam = get_object_or_404(
+        Exam,
+        pk=exam_id,
+        course__code=course_code,
+    )
     exam_reg = get_object_or_404(
         ExamRegistration,
         course_user__user=request.user.id,
-        exam=exam_id,
-        exam__course__code=course_code
+        exam=exam,
     )
 
     if request.method == 'POST':
@@ -206,7 +306,7 @@ def exam_detail(request, course_code, exam_id):
                 )
                 return HttpResponseRedirect(reverse(
                     'registration:exam-detail',
-                    args=[exam_reg.exam.course.code, exam_reg.exam.id],
+                    args=[exam.course.code, exam.id],
                 ))
 
         else:
@@ -221,7 +321,6 @@ def exam_detail(request, course_code, exam_id):
 
     # Reload exam_reg and related items
     exam_reg.refresh_from_db()
-    exam = exam_reg.exam
     time_slots = exam.time_slot_set.annotate(
         day=TruncDay('start_time'),
     )

@@ -1,23 +1,23 @@
 {% extends "base_generic.html" %}
 
-{% block title %}Edit course &mdash; {{ course.name }}{% endblock %}
+{% block title %}New course user &mdash; {{ course.name }}{% endblock %}
 
 {% block breadcrumb %}
 <li class="nav-item active">
   <a class="nav-link" href="{% url 'registration:course-detail' course.code %}">{{ course.code }}</a>
 </li>
 <li class="nav-item active" aria-current="page">
-  <a class="nav-link" href="{% url 'registration:course-manage' course.code %}">Manage</a>
+  <a class="nav-link" href="{% url 'registration:course-users' course.code %}">Users</a>
 </li>
 <li class="nav-item active" aria-current="page">
-  <span class="nav-link">Edit</span>
+  <span class="nav-link">New</span>
 </li>
 {% endblock %}
 
 {% block content %}
 
 <h1>
-  Edit course
+  New course user
   <small class="text-muted">{{ course.code }}</small>
 </h1>
 

@@ -2,7 +2,9 @@ import pytz
 
 from django import forms
 
-from .models import User, ExamRegistration, ExamSlot, Course
+from .models import (
+    User, ExamRegistration, ExamSlot, Course, CourseUser
+)
 
 
 class ProfileForm(forms.ModelForm):
@@ -42,6 +44,22 @@ class CourseEditForm(forms.ModelForm):
     class Meta:
         model = Course
         fields = ['name', 'code']
+
+
+class CourseUserCreateForm(forms.ModelForm):
+    class Meta:
+        model = CourseUser
+        fields = [
+            'user', 'user_type', 'lecture', 'section', 'dropped'
+        ]
+
+
+class CourseUserEditForm(forms.ModelForm):
+    class Meta:
+        model = CourseUser
+        fields = [
+            'user_type', 'lecture', 'section', 'dropped'
+        ]
 
 
 class ExamRegistrationForm(forms.ModelForm):
