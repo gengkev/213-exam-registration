@@ -65,7 +65,7 @@ def profile(request):
     # Format UTC offset
     def format_seconds(n):
         hours, minutes = divmod(n // 60, 60)
-        return f"{hours:02}:{minutes:02}"
+        return "{:02}:{:02}".format(hours, minutes)
 
     offset = now.utcoffset()
     stroffset = ('-' if offset < timedelta(0) else '+')
@@ -74,7 +74,9 @@ def profile(request):
     # Render template
     return render(request, 'registration/profile.html', {
         'form': form,
-        'current_timezone': f"{now.tzinfo} ({now.tzname()}, UTC{stroffset})"
+        'current_timezone': "{} ({}, UTC{})".format(
+            now.tzinfo, now.tzname(), stroffset
+        ),
     })
 
 

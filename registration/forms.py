@@ -18,7 +18,7 @@ class ProfileForm(forms.ModelForm):
 
         tz_timezones = [
             (
-                f"{code}: {pytz.country_names[code]}",
+                "{}: {}".format(code, pytz.country_names[code]),
                 [(tz, tz) for tz in tzlist],
             )
             for (code, tzlist) in pytz.country_timezones.items()

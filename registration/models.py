@@ -279,7 +279,10 @@ class ExamRegistration(models.Model):
         super(ExamRegistration, self).clean(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.course_user.user} for {self.exam.name}"
+        return "{} for {}".format(
+            self.course_user.user,
+            self.exam.name,
+        )
 
     class Meta:
         unique_together = (('exam', 'course_user'),)
