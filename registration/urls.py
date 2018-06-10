@@ -10,6 +10,8 @@ urlpatterns = [
         views.course_detail, name='course-detail'),
     path('courses/<course_code>/edit/',
         views.course_edit, name='course-edit'),
+    path('courses/<course_code>/sudo/',
+        views.course_sudo, name='course-sudo'),
 
     # Course users
     path('courses/<course_code>/users/',

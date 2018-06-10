@@ -93,9 +93,8 @@ class CourseUser(models.Model):
         return self.user_type == CourseUser.INSTRUCTOR
 
     def __str__(self):
-        return '{} ({}) [{}]'.format(
+        return '{} [{}]'.format(
             self.user,
-            dict(self.USER_TYPE)[self.user_type],
             self.course.code,
         )
 

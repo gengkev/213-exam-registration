@@ -14,49 +14,44 @@ from django.views.decorators.http import (
 )
 
 from .forms import (
-    ProfileForm, ExamRegistrationForm, CourseEditForm, CourseUserEditForm,
-    CourseUserCreateForm
+    ProfileForm, ExamRegistrationForm, CourseEditForm, CourseSudoForm,
+    CourseUserEditForm, CourseUserCreateForm
 )
 from .models import (
     Course, CourseUser, Exam, ExamRegistration, User
 )
 
 
-def course_auth(request, course_code):
+def course_auth(request, course_code, instructor=False, use_sudo=True):
     """
     Checks whether a user is enrolled in the course. If so, a 2-tuple
     (course, course_user) is returned, and otherwise, a PermissionDenied
     exception is raised. If the course doesn't exist, Http404 is raised.
+
+    If instructor is True, then only instructors are permitted to access
+    the course. If use_sudo is True, then the sudo user will be used if
+    activated in the session.
     """
     course = get_object_or_404(Course, code=course_code)
 
+    # Try to use sudo
+    sudo = request.session.get('sudo_user', None)
+    if (use_sudo and sudo is not None and
+            sudo['course_code'] == course_code):
+        query = {'course': course, 'pk': sudo['pk']}
+        request.sudo_enabled = True
+    else:
+        query = {'course': course, 'user': request.user.id}
+
+    # Limit to instructors if necessary
+    if instructor:
+        query['user_type'] = CourseUser.INSTRUCTOR
+
+    # Look up CourseUser in database
     try:
-        course_user = CourseUser.objects.get(
-            course=course,
-            user=request.user.id,
-        )
+        course_user = CourseUser.objects.get(**query)
     except CourseUser.DoesNotExist:
         raise PermissionDenied("You are not enrolled in this course.")
-
-    return course, course_user
-
-
-def course_auth_instructor(request, course_code):
-    """
-    Checks whether a user is an instructor in the course. If so, a 2-tuple
-    (course, course_user) is returned, and otherwise, a PermissionDenied
-    exception is raised. If the course doesn't exist, Http404 is raised.
-    """
-    course = get_object_or_404(Course, code=course_code)
-
-    try:
-        course_user = CourseUser.objects.get(
-            course=course,
-            user=request.user.id,
-            user_type=CourseUser.INSTRUCTOR,
-        )
-    except CourseUser.DoesNotExist:
-        raise PermissionDenied("You are not an instructor in this course.")
 
     return course, course_user
 
@@ -68,7 +63,8 @@ def index(request):
     Displays the home page, with all courses the user is enrolled in. If
     the user is not authenticated, displays an error message.
     """
-    course_user_list = request.user.course_user_set.all()
+    user = get_object_or_404(User, pk=request.user.id)
+    course_user_list = user.course_user_set.all()
     return render(request, 'registration/index.html', {
         'course_user_list': course_user_list,
     })
@@ -135,7 +131,7 @@ def course_detail(request, course_code):
 @require_http_methods(['GET', 'HEAD', 'POST'])
 @login_required
 def course_edit(request, course_code):
-    course, _ = course_auth_instructor(request, course_code)
+    course, _ = course_auth(request, course_code, instructor=True)
 
     if request.method == 'POST':
         # Populate form with request data
@@ -167,10 +163,77 @@ def course_edit(request, course_code):
     })
 
 
+@require_http_methods(['GET', 'HEAD', 'POST'])
+@login_required
+def course_sudo(request, course_code):
+    course, _ = course_auth(request, course_code,
+            instructor=True, use_sudo=False)
+
+    # Check for previous sudo user
+    prev_sudo_user = None
+    if 'sudo_user' in request.session:
+        prev_sudo_user = CourseUser.objects.get(
+            pk=request.session['sudo_user']['pk'],
+        )
+
+    if request.method == 'POST':
+        # Populate form with request data
+        form = CourseSudoForm(request.POST, course=course)
+
+        # Check for validity
+        if form.is_valid():
+            new_sudo_user = form.cleaned_data['user']
+
+            if prev_sudo_user is not None:
+                messages.warning(request,
+                    "You are no longer acting as {}."
+                        .format(prev_sudo_user)
+                )
+
+            if new_sudo_user is None:
+                # Clear sudo user
+                del request.session['sudo_user']
+
+            else:
+                # Set new sudo user
+                request.session['sudo_user'] = {
+                    'str': str(new_sudo_user),
+                    'pk': new_sudo_user.pk,
+                    'user_pk': new_sudo_user.user.pk,
+                    'course_code': course.code,
+                }
+                messages.success(request,
+                    "You are now acting as {}."
+                        .format(new_sudo_user),
+                )
+
+            return HttpResponseRedirect(reverse(
+                'registration:course-detail',
+                args=[course.code],
+            ))
+
+        else:
+            messages.error(request,
+                "Please correct the error below.",
+            )
+
+    else:
+        # Create default form
+        form = CourseSudoForm(
+            course=course,
+            initial={'user': prev_sudo_user}
+        )
+
+    return render(request, 'registration/course_sudo.html', {
+        'course': course,
+        'form': form,
+    })
+
+
 @require_safe
 @login_required
 def course_users(request, course_code):
-    course, _ = course_auth_instructor(request, course_code)
+    course, _ = course_auth(request, course_code, instructor=True)
 
     return render(request, 'registration/course_users.html', {
         'course': course,
@@ -180,7 +243,7 @@ def course_users(request, course_code):
 @require_http_methods(['GET', 'HEAD', 'POST'])
 @login_required
 def course_users_create(request, course_code):
-    course, _ = course_auth_instructor(request, course_code)
+    course, _ = course_auth(request, course_code, instructor=True)
 
     if request.method == 'POST':
         # Populate form with request data
@@ -219,7 +282,7 @@ def course_users_create(request, course_code):
 @require_http_methods(['GET', 'HEAD', 'POST'])
 @login_required
 def course_users_edit(request, course_code, course_user_id):
-    course, _ = course_auth_instructor(request, course_code)
+    course, _ = course_auth(request, course_code, instructor=True)
 
     # Find user in question
     course_user = get_object_or_404(
@@ -321,6 +384,7 @@ def exam_detail(request, course_code, exam_id):
 
     return render(request, 'registration/exam_detail.html', {
         'form': form,
+        'course': course,
         'exam': exam,
         'exam_reg': exam_reg,
         'time_slots': time_slots,

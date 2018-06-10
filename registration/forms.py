@@ -62,6 +62,21 @@ class CourseUserEditForm(forms.ModelForm):
         ]
 
 
+class CourseSudoForm(forms.Form):
+    user = forms.ModelChoiceField(
+        queryset=None,
+        required=False,
+    )
+
+    def __init__(self, *args, **kwargs):
+        course = kwargs.pop('course')
+        super().__init__(*args, **kwargs)
+
+        # Only select users enrolled in course
+        self.fields['user'].queryset = \
+            course.course_user_set.all()
+
+
 class ExamRegistrationForm(forms.ModelForm):
     exam_slot = forms.ModelChoiceField(
         queryset=None,
@@ -76,7 +91,7 @@ class ExamRegistrationForm(forms.ModelForm):
         # Filter possible time slots by exam
         exam_reg = self.instance
         self.fields['exam_slot'].queryset = \
-            ExamSlot.objects.filter(exam=exam_reg.exam)
+            exam_reg.exam.exam_slot_set.all()
 
     class Meta:
         model = ExamRegistration

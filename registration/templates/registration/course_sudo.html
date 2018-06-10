@@ -1,0 +1,61 @@
+{% extends "base_generic.html" %}
+
+{% block title %}Act as user &mdash; {{ course.name }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="nav-item active">
+  <a class="nav-link" href="{% url 'registration:course-detail' course.code %}">{{ course.code }}</a>
+</li>
+<li class="nav-item active" aria-current="page">
+  <span class="nav-link">Act as user</span>
+</li>
+{% endblock %}
+
+{% block content %}
+
+<h1>
+  Act as user
+  <small class="text-muted">{{ course.code }}</small>
+</h1>
+
+<p class="lead">
+  The sudo option allows you to act as if you are another user.
+</p>
+<p>
+  However, you will only be able to act as that user within this course,
+  {{ course.code }}. Additionally, you will only be able to sudo as one
+  user across all courses: enabling the sudo option in another course will
+  disable it for the current course.
+</p>
+<p>
+  An indicator in the navigation bar will display the user for which you
+  have activated the sudo option. It will also indicate whether the option
+  is activated for the current page with either
+  <span title="Sudo enabled for this page">
+    <i class="fa fa-check" aria-hidden="true"></i>
+    <span class="sr-only">(Sudo enabled for this page)</span>
+  </span>
+  or
+  <span title="Sudo disabled for this page">
+    <i class="fa fa-ban" aria-hidden="true"></i>
+    <span class="sr-only">(Sudo disabled for this page)</span>
+  </span>
+  .
+</p>
+<p>
+  You can return to this page at any time, by clicking on the indicator.
+  To cancel the sudo option, select the empty option from the dropdown
+  below.
+</p>
+
+<form action="" method="POST">
+  {% csrf_token %}
+
+  <table>
+    {{ form }}
+  </table>
+
+  <input type="submit" value="Submit">
+</form>
+
+{% endblock %}

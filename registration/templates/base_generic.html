@@ -29,6 +29,33 @@
 
     <!-- Right-aligned account items -->
     <ul class="navbar-nav ml-auto">
+      {% if request.session.sudo_user %}
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'registration:course-sudo' request.session.sudo_user.course_code %}">
+          <i class="fa fa-user-secret" aria-hidden="true"></i>
+
+          {% if request.sudo_enabled %}
+          <i class="fa fa-check" aria-hiden="true"></i>
+          <span class="sr-only">(Sudo enabled for this page)</span>
+          <span title="Sudo enabled for this page">
+          {% else %}
+          <i class="fa fa-ban" aria-hiden="true"></i>
+          <span class="sr-only">(Sudo disabled for this page)</span>
+          <s title="Sudo disabled for this page">
+          {% endif %}
+
+            Acting as {{ request.session.sudo_user.str }}
+
+          {% if request.sudo_enabled %}
+          </span>
+          {% else %}
+          </s>
+          {% endif %}
+
+        </a>
+      </li>
+      {% endif %}
+
       <li class="nav-item">
         <a class="nav-link" href="{% url 'registration:profile' %}">
           <i class="fa fa-user" aria-hidden="true"></i>

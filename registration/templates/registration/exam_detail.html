@@ -4,7 +4,7 @@
 
 {% block breadcrumb %}
 <li class="nav-item active">
-  <a class="nav-link" href="{% url 'registration:course-detail' exam.course.code %}">{{ exam.course.code }}</a>
+  <a class="nav-link" href="{% url 'registration:course-detail' course.code %}">{{ course.code }}</a>
 </li>
 <li class="nav-item active" aria-current="page">
   <span class="nav-link">{{ exam.name }}</span>
@@ -14,7 +14,7 @@
 {% block content %}
 <h1>
   {{ exam.name }}
-  <small class="text-muted">{{ exam.course.code }}</small>
+  <small class="text-muted">{{ course.code }}</small>
 </h1>
 
 <div class="row">
