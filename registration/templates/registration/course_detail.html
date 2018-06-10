@@ -70,8 +70,9 @@
           <!--<small>In X weeks</small>-->
         </div>
         <div>
-          {% if exam_reg.time_slot %}
-          {{ exam_reg.time_slot.start }}
+          {% if exam_reg.exam_slot %}
+          {{ exam_reg.exam_slot.get_start_time }} &ndash;
+          {{ exam_reg.exam_slot.get_end_time }}
           {% else %}
           Not registered
           {% endif %}
