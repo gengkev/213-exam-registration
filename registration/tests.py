@@ -142,8 +142,8 @@ class IndexViewTests(TestCase):
         self.assertQuerysetEqual(
             response.context['course_user_list'],
             [
-                '<CourseUser: tester (Student) [15101-m18]>',
-                '<CourseUser: tester (Student) [15123-s18]>',
+                '<CourseUser: tester [15101-m18]>',
+                '<CourseUser: tester [15123-s18]>',
             ],
             ordered=False,
         )
