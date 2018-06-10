@@ -274,7 +274,6 @@ def course_users_create(request, course_code):
 
     return render(request, 'registration/course_users_create.html', {
         'course': course,
-        'my_course_user': my_course_user,
         'form': form,
     })
 
