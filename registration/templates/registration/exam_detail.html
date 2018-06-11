@@ -56,7 +56,6 @@
 
 
   <!-- No selection -->
-
   <div class="list-group exam-slot-group mb-4">
     <input class="sr-only" type="radio" id="id_exam_slot_none"
         name="exam_slot" value=""
@@ -71,12 +70,17 @@
       </div>
 
       <div class="w-100 ml-3">
-        <h5 class="d-inline-block">Not registered</h3>
+        <h5 class="mb-0 d-inline-block">No selection</h3>
+
         <div class="d-inline-block float-right">
           {% if slot.pk == exam_reg.exam_slot.pk %}
           <span class="badge badge-info">Current registration</span>
           {% endif %}
         </div>
+
+        <p class="mb-0 text-muted">
+          Unregister me from the exam
+        </p>
       </div>
     </label>
   </div>
