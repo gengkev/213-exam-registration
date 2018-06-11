@@ -381,6 +381,11 @@ def exam_detail(request, course_code, exam_id):
         day=TruncDay('start_time_slot__start_time'),
     )
 
+    # Determine id of selected slot
+    selected_slot = form['exam_slot'].value()
+    if selected_slot is not None:
+        selected_slot = int(selected_slot)
+
     return render(request, 'registration/exam_detail.html', {
         'form': form,
         'course': course,
@@ -388,4 +393,5 @@ def exam_detail(request, course_code, exam_id):
         'exam_reg': exam_reg,
         'time_slots': time_slots,
         'exam_slots': exam_slots,
+        'selected_slot': selected_slot,
     })

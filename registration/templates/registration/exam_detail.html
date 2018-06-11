@@ -19,6 +19,7 @@
 
 <div class="row">
   <div class="col-lg-8">
+    <h2>Exam information</h2>
     <p>
       {{ exam.details | linebreaks }}
     </p>
@@ -27,59 +28,16 @@
 
 
 <div class="alert alert-warning" role="alert">
-  All human-readable times are displayed in your current timezone,
+  All human-readable times below (but not in the description above) are
+  displayed in your current timezone, which is
   <tt>{{ request.user.timezone }}</tt>.
   You can change this setting in your
   <a href="{% url 'registration:profile' %}">profile</a>.
 </div>
 
 
-<div class="row">
+<h2>Select an exam slot</h2>
 
-  <div class="col-md-6">
-    <h2>Time slots</h2>
-    {% regroup time_slots by day as time_day_list %}
-    {% for time_day in time_day_list %}
-    <h3>{{ time_day.grouper|date }}</h3>
-    <ul>
-      {% for slot in time_day.list %}
-      <li>
-        <p>
-          <strong>{{ slot }}</strong><br>
-          <em>Time:</em> {{ slot.start_time|time }} &ndash; {{ slot.end_time|time }}<br>
-          <em>Rooms:</em> {{ slot.rooms.all|join:", " }}<br>
-          <em>Registered:</em> {{ slot.count_num_registered }}<br>
-          <em>Capacity:</em> {{ slot.capacity }}
-        </p>
-      </li>
-      {% endfor %}
-    </ul>
-    {% endfor %}
-  </div>
-
-  <div class="col-md-6">
-    <h2>Exam slots</h2>
-    {% regroup exam_slots by day as exam_day_list %}
-    {% for exam_day in exam_day_list %}
-    <h3>{{ exam_day.grouper | date }}</h3>
-    <ul>
-      {% for slot in exam_day.list %}
-      <li>
-        <p>
-          <strong>{{ slot }}</strong><br>
-          <em>Time:</em> {{ slot.get_start_time|time }} &ndash; {{ slot.get_end_time|time }}<br>
-          <em>Registrations:</em> {{ slot.exam_registration_set.count }}<br>
-          <em>Slots left:</em> {{ slot.count_slots_left }}
-        </p>
-      </li>
-      {% endfor %}
-    </ul>
-    {% endfor %}
-  </div>
-</div>
-
-<h2>Exam slot selection</h2>
-<p>Your current exam slot: {{ exam_reg.exam_slot }}</p>
 <form action="" method="POST">
   {% csrf_token %}
 
@@ -95,39 +53,98 @@
   </div>
   {% endif %}
 
-  {% with form.exam_slot as field %}
+
+  <!-- No selection -->
+
   <div class="list-group exam-slot-group mb-4">
-    {% for radio in field %}
-    <div>
+    <input class="sr-only" type="radio" id="id_exam_slot_none"
+        name="exam_slot" value=""
+        {% if selected_slot is None %}checked{% endif %}>
 
-      <input type="radio" {% if radio.data.selected %}checked{% endif %}
-          id="{{ radio.id_for_label }}"
-          name="{{ radio.data.name }}"
-          value="{{ radio.data.value }}">
+    <label class="list-group-item list-group-item-action d-flex"
+        for="id_exam_slot_none">
 
-      <label class="list-group-item list-group-item-action"
-          for="{{ radio.id_for_label }}">
-        {{ radio.choice_label }}
-        {% if radio.data.value == exam_reg.exam_slot.pk or radio.data.value == '' and exam_reg.exam_slot is None %}
-        <span class="badge badge-info float-right">Current registration</span>
-        {% endif %}
+      <div class="exam-slot-icon">
+        <i class="fa fa-check" aria-hidden="true"></i>
+        <span class="sr-only">(selected)</span>
+      </div>
+
+      <div class="w-100 ml-3">
+        <h5 class="d-inline-block">Not registered</h3>
+        <div class="d-inline-block float-right">
+          {% if slot.pk == exam_reg.exam_slot.pk %}
+          <span class="badge badge-info">Current registration</span>
+          {% endif %}
+        </div>
+      </div>
+    </label>
+  </div>
+
+
+  <div class="row">
+
+  <!-- Group exam slots by day -->
+  {% regroup exam_slots by day as exam_day_list %}
+  {% for exam_day in exam_day_list %}
+
+  <div class="col-lg-6">
+    <h3>{{ exam_day.grouper | date }}</h3>
+
+    <div class="list-group exam-slot-group mb-4">
+      {% for slot in exam_day.list %}
+
+      <input class="sr-only" type="radio" id="id_exam_slot_{{ slot.pk }}"
+          name="exam_slot" value="{{ slot.pk }}"
+          {% if slot.pk == selected_slot %}checked{% endif %}>
+
+      <label class="list-group-item list-group-item-action d-flex"
+          for="id_exam_slot_{{ slot.pk }}">
+
+        <div class="exam-slot-icon">
+          <i class="fa fa-check" aria-hidden="true"></i>
+          <span class="sr-only">(selected)</span>
+        </div>
+
+        <div class="w-100 ml-3">
+          <h5 class="mb-0 d-inline-block" title="{{ slot }}">
+            {{ slot.get_start_time|time:"h:i a" }}
+          </h5>
+
+          <span class="ml-2 text-muted">
+            ({{ slot.count_slots_left }} slot{{ slot.count_slots_left|pluralize }} left)
+          </span>
+
+          <div class="d-inline-block float-right">
+            {% if slot.pk == exam_reg.exam_slot.pk %}
+            <span class="badge badge-info">Current registration</span>
+            {% endif %}
+          </div>
+
+          <p class="mb-0 text-muted" title="Ends at {{ slot.get_end_time|time:"h:i a" }}">
+            {{ slot.get_end_time|timeuntil:slot.get_start_time }} long
+          </p>
+
+        </div>
       </label>
 
+      {% endfor %} {# slot #}
     </div>
-    {% endfor %}
+  </div>
 
-    {% if field.errors %}
-    {% for error in field.errors %}
-    <div class="invalid-feedback">
-      {{ error }}
-    </div>
-    {% endfor %}
-    {% endif %}
+  {% endfor %} {# exam_day #}
+
+
+  {% if form.exam_slot.errors %}
+  {% for error in form.exam_slot.errors %}
+  <div class="invalid-feedback">
+    {{ error }}
+  </div>
+  {% endfor %}
+  {% endif %}
 
   </div>
-  {% endwith %}
 
-  <input type="submit" value="Submit">
+  <input class="btn btn-large btn-info" type="submit" value="Submit">
 
 </form>
 

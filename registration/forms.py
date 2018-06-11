@@ -82,6 +82,7 @@ class ExamRegistrationForm(forms.ModelForm):
         queryset=None,
         required=False,
         widget=forms.RadioSelect,
+        to_field_name=None,
         empty_label="(Not registered)",
     )
 

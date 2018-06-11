@@ -12,6 +12,10 @@ h2, h3 {
   margin-top: 1rem;
 }
 
+.sr-only {
+  position: fixed;
+}
+
 /* Course list */
 .course-card {
   width: 18rem;
@@ -46,29 +50,19 @@ h2, h3 {
 
 /* Exam slot form */
 /* Credit: https://stackoverflow.com/a/48273098/689161 */
-.exam-slot-group input[type="radio"] {
-  display: none;
-}
 .exam-slot-group .list-group-item {
   user-select: none;
   cursor: pointer;
 }
-.exam-slot-group input[type="radio"]:checked + .list-group-item {
+.exam-slot-group input[type=radio]:checked + .list-group-item {
   z-index: 2;
-  /*
-  color: #fff;
-  background-color: #007bff;
-  border-color: #007bff;
-  */
-  color: #212529;
-  background-color: #e9ecef;
+  border-color: #17a2b8;
+  color: #0c5460;
+  background-color: #d1ecf1;
 }
-.exam-slot-group input[type="radio"] + .list-group-item:before {
-  content: "\2713";
-  color: transparent;
-  font-weight: bold;
-  margin-right: 1em;
+.exam-slot-group input[type=radio] + .list-group-item .exam-slot-icon {
+  visibility: hidden;
 }
-.exam-slot-group input[type="radio"]:checked + .list-group-item:before {
-  color: #000;
+.exam-slot-group input[type=radio]:checked + .list-group-item .exam-slot-icon {
+  visibility: visible;
 }
