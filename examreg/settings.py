@@ -144,3 +144,9 @@ MESSAGE_TAGS = {
     messages.WARNING: 'alert-warning',
     messages.ERROR: 'alert-danger',
 }
+
+
+# Authentication settings
+
+# Suffix used for Andrew emails
+ANDREW_EMAIL_SUFFIX = '@andrew.cmu.edu'

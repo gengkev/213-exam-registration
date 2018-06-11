@@ -4,6 +4,9 @@ from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.db import models, transaction, IntegrityError
 
+from examreg import settings
+
+
 class User(AbstractUser):
     """
     A class that extends the AbstractUser model in the event that changes
@@ -25,6 +28,19 @@ class User(AbstractUser):
             pytz.timezone(self.timezone)
         except pytz.exceptions.UnknownTimeZoneError:
             raise ValidationError(dict(timezone="Timezone is invalid."))
+
+    def configure_new(self):
+        """
+        Configures a newly created user after creation by updating email
+        address and password fields accordingly.
+        """
+        self.email = self.username + settings.ANDREW_EMAIL_SUFFIX
+        self.set_unusable_password()
+        self.save()
+
+        # TODO: use info from CMU LDAP.
+        # https://github.com/ScottyLabs/directory-api/blob/master/server.js
+
 
 
 class Course(models.Model):

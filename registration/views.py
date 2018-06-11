@@ -247,7 +247,7 @@ def course_users_create(request, course_code):
 
     if request.method == 'POST':
         # Populate form with request data
-        form = CourseUserCreateForm(request.POST)
+        form = CourseUserCreateForm(request.POST, course=course)
 
         # Check for validity
         if form.is_valid():
@@ -270,7 +270,7 @@ def course_users_create(request, course_code):
 
     else:
         # Create default form
-        form = CourseUserCreateForm()
+        form = CourseUserCreateForm(course=course)
 
     return render(request, 'registration/course_users_create.html', {
         'course': course,

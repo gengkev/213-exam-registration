@@ -1,6 +1,7 @@
 import pytz
 
 from django import forms
+from django.core.exceptions import ValidationError
 
 from .models import (
     User, ExamRegistration, ExamSlot, Course, CourseUser
@@ -47,6 +48,39 @@ class CourseEditForm(forms.ModelForm):
 
 
 class CourseUserCreateForm(forms.ModelForm):
+    # Validate Andrew IDs
+    user = forms.RegexField(
+        required=True,
+        strip=True,
+        regex=r'^[a-z]{1,30}$',
+    )
+
+    def __init__(self, *args, course, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.course = course
+
+    def clean_user(self):
+        """Convert user field into a user object."""
+        username = self.cleaned_data['user']
+        user, created = User.objects.get_or_create(
+            username=username
+        )
+
+        if created:
+            # Configure newly created user
+            user.configure_new()
+
+        else:
+            # Check if CourseUser already exists
+            try:
+                CourseUser.objects.get(course=self.course, user=user)
+            except CourseUser.DoesNotExist:
+                pass
+            else:
+                raise ValidationError('Course user already exists.')
+
+        return user
+
     class Meta:
         model = CourseUser
         fields = [
@@ -68,8 +102,7 @@ class CourseSudoForm(forms.Form):
         required=False,
     )
 
-    def __init__(self, *args, **kwargs):
-        course = kwargs.pop('course')
+    def __init__(self, *args, course, **kwargs):
         super().__init__(*args, **kwargs)
 
         # Only select users enrolled in course
@@ -83,7 +116,6 @@ class ExamRegistrationForm(forms.ModelForm):
         required=False,
         widget=forms.RadioSelect,
         to_field_name=None,
-        empty_label="(Not registered)",
     )
 
     def __init__(self, *args, **kwargs):

@@ -1,11 +1,10 @@
 from django.contrib.auth.backends import RemoteUserBackend
 from django.core.exceptions import PermissionDenied
 
+from examreg import settings
+
 
 class CustomRemoteUserBackend(RemoteUserBackend):
-    # Suffix used for Andrew emails
-    ANDREW_EMAIL_SUFFIX = '@andrew.cmu.edu'
-
     # Let any Andrew ID log in and have a database entry created
     create_unknown_user = True
 
@@ -20,8 +19,8 @@ class CustomRemoteUserBackend(RemoteUserBackend):
         username was invalid.
         """
         # Extract Andrew ID
-        if username.endswith(self.ANDREW_EMAIL_SUFFIX):
-            return username[:-len(self.ANDREW_EMAIL_SUFFIX)]
+        if username.endswith(settings.ANDREW_EMAIL_SUFFIX):
+            return username[:-len(settings.ANDREW_EMAIL_SUFFIX)]
 
         raise PermissionDenied(
             "Only andrew.cmu.edu identities are permitted"
@@ -30,14 +29,8 @@ class CustomRemoteUserBackend(RemoteUserBackend):
 
     def configure_user(self, user):
         """
-        Configure user after creation by updating email address and
-        password fields accordingly. Returns the updated user.
+        Configures a newly user that was created via remote user login.
+        Returns the configured user.
         """
-        user.email = user.username + self.ANDREW_EMAIL_SUFFIX
-        user.set_unusable_password()
-        user.save()
-
-        # TODO: use info from CMU LDAP.
-        # https://github.com/ScottyLabs/directory-api/blob/master/server.js
-
+        user.configure_new()
         return user
