@@ -72,15 +72,15 @@
       <div class="w-100 ml-3">
         <h5 class="mb-0 d-inline-block">No selection</h3>
 
-        <div class="d-inline-block float-right">
+        <span class="ml-3 text-muted">
+          Unregister me from the exam
+        </span>
+
+        <div>
           {% if slot.pk == exam_reg.exam_slot.pk %}
-          <span class="badge badge-info">Current registration</span>
+          <span class="badge badge-success">Current reservation</span>
           {% endif %}
         </div>
-
-        <p class="mb-0 text-muted">
-          Unregister me from the exam
-        </p>
       </div>
     </label>
   </div>
@@ -115,19 +115,19 @@
               {{ slot.get_start_time|time:"h:i a" }}
             </h5>
 
-            <span class="ml-2 text-muted">
-              ({{ slot.count_slots_left }} slot{{ slot.count_slots_left|pluralize }} left)
+            <span class="ml-3 text-muted" title="Ends at {{ slot.get_end_time|time:"h:i a" }}">
+              {{ slot.get_end_time|timeuntil:slot.get_start_time }} long
             </span>
 
-            <div class="d-inline-block float-right">
+            <span class="ml-3 text-muted float-right">
+              {{ slot.count_slots_left }} slot{{ slot.count_slots_left|pluralize }} left
+            </span>
+
+            <div>
               {% if slot.pk == exam_reg.exam_slot.pk %}
-              <span class="badge badge-info">Current registration</span>
+              <span class="badge badge-success">Current reservation</span>
               {% endif %}
             </div>
-
-            <p class="mb-0 text-muted" title="Ends at {{ slot.get_end_time|time:"h:i a" }}">
-              {{ slot.get_end_time|timeuntil:slot.get_start_time }} long
-            </p>
 
           </div>
         </label>
