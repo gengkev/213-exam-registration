@@ -12,12 +12,6 @@ h2, h3 {
   margin-top: 1rem;
 }
 
-/* Necessary to prevent jumping to input[type=radio] whenever
- * the corresponding label is selected. */
-.sr-only {
-  position: fixed;
-}
-
 /* Course list */
 .course-card {
   width: 18rem;
@@ -51,6 +45,11 @@ h2, h3 {
 
 /* Exam slot form */
 /* Credit: https://stackoverflow.com/a/48273098/689161 */
+.exam-slot-group input[type=radio] {
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
 .exam-slot-group .list-group-item {
   user-select: none;
   cursor: pointer;

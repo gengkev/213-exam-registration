@@ -57,7 +57,7 @@
 
   <!-- No selection -->
   <div class="list-group exam-slot-group mb-4">
-    <input class="sr-only" type="radio" id="id_exam_slot_none"
+    <input type="radio" id="id_exam_slot_none"
         name="exam_slot" value=""
         {% if selected_slot is None %}checked{% endif %}>
 
@@ -98,7 +98,7 @@
       <div class="list-group exam-slot-group mb-4">
         {% for slot in exam_day.list %}
 
-        <input class="sr-only" type="radio" id="id_exam_slot_{{ slot.pk }}"
+        <input type="radio" id="id_exam_slot_{{ slot.pk }}"
             name="exam_slot" value="{{ slot.pk }}"
             {% if slot.pk == selected_slot %}checked{% endif %}>
 
