@@ -1,0 +1,20 @@
+{% extends "base_generic.html" %}
+{% block title %}404 Not Found{% endblock %}
+
+{% block breadcrumb %}
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-lg-8">
+    <h1 class="display-3">404 Not Found</h1>
+    <p class="lead">
+      {{ exception }}
+    </p>
+    <p>
+      We couldn't find that page on this server. Please make sure the URL
+      that you've entered is correct.
+    </p>
+  </div>
+</div>
+{% endblock %}

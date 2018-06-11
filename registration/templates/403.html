@@ -1,0 +1,22 @@
+{% extends "base_generic.html" %}
+{% block title %}403 Forbidden{% endblock %}
+
+{% block breadcrumb %}
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-lg-8">
+    <h1 class="display-3">403 Forbidden</h1>
+    <blockquote class="blockquote">
+      <p>{{ exception }}</p>
+    </blockquote>
+    <p>
+      The account you are currently logged into does not have the necessary
+      permissions required to access this page. If possible, try logging
+      in as a different user. If applicable, contact your course instructor
+      for assistance.
+    </p>
+  </div>
+</div>
+{% endblock %}

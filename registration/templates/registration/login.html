@@ -11,13 +11,16 @@
 {% block content %}
 
 <div class="row">
-  <div class="col-md-8">
-    <h2>Login</h2>
+  <div class="col-lg-8">
+    <h1>Login</h1>
 
     {% if request.user.is_authenticated %}
 
+    <p class="lead">
+      You're already logged in.
+    </p>
     <p>
-      You're already logged in. Your username is
+      Your username is
       <tt>{{ request.user.username }}</tt>,
       and your identity provided by the authentication server is
       <tt>{{ request.META.REMOTE_USER }}</tt>.
@@ -30,6 +33,10 @@
     </p>
 
     {% else %}
+
+    <p class="lead">
+      You aren't logged in.
+    </p>
 
     <p>
       This system only recognizes <tt>andrew.cmu.edu</tt> identities.
