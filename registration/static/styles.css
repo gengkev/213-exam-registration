@@ -12,6 +12,8 @@ h2, h3 {
   margin-top: 1rem;
 }
 
+/* Necessary to prevent jumping to input[type=radio] whenever
+ * the corresponding label is selected. */
 .sr-only {
   position: fixed;
 }
@@ -44,8 +46,7 @@ h2, h3 {
 
 /* Exam list */
 .exam-item-outline {
-  border-color: #17a2b8;
-  color: #17a2b8 !important;
+  color: #212529;
 }
 
 /* Exam slot form */
@@ -53,6 +54,10 @@ h2, h3 {
 .exam-slot-group .list-group-item {
   user-select: none;
   cursor: pointer;
+}
+.exam-slot-group .list-group-item:first-of-type {
+  border-top-left-radius: .25rem;
+  border-top-right-radius: .25rem;
 }
 .exam-slot-group input[type=radio]:checked + .list-group-item {
   z-index: 2;

@@ -27,16 +27,17 @@
 </div>
 
 
+
+<h2>Select an exam slot</h2>
+
 <div class="alert alert-warning" role="alert">
+  <strong>Caution:</strong>
   All human-readable times below (but not in the description above) are
   displayed in your current timezone, which is
   <tt>{{ request.user.timezone }}</tt>.
   You can change this setting in your
   <a href="{% url 'registration:profile' %}">profile</a>.
 </div>
-
-
-<h2>Select an exam slot</h2>
 
 <form action="" method="POST">
   {% csrf_token %}
@@ -88,7 +89,7 @@
   {% for exam_day in exam_day_list %}
 
   <div class="col-lg-6">
-    <h3>{{ exam_day.grouper | date }}</h3>
+    <h3>{{ exam_day.grouper|date:"l, F j, Y" }}</h3>
 
     <div class="list-group exam-slot-group mb-4">
       {% for slot in exam_day.list %}
