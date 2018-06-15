@@ -88,6 +88,12 @@ class CourseUserCreateForm(forms.ModelForm):
         ]
 
 
+class CourseUserImportForm(forms.Form):
+    roster_file = forms.FileField(
+        required=True,
+    )
+
+
 class CourseUserEditForm(forms.ModelForm):
     class Meta:
         model = CourseUser

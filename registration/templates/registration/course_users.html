@@ -19,9 +19,13 @@
 </h1>
 
 <div class="mt-4">
-  <a class="btn btn-success" role="button" href="{% url 'registration:course-users-create' course.code %}" title="New user">
+  <a class="btn btn-success" role="button" href="{% url 'registration:course-users-create' course.code %}" title="Enroll new users">
     <i class="fa fa-plus" aria-hidden="true"></i>
     &nbsp;Enroll new user
+  </a>
+  <a class="btn btn-info" role="button" href="{% url 'registration:course-users-import' course.code %}" title="Import course roster">
+    <i class="fa fa-upload" aria-hidden="true"></i>
+    &nbsp;Import course roster
   </a>
 </div>
 

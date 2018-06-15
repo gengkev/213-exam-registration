@@ -16,6 +16,8 @@ urlpatterns = [
     # Course users
     path('courses/<course_code>/users/',
         views.course_users, name='course-users'),
+    path('courses/<course_code>/users/import/',
+        views.course_users_import, name='course-users-import'),
     path('courses/<course_code>/users/create/',
         views.course_users_create, name='course-users-create'),
     path('courses/<course_code>/users/<int:course_user_id>/',

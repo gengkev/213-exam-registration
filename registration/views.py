@@ -1,3 +1,5 @@
+import codecs
+import csv
 from datetime import timedelta
 
 from django.contrib import messages
@@ -13,9 +15,11 @@ from django.views.decorators.http import (
     require_http_methods, require_safe, require_POST
 )
 
+from examreg import settings
+
 from .forms import (
     ProfileForm, ExamRegistrationForm, CourseEditForm, CourseSudoForm,
-    CourseUserEditForm, CourseUserCreateForm
+    CourseUserEditForm, CourseUserCreateForm, CourseUserImportForm,
 )
 from .models import (
     Course, CourseUser, Exam, ExamRegistration, User
@@ -273,6 +277,139 @@ def course_users_create(request, course_code):
         form = CourseUserCreateForm(course=course)
 
     return render(request, 'registration/course_users_create.html', {
+        'course': course,
+        'form': form,
+    })
+
+
+def import_roster_row(course, row):
+    """
+    Imports a CSV row from a roster. The row should be represented as a
+    dictionary, with the columns having been already mapped to the
+    appropriate keys by a DictReader. A ValueError will be raised if
+    invalid data is encountered, and an IntegrityError may be raised by
+    the database (though this is not expected).
+
+    The function will create a User and CourseUser from the row's data.
+    When dealing with users that already exists, the current behavior is to
+    preserve rather than overwrite any existing data.
+    """
+    # Parse username
+    if 'username' in row and row['username']:
+        username = row['username']
+
+    elif 'email' in row and row['email']:
+        if not row['email'].endswith(settings.ANDREW_EMAIL_SUFFIX):
+            raise ValueError("Invalid email: " + row['email'])
+        username = row['email'][:-len(settings.ANDREW_EMAIL_SUFFIX)]
+
+    else:
+        raise ValueError("Neither username nor email present in row")
+
+    # Create User, or get if already exists
+    extra_keys = ['first_name', 'last_name']
+    extra_dict = {k: row[k] for k in extra_keys if k in row and row[k]}
+
+    user, created_user = User.objects.get_or_create(
+        username=username,
+        defaults=extra_dict,
+    )
+
+    if created_user:
+        user.configure_new()
+
+    # Create CourseUser, or get if already exists
+    extra_keys = ['section', 'lecture']
+    extra_dict = {k: row[k] for k in extra_keys if k in row and row[k]}
+    extra_dict.update(dict(
+        dropped=False,
+        user_type=CourseUser.STUDENT,
+    ))
+
+    course_user, created = CourseUser.objects.get_or_create(
+        user=user,
+        course=course,
+        defaults=extra_dict,
+    )
+
+    return created
+
+
+def import_roster(course, f):
+    """
+    Imports an entire course roster from a file. The roster is parsed as
+    a CSV file in the Autolab format. The import is processed as a
+    transaction for speed, and so that any errors will cause the entire
+    import to fail.
+    """
+    AUTOLAB_FIELDNAMES = [
+        'semester', 'email', 'last_name', 'first_name', 'school', 'major',
+        'year', 'grading_policy', 'lecture', 'section',
+    ]
+
+    text_file = codecs.iterdecode(f, 'utf-8')
+    reader = csv.DictReader(text_file, fieldnames=AUTOLAB_FIELDNAMES)
+
+    created_count = 0
+    skipped_count = 0
+
+    with transaction.atomic():
+        for row in reader:
+            created = import_roster_row(course, row)
+            if created:
+                created_count += 1
+            else:
+                skipped_count += 1
+
+    return (created_count, skipped_count)
+
+
+@require_http_methods(['GET', 'HEAD', 'POST'])
+@login_required
+def course_users_import(request, course_code):
+    course, _ = course_auth(request, course_code, instructor=True)
+
+    if request.method == 'POST':
+        # Populate form with request data
+        form = CourseUserImportForm(request.POST, request.FILES)
+
+        # Check for validity
+        if form.is_valid():
+            try:
+                with request.FILES['roster_file'] as f:
+                    created_count, skipped_count = import_roster(course, f)
+
+            except ValueError as e:
+                messages.error(request, (
+                    "Failed to import roster: {}"
+                ).format(e))
+
+            except IntegrityError as e:
+                messages.error(request, (
+                    "A database error occurred: {}"
+                ).format(e))
+
+            else:
+                messages.success(request, (
+                    "The roster was imported successfully. {} users "
+                    "were created, and {} users were skipped."
+                ).format(created_count, skipped_count))
+
+                return HttpResponseRedirect(reverse(
+                    'registration:course-users',
+                    args=[course.code],
+                ))
+
+        else:
+            messages.error(request,
+                "Please correct the error below.",
+            )
+
+    else:
+        # Create default form
+        form = CourseUserImportForm()
+
+    return render(request, 'registration/course_users_import.html', {
         'course': course,
         'form': form,
     })

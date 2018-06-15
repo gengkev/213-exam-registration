@@ -1,0 +1,57 @@
+{% extends "base_generic.html" %}
+
+{% block title %}New course user &mdash; {{ course.name }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="nav-item active">
+  <a class="nav-link" href="{% url 'registration:course-detail' course.code %}">{{ course.code }}</a>
+</li>
+<li class="nav-item active" aria-current="page">
+  <a class="nav-link" href="{% url 'registration:course-users' course.code %}">Users</a>
+</li>
+<li class="nav-item active" aria-current="page">
+  <span class="nav-link">Import</span>
+</li>
+{% endblock %}
+
+{% block content %}
+
+<div class="row">
+  <div class="col-lg-8">
+    <h1>
+      Import course roster
+      <small class="text-muted">{{ course.code }}</small>
+    </h1>
+
+    <p>
+      You can use this form to import a course roster. The only format
+      currently accepted is the Autolab CSV format, with no header row,
+      and with the following columns:
+    </p>
+
+    <blockquote>
+      <code>
+        semester,email,last_name,first_name,school,major,year,grading_policy,lecture,section
+      </code>
+    </blockquote>
+
+    <p>
+      The current effect of this form on existing users is none: if a user
+      already exists in the course, their information will not be updated.
+      The only effect that this form has is adding new users.
+    </p>
+
+    <form action="" method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      <table>
+        {{ form }}
+      </table>
+
+      <input type="submit" value="Submit">
+    </form>
+
+  </div>
+</div>
+
+{% endblock %}
