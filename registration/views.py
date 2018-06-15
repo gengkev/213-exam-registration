@@ -335,26 +335,12 @@ def import_roster_row(course, row):
     return created
 
 
-def import_roster(course, f):
-    """
-    Imports an entire course roster from a file. The roster is parsed as
-    a CSV file in the Autolab format. The import is processed as a
-    transaction for speed, and so that any errors will cause the entire
-    import to fail.
-    """
-    AUTOLAB_FIELDNAMES = [
-        'semester', 'email', 'last_name', 'first_name', 'school', 'major',
-        'year', 'grading_policy', 'lecture', 'section',
-    ]
-
-    text_file = codecs.iterdecode(f, 'utf-8')
-    reader = csv.DictReader(text_file, fieldnames=AUTOLAB_FIELDNAMES)
-
+def import_roster_rows(course, rows):
     created_count = 0
     skipped_count = 0
 
     with transaction.atomic():
-        for row in reader:
+        for row in rows:
             created = import_roster_row(course, row)
             if created:
                 created_count += 1
@@ -362,6 +348,28 @@ def import_roster(course, f):
                 skipped_count += 1
 
     return (created_count, skipped_count)
+
+
+def import_roster_from_csv_file(f):
+    """
+    Imports an entire course roster from a file. The roster is parsed as
+    a CSV file in the Autolab format. The import is processed as a
+    transaction for speed, and so that any errors will cause the entire
+    import to fail.
+    """
+    # Column headers for Autolab CSV roster import
+    AUTOLAB_FIELDNAMES = [
+        'semester', 'email', 'last_name', 'first_name', 'school', 'major',
+        'year', 'grading_policy', 'lecture', 'section',
+    ]
+
+    with f:
+        text_file = codecs.iterdecode(f, 'utf-8')
+        reader = csv.DictReader(
+            text_file,
+            fieldnames=AUTOLAB_FIELDNAMES,
+        )
+        return import_roster_rows(course, reader)
 
 
 @require_http_methods(['GET', 'HEAD', 'POST'])
@@ -377,7 +385,8 @@ def course_users_import(request, course_code):
         if form.is_valid():
             try:
                 with request.FILES['roster_file'] as f:
-                    created_count, skipped_count = import_roster(course, f)
+                    created_count, skipped_count = \
+                        import_roster_from_csv_file(f)
 
             except ValueError as e:
                 messages.error(request, (
