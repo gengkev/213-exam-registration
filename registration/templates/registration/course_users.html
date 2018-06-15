@@ -41,7 +41,7 @@
         <th scope="col">Lecture</th>
         <th scope="col">Section</th>
         <th scope="col">Dropped</th>
-        <th scope="col"></th>
+        <th scope="col">Edit</th>
       </tr>
     </thead>
 
@@ -71,9 +71,9 @@
           {{ course_user.dropped|yesno:"yes,no" }}
         </td>
         <td>
-          <a class="btn btn-primary btn-sm" role="button" href="{% url 'registration:course-users-edit' course.code course_user.pk %}" title="Edit">
+          <a href="{% url 'registration:course-users-edit' course.code course_user.pk %}" title="Edit user">
             <i class="fa fa-pencil" aria-hidden="true"></i>
-            <span class="sr-only">Edit</span>
+            <span class="sr-only">Edit user</span>
           </a>
         </td>
       </tr>
