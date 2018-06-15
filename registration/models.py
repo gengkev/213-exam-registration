@@ -116,6 +116,7 @@ class CourseUser(models.Model):
 
     class Meta:
         unique_together = (('user', 'course'),)
+        ordering = ('user__username',)
 
 
 # TODO: consider changing to per-exam, or global
