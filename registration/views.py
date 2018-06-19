@@ -109,15 +109,16 @@ def profile(request):
         return "{:02}:{:02}".format(hours, minutes)
 
     offset = now.utcoffset()
-    stroffset = ('-' if offset < timedelta(0) else '+')
-    stroffset += format_seconds(abs(offset).seconds)
+    stroffset = 'UTC{}{}'.format(
+        '-' if offset < timedelta(0) else '+',
+        format_seconds(abs(offset).seconds),
+    )
 
     # Render template
     return render(request, 'registration/profile.html', {
         'form': form,
-        'current_timezone': "{} ({}, UTC{})".format(
-            now.tzinfo, now.tzname(), stroffset
-        ),
+        'timezone_name': now.tzinfo,
+        'timezone_utc_offset': stroffset,
     })
 
 

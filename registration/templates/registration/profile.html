@@ -10,18 +10,40 @@
 
 {% block content %}
 <h2>Profile</h2>
-<p>Current user: {{ request.user }}</p>
-<p>Authenticated: {{ request.user.is_authenticated }}</p>
-<p>Current timezone: {{ current_timezone }}</p>
-<p>Current local time: {% now "DATETIME_FORMAT" %}</p>
 
-{% load crispy_forms_tags %}
+<div class="row">
+  <div class="col-md-6">
+    <div class="border border-light p-4 bg-light rounded">
+      <dl class="row mb-0">
+        <dt class="col-sm-4">Authenticated</dt>
+        <dd class="col-sm-8">{{ request.user.is_authenticated|yesno }}</dd>
 
-<form action="" method="POST">
-  {% csrf_token %}
-  <table>
-    {{ form|crispy }}
-  </table>
-  <input type="submit" value="Submit">
-</form>
+        <dt class="col-sm-4">Username</dt>
+        <dd class="col-sm-8">{{ request.user.username }}</dd>
+
+        <dt class="col-sm-4">Timezone</dt>
+        <dd class="col-sm-8">
+          {{ timezone_name }}
+          ({% now "e" %}, {{ timezone_utc_offset }})
+        </dd>
+
+        <dt class="col-sm-4">Local time</dt>
+        <dd class="col-sm-8">{% now "DATETIME_FORMAT" %}</dd>
+      </dl>
+    </div>
+  </div> {# .col-md-6 #}
+
+  <div class="col-md-6">
+    {% load crispy_forms_tags %}
+
+    <form action="" method="POST">
+      {% csrf_token %}
+      <table>
+        {{ form|crispy }}
+      </table>
+      <input class="btn" type="submit" value="Submit">
+    </form>
+  </div> {# .col-md-6 #}
+
+</div> {# .row #}
 {% endblock %}
