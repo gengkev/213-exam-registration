@@ -350,7 +350,7 @@ def import_roster_rows(course, rows):
     return (created_count, skipped_count)
 
 
-def import_roster_from_csv_file(f):
+def import_roster_from_csv_file(course, f):
     """
     Imports an entire course roster from a file. The roster is parsed as
     a CSV file in the Autolab format. The import is processed as a
@@ -386,7 +386,7 @@ def course_users_import(request, course_code):
             try:
                 with request.FILES['roster_file'] as f:
                     created_count, skipped_count = \
-                        import_roster_from_csv_file(f)
+                        import_roster_from_csv_file(course, f)
 
             except ValueError as e:
                 messages.error(request, (
