@@ -50,11 +50,13 @@
       below.
     </p>
 
+    {% load crispy_forms_tags %}
+
     <form action="" method="POST">
       {% csrf_token %}
 
       <table>
-        {{ form }}
+        {{ form|crispy }}
       </table>
 
       <input type="submit" value="Submit">

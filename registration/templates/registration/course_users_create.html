@@ -1,6 +1,6 @@
 {% extends "base_generic.html" %}
 
-{% block title %}New course user &mdash; {{ course.name }}{% endblock %}
+{% block title %}Enroll new user &mdash; {{ course.name }}{% endblock %}
 
 {% block breadcrumb %}
 <li class="nav-item active">
@@ -10,25 +10,27 @@
   <a class="nav-link" href="{% url 'registration:course-users' course.code %}">Users</a>
 </li>
 <li class="nav-item active" aria-current="page">
-  <span class="nav-link">New</span>
+  <span class="nav-link">Enroll</span>
 </li>
 {% endblock %}
 
 {% block content %}
 
 <h1>
-  New course user
+  Enroll new user
   <small class="text-muted">{{ course.code }}</small>
 </h1>
+
+{% load crispy_forms_tags %}
 
 <form action="" method="POST">
   {% csrf_token %}
 
   <table>
-    {{ form }}
+    {{ form|crispy }}
   </table>
 
-  <input type="submit" value="Submit">
+  <input class="btn" type="submit" value="Submit">
 </form>
 
 {% endblock %}

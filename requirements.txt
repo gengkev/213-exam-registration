@@ -2,3 +2,4 @@ Django~=2.0.6
 pytz>=2018.4
 ldap3~=2.5
 pyasn1~=0.4.3
+django-crispy-forms~=1.7.2

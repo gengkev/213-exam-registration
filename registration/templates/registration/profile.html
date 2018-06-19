@@ -15,10 +15,12 @@
 <p>Current timezone: {{ current_timezone }}</p>
 <p>Current local time: {% now "DATETIME_FORMAT" %}</p>
 
+{% load crispy_forms_tags %}
+
 <form action="" method="POST">
   {% csrf_token %}
   <table>
-    {{ form }}
+    {{ form|crispy }}
   </table>
   <input type="submit" value="Submit">
 </form>

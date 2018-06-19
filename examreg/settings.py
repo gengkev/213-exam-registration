@@ -25,7 +25,7 @@ SECRET_KEY = 's=s*s#u%@+obtmh%i@%1_i9enl4dx!^p_+%6izfkimxi#*jzy_'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'crispy_forms',
 ]
 
 MIDDLEWARE = [
@@ -134,6 +135,11 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 STATIC_ROOT = 'static/'
+
+
+# Crispy forms settings
+
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 
 # Custom message tags for Bootstrap classes

@@ -43,15 +43,17 @@
 
 </div>
 
+{% load crispy_forms_tags %}
+
 <h2>Course data</h2>
 <form action="" method="POST">
   {% csrf_token %}
 
   <table>
-    {{ form }}
+    {{ form|crispy }}
   </table>
 
-  <input type="submit" value="Submit">
+  <input class="btn" type="submit" value="Submit">
 </form>
 
 {% endblock %}
