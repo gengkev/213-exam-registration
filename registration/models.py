@@ -200,9 +200,7 @@ class TimeSlot(models.Model):
         super(TimeSlot, self).clean(*args, **kwargs)
 
     def __str__(self):
-        return self.start_time \
-            .isoformat(timespec='minutes') \
-            .replace('+00:00', 'Z')
+        return "{:%Y-%m-%d %H:%M}".format(self.start_time)
 
     def __repr__(self):
         return "<TimeSlot: {} [{}]>".format(
