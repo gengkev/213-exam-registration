@@ -21,14 +21,12 @@
     </a>
 
     <div class="list-group list-group-flush">
-      {% for exam_reg in course_user.exam_registration_set.all %}
-      {% with exam_reg.exam as exam %}
+      {% for exam in course.exam_set.all %}
       <a href="{% url 'registration:exam-detail' course.code exam.id %}"
           class="list-group-item list-group-item-action">
         {{ exam.name }}
       </a>
-      {% endwith %}
-      {% endfor %} {# exam_reg #}
+      {% endfor %} {# exam #}
     </div>
   </div>
 

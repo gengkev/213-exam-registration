@@ -127,9 +127,25 @@ def profile(request):
 def course_detail(request, course_code):
     course, my_course_user = course_auth(request, course_code)
 
+    # Get list of (exam, exam_reg)
+    def get_exam_reg(exam):
+        try:
+            return ExamRegistration.objects.get(
+                exam=exam,
+                course_user=my_course_user,
+            )
+        except ExamRegistration.DoesNotExist:
+            return None
+
+    exam_list = [
+        (exam, get_exam_reg(exam))
+        for exam in course.exam_set.all()
+    ]
+
     return render(request, 'registration/course_detail.html', {
         'course': course,
         'my_course_user': my_course_user,
+        'exam_list': exam_list,
     })
 
 
@@ -477,8 +493,7 @@ def exam_detail(request, course_code, exam_id):
         pk=exam_id,
         course=course,
     )
-    exam_reg = get_object_or_404(
-        ExamRegistration,
+    exam_reg, _ = ExamRegistration.objects.get_or_create(
         course_user=my_course_user,
         exam=exam,
     )

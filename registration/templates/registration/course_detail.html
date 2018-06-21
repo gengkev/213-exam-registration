@@ -58,16 +58,15 @@
     <h2>Exams</h2>
     <div class="list-group mb-4">
 
-      {% if my_course_user.exam_registration_set.all %}
+      {% if exam_list %}
 
       {# For each course, loop through each exam this user is in #}
-      {% for exam_reg in my_course_user.exam_registration_set.all %}
-      {% with exam_reg.exam as exam %}
+      {% for exam, exam_reg in exam_list %}
 
       <a href="{% url 'registration:exam-detail' course.code exam.id %}" class="list-group-item list-group-item-action exam-item-outline">
         <h5 class="mb-1">{{ exam.name }}</h5>
         <p class="mb-0">
-          {% if exam_reg.exam_slot %}
+          {% if exam_reg and exam_reg.exam_slot %}
           {{ exam_reg.exam_slot.get_start_time|date:"l, F j, Y" }} at
           {{ exam_reg.exam_slot.get_start_time|time:"h:i a" }}
           {% else %}
@@ -76,7 +75,6 @@
         </p>
       </a>
 
-      {% endwith %}
       {% endfor %}
 
       {% else %}
