@@ -264,13 +264,9 @@ class ExamSlot(models.Model):
         super(ExamSlot, self).clean(*args, **kwargs)
 
     def __str__(self):
-        return "{} \u2013 {}".format(
-            self.get_start_time() \
-                .isoformat(timespec='minutes') \
-                .replace('+00:00', 'Z'),
-            self.get_end_time() \
-                .isoformat(timespec='minutes') \
-                .replace('+00:00', 'Z'),
+        return "{:%Y-%m-%d %H:%M} \u2013 {:%Y-%m-%d %H:%M}".format(
+            self.get_start_time(),
+            self.get_end_time(),
         )
 
     def __repr__(self):
