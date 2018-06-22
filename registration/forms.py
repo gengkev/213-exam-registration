@@ -61,7 +61,7 @@ class CourseUserCreateForm(forms.ModelForm):
     user = forms.RegexField(
         required=True,
         strip=True,
-        regex=r'^[a-z]{1,30}$',
+        regex=r'^[a-z0-9]{1,30}$',
     )
 
     def __init__(self, *args, course, **kwargs):
