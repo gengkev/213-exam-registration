@@ -1,6 +1,8 @@
 from django import forms
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
+from simple_history.admin import SimpleHistoryAdmin
+
 from .models import (
     User, Course, CourseUser, Room, Exam, TimeSlot, ExamSlot,
     ExamRegistration,
@@ -104,7 +106,7 @@ class RoomsInstanceInline(admin.TabularInline):
 # Declare custom admins
 
 @admin.register(User)
-class MyUserAdmin(UserAdmin):
+class MyUserAdmin(UserAdmin, SimpleHistoryAdmin):
     model = User
     fieldsets = UserAdmin.fieldsets + (
         ('Custom options', {
@@ -114,7 +116,7 @@ class MyUserAdmin(UserAdmin):
 
 
 @admin.register(Course)
-class CourseAdmin(admin.ModelAdmin):
+class CourseAdmin(SimpleHistoryAdmin):
     list_display = ('code', 'name')
     inlines = [
         RoomsInstanceInline,
@@ -124,7 +126,7 @@ class CourseAdmin(admin.ModelAdmin):
 
 
 @admin.register(CourseUser)
-class CourseUserAdmin(admin.ModelAdmin):
+class CourseUserAdmin(SimpleHistoryAdmin):
     list_display = (
         'user', 'course', 'user_type', 'lecture', 'section', 'dropped',
     )
@@ -135,7 +137,7 @@ class CourseUserAdmin(admin.ModelAdmin):
 
 
 @admin.register(Exam)
-class ExamAdmin(admin.ModelAdmin):
+class ExamAdmin(SimpleHistoryAdmin):
     list_display = ('name', 'course')
     list_filter = ('course',)
     inlines = [

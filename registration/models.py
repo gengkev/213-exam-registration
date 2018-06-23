@@ -3,6 +3,7 @@ import pytz
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.db import models, transaction, IntegrityError
+from simple_history.models import HistoricalRecords
 
 from examreg import settings
 
@@ -21,6 +22,7 @@ class User(AbstractUser):
         default='America/New_York',
         help_text="Current time zone of the user.",
     )
+    history = HistoricalRecords()
 
     def clean(self, *args, **kwargs):
         """Validates custom attributes in the User model."""
@@ -57,6 +59,7 @@ class Course(models.Model):
         through='CourseUser',
         help_text="Accounts enrolled in this course",
     )
+    history = HistoricalRecords()
 
     def __str__(self):
         return self.code
@@ -71,6 +74,7 @@ class CourseUser(models.Model):
         on_delete=models.CASCADE,
         related_name='course_user_set',
     )
+    history = HistoricalRecords()
 
     # Type of account in this course
     INSTRUCTOR = 'i'
@@ -126,6 +130,7 @@ class Room(models.Model):
     )
     name = models.CharField(max_length=200)
     capacity = models.PositiveIntegerField()
+    history = HistoricalRecords()
 
     def __str__(self):
         return self.name
@@ -145,6 +150,7 @@ class Exam(models.Model):
         through='ExamRegistration',
     )
     details = models.TextField(blank=True)
+    history = HistoricalRecords()
 
     def __str__(self):
         return self.name
@@ -164,6 +170,7 @@ class TimeSlot(models.Model):
     end_time = models.DateTimeField()
     rooms = models.ManyToManyField(Room, blank=True)
     capacity = models.PositiveIntegerField()
+    history = HistoricalRecords()
 
     def count_num_registered(self):
         """
@@ -224,6 +231,7 @@ class ExamSlot(models.Model):
     time_slots = models.ManyToManyField(TimeSlot,
         related_name='exam_slot_set',
     )
+    history = HistoricalRecords()
 
     def get_start_time(self):
         """Returns the start time of this exam slot."""
@@ -293,6 +301,7 @@ class ExamRegistration(models.Model):
         null=True,
         blank=True,
     )
+    history = HistoricalRecords()
 
     def clean(self, *args, **kwargs):
         """Validates consistency of ExamRegistration objects."""
