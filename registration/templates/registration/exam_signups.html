@@ -21,6 +21,33 @@
   <small class="text-muted">{{ exam.name }}</small>
 </h1>
 
+<h2>By exam slot</h2>
+<div class="row">
+  <!-- Group exam slots by day -->
+  {% regroup exam_slots by day as exam_day_list %}
+  {% for exam_day in exam_day_list %}
+
+  <div class="col-lg-6">
+    <h3>{{ exam_day.grouper|date:"l, F j, Y" }}</h3>
+
+    {% for slot in exam_day.list %}
+    <h4>{{ slot.get_start_time|time:"h:i a" }}</h4>
+    <ul>
+      {% for exam_reg in slot.exam_registration_set.all %}
+      <li>
+        {{ exam_reg.course_user.user }}
+        ({{ exam_reg.course_user.user.first_name }}
+        {{ exam_reg.course_user.user.last_name }})
+      </li>
+      {% endfor %}
+    </ul>
+    {% endfor %}
+  </div>
+
+  {% endfor %}
+</div>
+
+<h2>By user</h2>
 <div class="table-responsive-md mt-4">
   <table class="table table-sm table-hover">
     <thead class="thead-light">

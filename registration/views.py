@@ -612,7 +612,16 @@ def exam_signups(request, course_code, exam_id):
         course=course,
     )
 
+    time_slots = exam.time_slot_set.annotate(
+        day=TruncDay('start_time'),
+    )
+    exam_slots = exam.exam_slot_set.annotate(
+        day=TruncDay('start_time_slot__start_time'),
+    )
+
     return render(request, 'registration/exam_signups.html', {
         'course': course,
         'exam': exam,
+        'time_slots': time_slots,
+        'exam_slots': exam_slots,
     })
