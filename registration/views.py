@@ -20,6 +20,7 @@ from examreg import settings
 from .forms import (
     ProfileForm, ExamRegistrationForm, CourseEditForm, CourseSudoForm,
     CourseUserEditForm, CourseUserCreateForm, CourseUserImportForm,
+    ExamEditForm,
 )
 from .models import (
     Course, CourseUser, Exam, ExamRegistration, User
@@ -551,9 +552,67 @@ def exam_detail(request, course_code, exam_id):
     return render(request, 'registration/exam_detail.html', {
         'form': form,
         'course': course,
+        'my_course_user': my_course_user,
         'exam': exam,
         'exam_reg': exam_reg,
         'time_slots': time_slots,
         'exam_slots': exam_slots,
         'selected_slot': selected_slot,
+    })
+
+
+@require_http_methods(['GET', 'HEAD', 'POST'])
+@login_required
+def exam_edit(request, course_code, exam_id):
+    course, _ = course_auth(request, course_code, instructor=True)
+    exam = get_object_or_404(
+        Exam,
+        pk=exam_id,
+        course=course,
+    )
+
+    if request.method == 'POST':
+        # Populate form with request data
+        form = ExamEditForm(request.POST, instance=exam)
+
+        # Check for validity
+        if form.is_valid():
+            exam = form.save()
+            messages.success(request,
+                "The exam was updated successfully.",
+            )
+            return HttpResponseRedirect(reverse(
+                'registration:exam-detail',
+                args=[course.code, exam.pk],
+            ))
+
+        else:
+            messages.error(request,
+                "Please correct the error below.",
+            )
+
+    else:
+        # Create default form
+        form = ExamEditForm(instance=exam)
+
+    return render(request, 'registration/exam_edit.html', {
+        'course': course,
+        'exam': exam,
+        'form': form,
+    })
+
+
+@require_safe
+@login_required
+def exam_signups(request, course_code, exam_id):
+    course, _ = course_auth(request, course_code, instructor=True)
+    exam = get_object_or_404(
+        Exam,
+        pk=exam_id,
+        course=course,
+    )
+
+    return render(request, 'registration/exam_signups.html', {
+        'course': course,
+        'exam': exam,
     })

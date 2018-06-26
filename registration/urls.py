@@ -26,4 +26,8 @@ urlpatterns = [
     # Exams
     path('courses/<course_code>/exams/<int:exam_id>/',
         views.exam_detail, name='exam-detail'),
+    path('courses/<course_code>/exams/<int:exam_id>/edit/',
+        views.exam_edit, name='exam-edit'),
+    path('courses/<course_code>/exams/<int:exam_id>/signups/',
+        views.exam_signups, name='exam-signups'),
 ]

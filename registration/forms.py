@@ -4,7 +4,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 
 from .models import (
-    User, ExamRegistration, ExamSlot, Course, CourseUser
+    User, Exam, ExamRegistration, ExamSlot, Course, CourseUser
 )
 
 
@@ -123,6 +123,12 @@ class CourseSudoForm(forms.Form):
         # Only select users enrolled in course
         self.fields['user'].queryset = \
             course.course_user_set.all()
+
+
+class ExamEditForm(forms.ModelForm):
+    class Meta:
+        model = Exam
+        fields = ['name', 'details']
 
 
 class ExamRegistrationForm(forms.ModelForm):

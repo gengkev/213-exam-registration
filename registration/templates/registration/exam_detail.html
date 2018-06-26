@@ -17,6 +17,25 @@
   <small class="text-muted">{{ course.code }}</small>
 </h1>
 
+{% if my_course_user.is_instructor %}
+<div class="border border-dark shadow px-4 pt-2 pb-4 my-4 rounded">
+  <div>
+    <h3>Exam management</h3>
+
+    <div>
+      <a class="btn btn-lg btn-info" role="button" href="{% url 'registration:exam-edit' course.code exam.pk %}" title="Edit exam">
+        <i class="fa fa-pencil" aria-hidden="true"></i>
+        &nbsp;Edit exam
+      </a>
+      <a class="btn btn-lg btn-success" role="button" href="{% url 'registration:exam-signups' course.code exam.pk %}" title="View signups">
+        <i class="fa fa-users" aria-hidden="true"></i>
+        &nbsp;View signups
+      </a>
+    </div>
+  </div>
+</div>
+{% endif %}
+
 <div class="row">
   <div class="col-lg-8">
     <h2>Exam information</h2>

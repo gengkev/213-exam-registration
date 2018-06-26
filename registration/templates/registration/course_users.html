@@ -48,7 +48,7 @@
     <tbody>
       {% for course_user in course.course_user_set.all %}
       <tr>
-        <th scope="row">{{ forloop.counter }}</td>
+        <th scope="row">{{ forloop.counter }}</th>
         <td>{{ course_user.user.username }}</td>
         <td>{{ course_user.user.first_name }}</td>
         <td>{{ course_user.user.last_name }}</td>

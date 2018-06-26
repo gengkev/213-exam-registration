@@ -1,0 +1,36 @@
+{% extends "base_generic.html" %}
+
+{% block title %}Edit exam &mdash; {{ course.name }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="nav-item active">
+  <a class="nav-link" href="{% url 'registration:course-detail' course.code %}">{{ course.code }}</a>
+</li>
+<li class="nav-item active" aria-current="page">
+  <a class="nav-link" href="{% url 'registration:exam-detail' course.code exam.pk %}">{{ exam.name }}</a>
+</li>
+<li class="nav-item active" aria-current="page">
+  <span class="nav-link">Edit</span>
+</li>
+{% endblock %}
+
+{% block content %}
+
+<h1>
+  Edit exam
+  <small class="text-muted">{{ exam.name }}</small>
+</h1>
+
+{% load crispy_forms_tags %}
+
+<form action="" method="POST">
+  {% csrf_token %}
+
+  <table>
+    {{ form|crispy }}
+  </table>
+
+  <input class="btn" type="submit" value="Submit">
+</form>
+
+{% endblock %}
