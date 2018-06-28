@@ -92,7 +92,13 @@
     <h3>{{ exam_day.grouper|date:"l, F j, Y" }}</h3>
 
     {% for slot in exam_day.list %}
-    <h4>{{ slot.get_start_time|time:"h:i a" }}</h4>
+    <h4>
+      {{ slot.get_start_time|time:"h:i a" }}
+      <small class="text-muted">
+        {{ slot.exam_registration_set.count }}
+        registered
+      </small>
+    </h4>
     <ul>
       {% for exam_reg in slot.exam_registration_set.all %}
       <li>
