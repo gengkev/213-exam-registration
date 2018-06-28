@@ -539,7 +539,7 @@ def exam_detail(request, course_code, exam_id):
     exam_reg.refresh_from_db()
     exam_slots = exam.exam_slot_set.annotate(
         day=TruncDay('start_time_slot__start_time'),
-    )
+    ).select_related('start_time_slot').prefetch_related('time_slots')
 
     # Determine id of selected slot
     selected_slot = form['exam_slot'].value()
