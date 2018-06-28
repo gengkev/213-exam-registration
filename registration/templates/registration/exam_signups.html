@@ -118,10 +118,8 @@
 
 <h2>Registrations by user</h2>
 <p>
-  This section lists which time slot each user is registered for. However,
-  as of now, it only lists the users who have an exam registration in the
-  database. Currently, that means those users who have opened the exam
-  registration page, or who have been manually registered.
+  This section lists which exam slot each user is registered for. It only
+  lists the users who are registered, i.e., have selected an exam slot.
 </p>
 <div class="table-responsive-md mt-4">
   <table class="table table-sm table-hover">
@@ -138,7 +136,7 @@
     </thead>
 
     <tbody>
-      {% for exam_reg in exam.exam_registration_set.all %}
+      {% for exam_reg in user_registrations %}
       {% with exam_reg.course_user as course_user %}
       <tr>
         <th scope="row">{{ forloop.counter }}</th>
@@ -162,6 +160,49 @@
         </td>
       </tr>
       {% endwith %}
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<hr>
+
+<h2>Unregistered users</h2>
+<p>
+  This section lists the users in your course who have not yet registered
+  for this exam.
+</p>
+<div class="table-responsive-md mt-4">
+  <table class="table table-sm table-hover">
+    <thead class="thead-light">
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Username</th>
+        <th scope="col">First name</th>
+        <th scope="col">Last name</th>
+        <th scope="col">User type</th>
+        <th scope="col">Dropped</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for course_user in unregistered_users %}
+      <tr>
+        <th scope="row">{{ forloop.counter }}</th>
+        <td>{{ course_user.user.username }}</td>
+        <td>{{ course_user.user.first_name }}</td>
+        <td>{{ course_user.user.last_name }}</td>
+        <td>
+          {% if course_user.user_type == 'i' %}
+          Instructor
+          {% elif course_user.user_type == 's' %}
+          Student
+          {% else %}
+          Unknown ({{ course_user.user_type }})
+          {% endif %}
+        </td>
+        <td>{{ course_user.dropped }}</td>
+      </tr>
       {% endfor %}
     </tbody>
   </table>

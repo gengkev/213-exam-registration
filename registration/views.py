@@ -5,7 +5,7 @@ from datetime import timedelta
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
-from django.db import transaction, IntegrityError
+from django.db import transaction, IntegrityError, models
 from django.db.models.functions import TruncDay
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render, reverse
@@ -608,6 +608,7 @@ def exam_signups(request, course_code, exam_id):
         course=course,
     )
 
+    # Compute time slots, exam slots
     time_slots = exam.time_slot_set.annotate(
         day=TruncDay('start_time'),
     )
@@ -615,9 +616,22 @@ def exam_signups(request, course_code, exam_id):
         day=TruncDay('start_time_slot__start_time'),
     )
 
+    # Compute registered users
+    user_registrations = exam.exam_registration_set \
+            .exclude(exam_slot__isnull=True)
+
+    # Compute unregistered users
+    no_reg_q = ~models.Q(exam_registration_set__exam=exam)
+    null_reg_q = models.Q(exam_registration_set__exam=exam,
+            exam_registration_set__exam_slot=None)
+    unregistered_users = course.course_user_set \
+        .filter(no_reg_q | null_reg_q)
+
     return render(request, 'registration/exam_signups.html', {
         'course': course,
         'exam': exam,
         'time_slots': time_slots,
         'exam_slots': exam_slots,
+        'user_registrations': user_registrations,
+        'unregistered_users': unregistered_users,
     })
