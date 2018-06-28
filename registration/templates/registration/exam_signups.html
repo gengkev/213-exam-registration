@@ -21,9 +21,70 @@
   <small class="text-muted">{{ exam.name }}</small>
 </h1>
 
-<h2>By exam slot</h2>
+<hr>
+
+<h2>Seats taken by time period</h2>
+<p>
+  This table shows the number of seats that are taken for each time period.
+  For any given time period, this is the number of users whose registered exam
+  slots contain that time period.
+</p>
+<p>
+  Time periods are non-overlapping durations of time that can each handle a
+  certain capacity. Exam slots are created by selecting multiple time periods
+  that the exam slot will encompass.
+</p>
+
 <div class="row">
-  <!-- Group exam slots by day -->
+  {# Group time slots by day #}
+  {% regroup time_slots by day as time_slot_day_list %}
+  {% for time_slot_day in time_slot_day_list %}
+
+  <div class="col-md-6">
+    <h3>{{ time_slot_day.grouper|date:"l, F j, Y" }}</h3>
+
+    <div class="table-responsive-md mt-4">
+      <table class="table table-sm table-hover">
+        <thead class="thead-light">
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Start time</th>
+            <th scope="col">End time</th>
+            <th scope="col">Seats taken</th>
+            <th scope="col">Capacity</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          {% for slot in time_slot_day.list %}
+          <tr>
+            <th scope="row">{{ forloop.counter }}</th>
+            <td>{{ slot.start_time|time:"h:i a" }}</td>
+            <td>{{ slot.end_time|time:"h:i a" }}</td>
+            <td>{{ slot.count_num_registered }}</td>
+            <td>{{ slot.capacity }}</td>
+          </tr>
+          {% endfor %}
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% endfor %}
+</div>
+
+
+<hr>
+
+<h2>Registrations by exam slot</h2>
+<p>
+  This section lists the available exam slots, and shows which users are
+  registered for each of them.
+</p>
+<div class="row">
+  {# Group exam slots by day #}
   {% regroup exam_slots by day as exam_day_list %}
   {% for exam_day in exam_day_list %}
 
@@ -47,7 +108,15 @@
   {% endfor %}
 </div>
 
-<h2>By user</h2>
+<hr>
+
+<h2>Registrations by user</h2>
+<p>
+  This section lists which time slot each user is registered for. However,
+  as of now, it only lists the users who have an exam registration in the
+  database. Currently, that means those users who have opened the exam
+  registration page, or who have been manually registered.
+</p>
 <div class="table-responsive-md mt-4">
   <table class="table table-sm table-hover">
     <thead class="thead-light">

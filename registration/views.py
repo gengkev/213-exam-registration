@@ -537,9 +537,6 @@ def exam_detail(request, course_code, exam_id):
 
     # Reload exam_reg and related items
     exam_reg.refresh_from_db()
-    time_slots = exam.time_slot_set.annotate(
-        day=TruncDay('start_time'),
-    )
     exam_slots = exam.exam_slot_set.annotate(
         day=TruncDay('start_time_slot__start_time'),
     )
@@ -555,7 +552,6 @@ def exam_detail(request, course_code, exam_id):
         'my_course_user': my_course_user,
         'exam': exam,
         'exam_reg': exam_reg,
-        'time_slots': time_slots,
         'exam_slots': exam_slots,
         'selected_slot': selected_slot,
     })
