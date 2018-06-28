@@ -43,6 +43,8 @@ class User(AbstractUser):
         # TODO: use info from CMU LDAP.
         # https://github.com/ScottyLabs/directory-api/blob/master/server.js
 
+    class Meta:
+        ordering = ('username',)
 
 
 class Course(models.Model):
@@ -120,7 +122,7 @@ class CourseUser(models.Model):
 
     class Meta:
         unique_together = (('user', 'course'),)
-        ordering = ('user__username',)
+        ordering = ('user',)
 
 
 # TODO: consider changing to per-exam, or global
@@ -323,8 +325,8 @@ class ExamRegistration(models.Model):
         )
 
     class Meta:
-        ordering = ['course_user__user__username']
         unique_together = (('exam', 'course_user'),)
+        ordering = ('course_user',)
 
     @classmethod
     def update_slot(cls, exam_reg_pk, exam_slot_pk):
