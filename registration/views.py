@@ -69,7 +69,9 @@ def index(request):
     the user is not authenticated, displays an error message.
     """
     user = get_object_or_404(User, pk=request.user.id)
-    course_user_list = user.course_user_set.all()
+    course_user_list = user.course_user_set.all() \
+            .select_related('course') \
+            .prefetch_related('course__exam_set')
     return render(request, 'registration/index.html', {
         'course_user_list': course_user_list,
     })
@@ -256,9 +258,11 @@ def course_sudo(request, course_code):
 @login_required
 def course_users(request, course_code):
     course, _ = course_auth(request, course_code, instructor=True)
+    course_users = course.course_user_set.select_related('user')
 
     return render(request, 'registration/course_users.html', {
         'course': course,
+        'course_users': course_users,
     })
 
 
