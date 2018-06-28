@@ -323,6 +323,7 @@ class ExamRegistration(models.Model):
         )
 
     class Meta:
+        ordering = ['course_user__user__username']
         unique_together = (('exam', 'course_user'),)
 
     @classmethod
