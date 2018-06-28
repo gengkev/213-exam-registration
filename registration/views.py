@@ -618,14 +618,16 @@ def exam_signups(request, course_code, exam_id):
 
     # Compute registered users
     user_registrations = exam.exam_registration_set \
-            .exclude(exam_slot__isnull=True)
+            .exclude(exam_slot__isnull=True) \
+            .select_related('course_user', 'course_user__user')
 
     # Compute unregistered users
     no_reg_q = ~models.Q(exam_registration_set__exam=exam)
     null_reg_q = models.Q(exam_registration_set__exam=exam,
             exam_registration_set__exam_slot=None)
     unregistered_users = course.course_user_set \
-        .filter(no_reg_q | null_reg_q)
+            .filter(no_reg_q | null_reg_q) \
+            .select_related('user')
 
     return render(request, 'registration/exam_signups.html', {
         'course': course,
