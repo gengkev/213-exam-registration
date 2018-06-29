@@ -23,7 +23,7 @@ from .forms import (
     ExamEditForm,
 )
 from .models import (
-    Course, CourseUser, Exam, ExamRegistration, User
+    Course, CourseUser, Exam, ExamRegistration, User, ExamSlot
 )
 
 
@@ -516,10 +516,9 @@ def exam_detail(request, course_code, exam_id):
             try:
                 ExamRegistration.update_slot(exam_reg.pk, exam_slot_pk)
             except IntegrityError as e:
-                messages.error(request,
-                    "Error while updating database. Your registration "
-                    "was not updated."
-                )
+                messages.error(request, (
+                    "Error: {}. Your exam registration was not updated."
+                ).format(e))
             else:
                 messages.success(request,
                     "Your exam registration was updated successfully.",
@@ -541,9 +540,16 @@ def exam_detail(request, course_code, exam_id):
 
     # Reload exam_reg and related items
     exam_reg.refresh_from_db()
-    exam_slots = exam.exam_slot_set.annotate(
-        day=TruncDay('start_time_slot__start_time'),
-    ).select_related('start_time_slot').prefetch_related('time_slots')
+    exam_slots = exam.exam_slot_set \
+        .filter(exam_slot_type=my_course_user.exam_slot_type) \
+        .annotate(day=TruncDay('start_time_slot__start_time')) \
+        .select_related('start_time_slot') \
+        .prefetch_related('time_slots')
+
+    # Currently selected slot is wrong type
+    wrong_type_slot = (exam_reg.exam_slot and
+            exam_reg.exam_slot.exam_slot_type !=
+            my_course_user.exam_slot_type)
 
     # Determine id of selected slot
     selected_slot = form['exam_slot'].value()
@@ -558,6 +564,7 @@ def exam_detail(request, course_code, exam_id):
         'exam_reg': exam_reg,
         'exam_slots': exam_slots,
         'selected_slot': selected_slot,
+        'wrong_type_slot': wrong_type_slot,
     })
 
 
@@ -613,12 +620,14 @@ def exam_signups(request, course_code, exam_id):
     )
 
     # Compute time slots, exam slots
-    time_slots = exam.time_slot_set.annotate(
-        day=TruncDay('start_time'),
-    )
-    exam_slots = exam.exam_slot_set.annotate(
-        day=TruncDay('start_time_slot__start_time'),
-    )
+    time_slots = exam.time_slot_set \
+            .annotate(day=TruncDay('start_time'))
+    exam_slots = exam.exam_slot_set \
+            .annotate(day=TruncDay('start_time_slot__start_time'))
+    normal_exam_slots = exam_slots \
+            .filter(exam_slot_type=CourseUser.NORMAL)
+    extended_exam_slots = exam_slots \
+            .filter(exam_slot_type=CourseUser.EXTENDED_TIME)
 
     # Compute registered users
     user_registrations = exam.exam_registration_set \
@@ -637,7 +646,8 @@ def exam_signups(request, course_code, exam_id):
         'course': course,
         'exam': exam,
         'time_slots': time_slots,
-        'exam_slots': exam_slots,
+        'normal_exam_slots': normal_exam_slots,
+        'extended_exam_slots': extended_exam_slots,
         'user_registrations': user_registrations,
         'unregistered_users': unregistered_users,
     })

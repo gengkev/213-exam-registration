@@ -38,6 +38,7 @@
         <th scope="col">First name</th>
         <th scope="col">Last name</th>
         <th scope="col">User type</th>
+        <th scope="col">Exam type</th>
         <th scope="col">Lecture</th>
         <th scope="col">Section</th>
         <th scope="col">Dropped</th>
@@ -52,24 +53,11 @@
         <td>{{ course_user.user.username }}</td>
         <td>{{ course_user.user.first_name }}</td>
         <td>{{ course_user.user.last_name }}</td>
-        <td>
-          {% if course_user.user_type == 'i' %}
-          Instructor
-          {% elif course_user.user_type == 's' %}
-          Student
-          {% else %}
-          Unknown ({{ course_user.user_type }})
-          {% endif %}
-        </td>
-        <td>
-          {{ course_user.lecture }}
-        </td>
-        <td>
-          {{ course_user.section }}
-        </td>
-        <td>
-          {{ course_user.dropped|yesno:"yes,no" }}
-        </td>
+        <td>{{ course_user.user_type_display }}</td>
+        <td>{{ course_user.exam_slot_type_display }}</td>
+        <td>{{ course_user.lecture }}</td>
+        <td>{{ course_user.section }}</td>
+        <td>{{ course_user.dropped|yesno:"yes,no" }}</td>
         <td>
           <a href="{% url 'registration:course-users-edit' course.code course_user.pk %}" title="Edit user">
             <i class="fa fa-pencil" aria-hidden="true"></i>

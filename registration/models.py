@@ -90,6 +90,18 @@ class CourseUser(models.Model):
         choices=USER_TYPE,
     )
 
+    # Type of exam slot this user can select
+    NORMAL = 'r'
+    EXTENDED_TIME = 'e'
+    EXAM_SLOT_TYPE = (
+        (NORMAL, "Normal"),
+        (EXTENDED_TIME, "Extended time"),
+    )
+    exam_slot_type = models.CharField(
+        max_length=1,
+        choices=EXAM_SLOT_TYPE,
+    )
+
     # Attributes from Autolab export
     lecture = models.CharField(
         max_length=32,
@@ -109,6 +121,18 @@ class CourseUser(models.Model):
             "course, although they can continue to log in."
         ),
     )
+
+    def user_type_display(self):
+        return dict(CourseUser.USER_TYPE).get(
+            self.user_type,
+            "Unknown ({})".format(self.user_type),
+        )
+
+    def exam_slot_type_display(self):
+        return dict(CourseUser.EXAM_SLOT_TYPE).get(
+            self.exam_slot_type,
+            "Unknown ({})".format(self.exam_slot_type),
+        )
 
     def is_instructor(self):
         """Returns whether this course user is an instructor."""
@@ -226,7 +250,7 @@ class ExamSlot(models.Model):
         on_delete=models.CASCADE,
         related_name='exam_slot_set',
     )
-    start_time_slot = models.OneToOneField(TimeSlot,
+    start_time_slot = models.ForeignKey(TimeSlot,
         on_delete=models.CASCADE,
         related_name='exam_slot',
     )
@@ -234,6 +258,18 @@ class ExamSlot(models.Model):
         related_name='exam_slot_set',
     )
     history = HistoricalRecords()
+
+    # Type of exam slot this is
+    exam_slot_type = models.CharField(
+        max_length=1,
+        choices=CourseUser.EXAM_SLOT_TYPE,
+    )
+
+    def exam_slot_type_display(self):
+        return dict(CourseUser.EXAM_SLOT_TYPE).get(
+            self.exam_slot_type,
+            "Unknown ({})".format(self.exam_slot_type),
+        )
 
     def get_start_time(self):
         """Returns the start time of this exam slot."""
@@ -274,9 +310,10 @@ class ExamSlot(models.Model):
         super(ExamSlot, self).clean(*args, **kwargs)
 
     def __str__(self):
-        return "{:%Y-%m-%d %H:%M} \u2013 {:%Y-%m-%d %H:%M}".format(
+        return "{:%Y-%m-%d %H:%M} \u2013 {:%Y-%m-%d %H:%M} [{}]".format(
             self.get_start_time(),
             self.get_end_time(),
+            self.exam_slot_type_display(),
         )
 
     def __repr__(self):
@@ -349,6 +386,11 @@ class ExamRegistration(models.Model):
                     .get(pk=exam_slot_pk)
                 time_slot_list = exam_slot.time_slots \
                     .select_for_update()
+
+                # Check that exam slot type is correct
+                if (exam_slot.exam_slot_type !=
+                        exam_reg.course_user.exam_slot_type):
+                    raise IntegrityError("Wrong exam slot type")
 
                 # Check that all time slots have seats
                 for time_slot in time_slot_list:

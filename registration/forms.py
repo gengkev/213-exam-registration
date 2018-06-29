@@ -93,7 +93,8 @@ class CourseUserCreateForm(forms.ModelForm):
     class Meta:
         model = CourseUser
         fields = [
-            'user', 'user_type', 'lecture', 'section', 'dropped'
+            'user', 'user_type', 'exam_slot_type', 'lecture',
+            'section', 'dropped',
         ]
 
 
@@ -107,7 +108,7 @@ class CourseUserEditForm(forms.ModelForm):
     class Meta:
         model = CourseUser
         fields = [
-            'user_type', 'lecture', 'section', 'dropped'
+            'user_type', 'exam_slot_type', 'lecture', 'section', 'dropped'
         ]
 
 

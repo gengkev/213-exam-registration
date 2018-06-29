@@ -85,7 +85,41 @@
 </p>
 <div class="row">
   {# Group exam slots by day #}
-  {% regroup exam_slots by day as exam_day_list %}
+  {% regroup normal_exam_slots by day as exam_day_list %}
+  {% for exam_day in exam_day_list %}
+
+  <div class="col-lg-6">
+    <h3>{{ exam_day.grouper|date:"l, F j, Y" }}</h3>
+
+    {% for slot in exam_day.list %}
+    <h4>
+      {{ slot.get_start_time|time:"h:i a" }}
+      <small class="text-muted">
+        {{ slot.exam_registration_set.count }}
+        registered
+      </small>
+    </h4>
+    <ul>
+      {% for exam_reg in slot.exam_registration_set.all %}
+      <li>
+        {{ exam_reg.course_user.user }}
+        ({{ exam_reg.course_user.user.first_name }}
+        {{ exam_reg.course_user.user.last_name }})
+      </li>
+      {% endfor %}
+    </ul>
+    {% endfor %}
+  </div>
+
+  {% endfor %}
+</div>
+
+<hr>
+
+<h2>Registrations by exam slot <strong>(extended time)</strong></h2>
+<div class="row">
+  {# Repeat for extended slots #}
+  {% regroup extended_exam_slots by day as exam_day_list %}
   {% for exam_day in exam_day_list %}
 
   <div class="col-lg-6">
@@ -130,6 +164,7 @@
         <th scope="col">First name</th>
         <th scope="col">Last name</th>
         <th scope="col">User type</th>
+        <th scope="col">Exam type</th>
         <th scope="col">Exam day</th>
         <th scope="col">Exam time</th>
       </tr>
@@ -143,20 +178,14 @@
         <td>{{ course_user.user.username }}</td>
         <td>{{ course_user.user.first_name }}</td>
         <td>{{ course_user.user.last_name }}</td>
-        <td>
-          {% if course_user.user_type == 'i' %}
-          Instructor
-          {% elif course_user.user_type == 's' %}
-          Student
-          {% else %}
-          Unknown ({{ course_user.user_type }})
-          {% endif %}
-        </td>
+        <td>{{ course_user.user_type_display }}</td>
+        <td>{{ course_user.exam_slot_type_display }}</td>
         <td>
           {{ exam_reg.exam_slot.get_start_time|date:"l, F j, Y" }}
         </td>
         <td>
           {{ exam_reg.exam_slot.get_start_time|time:"h:i a" }}
+          ({{ exam_reg.exam_slot.exam_slot_type_display }})
         </td>
       </tr>
       {% endwith %}
@@ -181,6 +210,7 @@
         <th scope="col">First name</th>
         <th scope="col">Last name</th>
         <th scope="col">User type</th>
+        <th scope="col">Exam type</th>
         <th scope="col">Dropped</th>
       </tr>
     </thead>
@@ -192,16 +222,9 @@
         <td>{{ course_user.user.username }}</td>
         <td>{{ course_user.user.first_name }}</td>
         <td>{{ course_user.user.last_name }}</td>
-        <td>
-          {% if course_user.user_type == 'i' %}
-          Instructor
-          {% elif course_user.user_type == 's' %}
-          Student
-          {% else %}
-          Unknown ({{ course_user.user_type }})
-          {% endif %}
-        </td>
-        <td>{{ course_user.dropped }}</td>
+        <td>{{ course_user.user_type_display }}</td>
+        <td>{{ course_user.exam_slot_type_display }}</td>
+        <td>{{ course_user.dropped|yesno }}</td>
       </tr>
       {% endfor %}
     </tbody>

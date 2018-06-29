@@ -99,13 +99,12 @@
       <dl class="row mb-0">
         <dt class="col-sm-3">User type</dt>
         <dd class="col-sm-9">
-        {% if my_course_user.user_type == 'i' %}
-        Instructor
-        {% elif my_course_user.user_type == 's' %}
-        Student
-        {% else %}
-        Unknown ({{ my_course_user.user_type }})
-        {% endif %}
+        {{ my_course_user.user_type_display }}
+        </dd>
+
+        <dt class="col-sm-3">Exam type</dt>
+        <dd class="col-sm-9">
+        {{ my_course_user.exam_slot_type_display }}
         </dd>
 
         <dt class="col-sm-3">Lecture</dt>
