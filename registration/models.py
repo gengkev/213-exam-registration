@@ -3,6 +3,7 @@ import pytz
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.db import models, transaction, IntegrityError
+from django.utils import timezone
 from simple_history.models import HistoricalRecords
 
 from examreg import settings
@@ -233,7 +234,10 @@ class TimeSlot(models.Model):
         super(TimeSlot, self).clean(*args, **kwargs)
 
     def __str__(self):
-        return "{:%Y-%m-%d %H:%M}".format(self.start_time)
+        tz = timezone.get_current_timezone()
+        return "{:%Y-%m-%d %H:%M}".format(
+            self.start_time.astimezone(tz),
+        )
 
     def __repr__(self):
         return "<TimeSlot: {} [{}]>".format(
@@ -310,9 +314,10 @@ class ExamSlot(models.Model):
         super(ExamSlot, self).clean(*args, **kwargs)
 
     def __str__(self):
+        tz = timezone.get_current_timezone()
         return "{:%Y-%m-%d %H:%M} \u2013 {:%Y-%m-%d %H:%M} [{}]".format(
-            self.get_start_time(),
-            self.get_end_time(),
+            self.get_start_time().astimezone(tz),
+            self.get_end_time().astimezone(tz),
             self.exam_slot_type_display(),
         )
 
