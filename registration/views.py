@@ -214,25 +214,26 @@ def course_sudo(request, course_code):
                         .format(prev_sudo_user)
                 )
 
-            if new_sudo_user is None:
-                # Clear sudo user
-                del request.session['sudo_user']
+            # Clear sudo user, if exists
+            request.session.pop('sudo_user', None)
 
-            else:
+            if new_sudo_user is not None:
                 # Set new sudo user
                 request.session['sudo_user'] = {
-                    'str': str(new_sudo_user),
+                    'username': new_sudo_user.user.username,
                     'pk': new_sudo_user.pk,
                     'user_pk': new_sudo_user.user.pk,
                     'course_code': course.code,
                 }
+                '''
                 messages.success(request,
                     "You are now acting as {}."
                         .format(new_sudo_user),
                 )
+                '''
 
             return HttpResponseRedirect(reverse(
-                'registration:course-detail',
+                'registration:course-sudo',
                 args=[course.code],
             ))
 
@@ -250,6 +251,7 @@ def course_sudo(request, course_code):
 
     return render(request, 'registration/course_sudo.html', {
         'course': course,
+        'course_users': course_users,
         'form': form,
     })
 

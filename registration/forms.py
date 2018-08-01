@@ -123,7 +123,7 @@ class CourseSudoForm(forms.Form):
 
         # Only select users enrolled in course
         self.fields['user'].queryset = \
-            course.course_user_set.all()
+            course.course_user_set.select_related('user').all()
 
 
 class ExamEditForm(forms.ModelForm):

@@ -31,27 +31,18 @@
     <ul class="navbar-nav ml-auto">
       {% if request.session.sudo_user %}
       <li class="nav-item">
-        <a class="nav-link" href="{% url 'registration:course-sudo' request.session.sudo_user.course_code %}">
+        <a class="nav-link"
+            href="{% url 'registration:course-sudo' request.session.sudo_user.course_code %}"
+            title="Sudo {% if request.sudo_enabled %}enabled{% else %}disabled{% endif %} for this page"
+            style="{% if not request.sudo_enabled %}text-decoration: line-through{% endif %}">
           <i class="fa fa-user-secret" aria-hidden="true"></i>
-
-          {% if request.sudo_enabled %}
-          <i class="fa fa-check" aria-hiden="true"></i>
-          <span class="sr-only">(Sudo enabled for this page)</span>
-          <span title="Sudo enabled for this page">
-          {% else %}
-          <i class="fa fa-ban" aria-hiden="true"></i>
-          <span class="sr-only">(Sudo disabled for this page)</span>
-          <s title="Sudo disabled for this page">
-          {% endif %}
-
-            Acting as {{ request.session.sudo_user.str }}
-
-          {% if request.sudo_enabled %}
+          <span class="sr-only">
+            (Sudo
+            {% if request.sudo_enabled %}enabled{% else %}disabled{% endif %}
+            for this page)
           </span>
-          {% else %}
-          </s>
-          {% endif %}
-
+          Acting as
+          <strong>{{ request.session.sudo_user.username }}</strong>
         </a>
       </li>
       {% endif %}

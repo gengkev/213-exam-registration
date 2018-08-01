@@ -13,6 +13,14 @@
 
 {% block content %}
 
+    {% if request.session.sudo_user %}
+    <div class="border border-danger px-3 py-2 mb-4 rounded">
+      You are acting as user <strong>{{ request.session.sudo_user.username }}</strong>
+      in <strong>{{ request.session.sudo_user.course_code }}</strong>.&nbsp;
+      <button id="clear-sudo" class="btn btn-sm btn-danger">Cancel</button>
+    </div>
+    {% endif %}
+
 <div class="row">
   <div class="col-lg-8">
     <h1>
@@ -31,38 +39,37 @@
     </p>
     <p>
       An indicator in the navigation bar will display the user for which you
-      have activated the sudo option. It will also indicate whether the option
-      is activated for the current page with either
-      <span title="Sudo enabled for this page">
-        <i class="fa fa-check" aria-hidden="true"></i>
-        <span class="sr-only">(Sudo enabled for this page)</span>
-      </span>
-      or
-      <span title="Sudo disabled for this page">
-        <i class="fa fa-ban" aria-hidden="true"></i>
-        <span class="sr-only">(Sudo disabled for this page)</span>
-      </span>
-      .
-    </p>
-    <p>
-      You can return to this page at any time, by clicking on the indicator.
-      To cancel the sudo option, select the empty option from the dropdown
-      below.
+      have activated the sudo option, and whether it is activated on the
+      current page. Select it at any time to return to this page.
     </p>
 
+    <h2>Select user to sudo</h2>
     {% load crispy_forms_tags %}
 
-    <form action="" method="POST">
+    <form action="" method="POST" id="sudo-form">
       {% csrf_token %}
 
       <table>
         {{ form|crispy }}
       </table>
 
-      <input type="submit" value="Submit">
+      <input type="submit" class="btn btn-primary" value="Submit">
     </form>
 
   </div>
 </div>
+
+<script>
+  var clearSudoBtn = document.getElementById('clear-sudo');
+  var selectUserInput = document.getElementById('id_user');
+  var sudoForm = document.getElementById('sudo-form');
+  if (clearSudoBtn) {
+    clearSudoBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      selectUserInput.value = '';
+      sudoForm.submit();
+    });
+  }
+</script>
 
 {% endblock %}
