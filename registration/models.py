@@ -89,6 +89,7 @@ class CourseUser(models.Model):
     user_type = models.CharField(
         max_length=1,
         choices=USER_TYPE,
+        default=STUDENT,
     )
 
     # Type of exam slot this user can select
@@ -101,6 +102,7 @@ class CourseUser(models.Model):
     exam_slot_type = models.CharField(
         max_length=1,
         choices=EXAM_SLOT_TYPE,
+        default=NORMAL,
     )
 
     # Attributes from Autolab export

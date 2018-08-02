@@ -347,10 +347,6 @@ def import_roster_row(course, row):
     # Create CourseUser, or get if already exists
     extra_keys = ['section', 'lecture']
     extra_dict = {k: row[k] for k in extra_keys if k in row and row[k]}
-    extra_dict.update(dict(
-        dropped=False,
-        user_type=CourseUser.STUDENT,
-    ))
 
     course_user, created = CourseUser.objects.get_or_create(
         user=user,
