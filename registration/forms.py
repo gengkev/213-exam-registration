@@ -4,7 +4,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 
 from .models import (
-    User, Exam, ExamRegistration, ExamSlot, Course, CourseUser
+    User, Exam, ExamRegistration, TimeSlot, ExamSlot, Course, CourseUser
 )
 
 
@@ -131,6 +131,33 @@ class ExamEditForm(forms.ModelForm):
         model = Exam
         fields = ['name', 'details']
 
+
+class TimeSlotForm(forms.ModelForm):
+    class Meta:
+        model = TimeSlot
+        fields = ['start_time', 'end_time', 'capacity']
+
+
+TimeSlotFormSet = forms.inlineformset_factory(
+    Exam,
+    TimeSlot,
+    form=TimeSlotForm,
+    extra=0,
+)
+
+
+class ExamSlotForm(forms.ModelForm):
+    class Meta:
+        model = ExamSlot
+        fields = ['time_slots', 'exam_slot_type']
+
+
+ExamSlotFormSet = forms.inlineformset_factory(
+    Exam,
+    ExamSlot,
+    form=ExamSlotForm,
+    extra=0,
+)
 
 class ExamRegistrationForm(forms.ModelForm):
     exam_slot = forms.ModelChoiceField(

@@ -15,12 +15,14 @@ from django.views.decorators.http import (
     require_http_methods, require_safe, require_POST
 )
 
+from crispy_forms.helper import FormHelper
+
 from examreg import settings
 
 from .forms import (
     ProfileForm, ExamRegistrationForm, CourseEditForm, CourseSudoForm,
-    CourseUserEditForm, CourseUserCreateForm, CourseUserImportForm,
-    ExamEditForm,
+    CourseUserEditForm, TimeSlotFormSet, ExamSlotFormSet,
+    CourseUserCreateForm, CourseUserImportForm, ExamEditForm,
 )
 from .models import (
     Course, CourseUser, Exam, ExamRegistration, User, ExamSlot
@@ -583,9 +585,18 @@ def exam_edit(request, course_code, exam_id):
     if request.method == 'POST':
         # Populate form with request data
         form = ExamEditForm(request.POST, instance=exam)
+        timeslot_formset = TimeSlotFormSet(
+            request.POST,
+            instance=exam,
+        )
+        examslot_formset = ExamSlotFormSet(
+            request.POST,
+            instance=exam,
+        )
 
         # Check for validity
-        if form.is_valid():
+        if (form.is_valid() and timeslot_formset.is_valid() and
+                examslot_formset.is_valid()):
             exam = form.save()
             messages.success(request,
                 "The exam was updated successfully.",
@@ -603,9 +614,25 @@ def exam_edit(request, course_code, exam_id):
     else:
         # Create default form
         form = ExamEditForm(instance=exam)
+        timeslot_formset = TimeSlotFormSet(instance=exam)
+        examslot_formset = ExamSlotFormSet(instance=exam)
+
+    timeslot_helper = FormHelper()
+    timeslot_helper.template = 'bootstrap4/table_inline_formset.html'
+    timeslot_helper.form_tag = False
+    timeslot_helper.disable_csrf = True
+
+    examslot_helper = FormHelper()
+    examslot_helper.template = 'bootstrap4/table_inline_formset.html'
+    examslot_helper.form_tag = False
+    examslot_helper.disable_csrf = True
 
     return render(request, 'registration/exam_edit.html', {
         'course': course,
+        'timeslot_formset': timeslot_formset,
+        'timeslot_helper': timeslot_helper,
+        'examslot_formset': examslot_formset,
+        'examslot_helper': examslot_helper,
         'exam': exam,
         'form': form,
     })

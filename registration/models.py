@@ -212,6 +212,12 @@ class TimeSlot(models.Model):
 
     def clean(self, *args, **kwargs):
         """Validates consistency of TimeSlot objects."""
+        super(TimeSlot, self).clean(*args, **kwargs)
+
+        if not self.start_time:
+            raise ValidationError(dict(start_time='No start time provided'))
+        if not self.end_time:
+            raise ValidationError(dict(end_time='No end time provided'))
 
         # Ensure end time is not before start time
         if self.start_time > self.end_time:
@@ -230,8 +236,6 @@ class TimeSlot(models.Model):
                 "The selected start and end times overlap with one or "
                 "more existing time slots for this exam."
             )))
-
-        super(TimeSlot, self).clean(*args, **kwargs)
 
     def __str__(self):
         tz = timezone.get_current_timezone()

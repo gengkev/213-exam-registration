@@ -26,9 +26,26 @@
 <form action="" method="POST">
   {% csrf_token %}
 
-  <table>
-    {{ form|crispy }}
-  </table>
+  {{ form|crispy }}
+
+
+  <h2>Time slots</h2>
+  <p>
+    A time slot is a discrete, unique block of time. Time slots cannot overlap
+    each other, and each exam slots consists of multiple time slots.
+  </p>
+  <p>
+    Each time slot has a capacity, which represents the maximum number of
+    students who can register for that slot. When a student selects an exam
+    slot, they take up one seat in each of the time slots that it contains.
+  </p>
+
+  {% crispy timeslot_formset timeslot_helper %}
+
+
+  <h2>Exam slots</h2>
+
+  {% crispy examslot_formset examslot_helper %}
 
   <input class="btn btn-primary" type="submit" value="Submit">
 </form>
