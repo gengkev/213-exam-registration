@@ -331,7 +331,7 @@ class ExamSlot(models.Model):
         )
 
     class Meta:
-        ordering = ['exam', 'start_time_slot']
+        ordering = ['exam', 'exam_slot_type', 'start_time_slot']
 
 
 class ExamRegistration(models.Model):
@@ -372,7 +372,7 @@ class ExamRegistration(models.Model):
 
     class Meta:
         unique_together = (('exam', 'course_user'),)
-        ordering = ('course_user',)
+        ordering = ['course_user', 'exam']
 
     @classmethod
     def update_slot(cls, exam_reg_pk, exam_slot_pk):
