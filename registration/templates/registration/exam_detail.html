@@ -57,12 +57,23 @@
   <a href="{% url 'registration:profile' %}">profile</a>.
 </div>
 
+{% if my_course_user.exam_slot_type_display == 'Extended time' %}
+<div class="alert alert-warning" role="alert">
+  <strong>Extended time:</strong>
+  You may sign up for exam slots with up to double the standard length.
+  Keep in mind, however, that the time you have is still limited by when
+  the exam rooms close. Please ensure that you select an exam slot that
+  will give you enough time to complete your exam.
+</div>
+{% endif %}
+
 {% if wrong_type_slot %}
 <div class="alert alert-danger" role="alert">
-  You are currently registered in this course for exam type
-  "{{ my_course_user.exam_slot_type_display }}".
-  However, your currently selected exam slot has exam type
-  "{{ exam_reg.exam_slot.exam_slot_type_display }}".
+  <strong>Registered for wrong type of exam slot:</strong>
+  You are currently registered in this course for a
+  "{{ my_course_user.exam_slot_type_display }}" slot.
+  However, your currently selected exam slot is a
+  "{{ exam_reg.exam_slot.exam_slot_type_display }}" slot.
   Using this form, you will only be able to select exam slots of the
   type you are registered for. Please contact the course staff if you
   believe this is a mistake.
