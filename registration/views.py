@@ -593,7 +593,9 @@ def exam_edit(request, course_code, exam_id):
         # Check for validity
         if (form.is_valid() and timeslot_formset.is_valid() and
                 examslot_formset.is_valid()):
-            exam = form.save()
+            form.save()
+            timeslot_formset.save()
+            examslot_formset.save()
             messages.success(request,
                 "The exam was updated successfully.",
             )
