@@ -78,7 +78,7 @@
 
 <hr>
 
-<h2>Registrations by exam slot</h2>
+<h2>Registrations by exam slot <strong>(normal time)</strong></h2>
 <p>
   This section lists the available exam slots, and shows which users are
   registered for each of them.
@@ -102,9 +102,12 @@
     <ul>
       {% for exam_reg in slot.exam_registration_set.all %}
       <li>
-        {{ exam_reg.course_user.user }}
-        ({{ exam_reg.course_user.user.first_name }}
-        {{ exam_reg.course_user.user.last_name }})
+        <a class="" href="{% url 'registration:exam-signups-detail' course.code exam.pk exam_reg.course_user.user.username %}">
+          {{ exam_reg.course_user.user }}
+          ({{ exam_reg.course_user.user.first_name }}
+          {{ exam_reg.course_user.user.last_name }})
+        </a>
+
       </li>
       {% endfor %}
     </ul>

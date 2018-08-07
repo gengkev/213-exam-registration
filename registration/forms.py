@@ -178,3 +178,54 @@ class ExamRegistrationForm(forms.ModelForm):
     class Meta:
         model = ExamRegistration
         fields = ['exam_slot']
+
+
+class ExamInitialCheckinForm(forms.ModelForm):
+    checkin_room = forms.ModelChoiceField(
+        queryset=None,
+        required=True,
+        empty_label=None,
+    )
+    checkin_notes = forms.CharField(
+        required=False,
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Filter possible rooms by course
+        exam_reg = self.instance
+        course = exam_reg.exam.course
+        self.fields['checkin_room'].queryset = course.room_set.all()
+
+    class Meta:
+        model = ExamRegistration
+        fields = ['checkin_room', 'checkin_notes']
+
+
+class ExamEditSignupForm(forms.ModelForm):
+    checkin_notes = forms.CharField(
+        required=False,
+    )
+    checkin_user = forms.ModelChoiceField(
+        queryset=None,
+        required=True,
+        empty_label=None,
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Filter possible check-in users
+        exam_reg = self.instance
+        course = exam_reg.exam.course
+        self.fields['checkin_user'].queryset = \
+            course.course_user_set.filter(user_type=CourseUser.INSTRUCTOR)
+
+    class Meta:
+        model = ExamRegistration
+        fields = [
+            'checkin_room', 'checkin_notes', 'checkin_user',
+            'checkin_time_in', 'checkin_time_out',
+            'exam_password',
+        ]

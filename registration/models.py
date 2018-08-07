@@ -177,6 +177,7 @@ class Exam(models.Model):
     name = models.CharField(max_length=200)
     registrations = models.ManyToManyField(CourseUser,
         through='ExamRegistration',
+        through_fields=('exam', 'course_user'),
     )
     details = models.TextField(blank=True)
     history = HistoricalRecords()
@@ -352,6 +353,24 @@ class ExamRegistration(models.Model):
         blank=True,
     )
     history = HistoricalRecords()
+
+    # Check-in fields
+    checkin_room = models.ForeignKey(Room,
+        on_delete=models.SET_NULL,
+        related_name='+',
+        null=True,
+        blank=True,
+    )
+    checkin_user = models.ForeignKey(CourseUser,
+        on_delete=models.SET_NULL,
+        related_name='+',
+        null=True,
+        blank=True,
+    )
+    checkin_notes = models.TextField(blank=True)
+    checkin_time_in = models.DateTimeField(null=True, blank=True)
+    checkin_time_out = models.DateTimeField(null=True, blank=True)
+    exam_password = models.CharField(max_length=64, blank=True)
 
     def clean(self, *args, **kwargs):
         """Validates consistency of ExamRegistration objects."""

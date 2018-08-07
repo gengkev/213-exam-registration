@@ -23,6 +23,7 @@ from .forms import (
     ProfileForm, ExamRegistrationForm, CourseEditForm, CourseSudoForm,
     CourseUserEditForm, TimeSlotFormSet, ExamSlotFormSet,
     CourseUserCreateForm, CourseUserImportForm, ExamEditForm,
+    ExamInitialCheckinForm, ExamEditSignupForm,
 )
 from .models import (
     Course, CourseUser, Exam, ExamRegistration, User, ExamSlot
@@ -678,3 +679,113 @@ def exam_signups(request, course_code, exam_id):
         'user_registrations': user_registrations,
         'unregistered_users': unregistered_users,
     })
+
+
+@require_http_methods(['GET', 'HEAD', 'POST'])
+@login_required
+def exam_signups_detail(request, course_code, exam_id, username):
+    course, my_course_user = course_auth(
+        request, course_code, instructor=True)
+    exam = get_object_or_404(
+        Exam,
+        pk=exam_id,
+        course=course,
+    )
+    course_user = get_object_or_404(
+        CourseUser,
+        course=course,
+        user__username=username,
+    )
+    exam_reg, _ = ExamRegistration.objects.get_or_create(
+        course_user=course_user,
+        exam=exam,
+    )
+
+    # Force checkin form, if not checked in
+    if not exam_reg.checkin_time_in:
+        form = ExamInitialCheckinForm(instance=exam_reg)
+        return render(request, 'registration/exam_checkin.html', {
+            'course': course,
+            'course_user': course_user,
+            'exam': exam,
+            'exam_reg': exam_reg,
+            'form': form,
+        })
+
+    if request.method == 'POST':
+        # Populate form with request data
+        form = ExamEditSignupForm(request.POST, instance=exam_reg)
+
+        # Check for validity
+        if form.is_valid():
+            form.save()
+
+            messages.success(request,
+                "The registration was updated successfully.",
+            )
+            return HttpResponseRedirect(reverse(
+                'registration:exam-signups-detail',
+                args=[course.code, exam.id, course_user.user.username],
+            ))
+
+        else:
+            messages.error(request,
+                "Please correct the error below.",
+            )
+
+    else:
+        # Create default form
+        form = ExamEditSignupForm(instance=exam_reg)
+
+    return render(request, 'registration/exam_checkin.html', {
+        'course': course,
+        'course_user': course_user,
+        'exam': exam,
+        'exam_reg': exam_reg,
+        'form': form,
+    })
+
+
+@require_http_methods(['POST'])
+@login_required
+def exam_signups_checkin(request, course_code, exam_id, username):
+    course, my_course_user = course_auth(
+        request, course_code, instructor=True)
+    exam = get_object_or_404(
+        Exam,
+        pk=exam_id,
+        course=course,
+    )
+    course_user = get_object_or_404(
+        CourseUser,
+        course=course,
+        user__username=username,
+    )
+    exam_reg, _ = ExamRegistration.objects.get_or_create(
+        course_user=course_user,
+        exam=exam,
+    )
+
+    # Populate form with request data
+    form = ExamInitialCheckinForm(request.POST, instance=exam_reg)
+
+    # Check for validity
+    if form.is_valid():
+        examreg = form.save(commit=False)
+        examreg.checkin_user = my_course_user
+        examreg.checkin_time_in = timezone.now()
+        examreg.save()
+
+        messages.success(request,
+            "The user was checked in successfully.",
+        )
+
+    else:
+        messages.error(request,
+            "Please correct the error below.",
+        )
+
+    return HttpResponseRedirect(reverse(
+        'registration:exam-signups-detail',
+        args=[course.code, exam.id, course_user.user.username],
+    ))
