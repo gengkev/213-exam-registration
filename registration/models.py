@@ -408,6 +408,13 @@ class ExamRegistration(models.Model):
                 .select_for_update() \
                 .get(pk=exam_reg_pk)
 
+            # Don't allow checked-in users to change slot.
+            if exam_reg.checkin_time:
+                raise IntegrityError(
+                    "You cannot change your slot, since you have already "
+                    "been checked in for this slot"
+                )
+
             # Clear exam slot (in transaction)
             # This is so when counting registered in time slots below,
             # we don't include ourselves in the count

@@ -84,6 +84,18 @@
 </div>
 {% endif %}
 
+{% if exam_reg.checkin_time %}
+<div class="alert alert-danger" role="alert">
+  <strong>Already checked in:</strong>
+  You have already been checked into your current exam slot, so you may no
+  longer change your exam slot. You were checked into
+  room {{ exam_reg.checkin_room.name }}
+  at {{ exam_reg.checkin_time }}
+  by {{ exam_reg.checkin_user.user.username }}.
+  If you believe this is a mistake, contact course staff immediately.
+</div>
+{% endif %}
+
 <form action="" method="POST">
   {% csrf_token %}
 
