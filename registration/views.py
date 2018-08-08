@@ -652,15 +652,6 @@ def exam_signups(request, course_code, exam_id):
             .annotate(day=TruncDay('start_time'))
     exam_slots = exam.exam_slot_set \
             .annotate(day=TruncDay('start_time_slot__start_time'))
-    normal_exam_slots = exam_slots \
-            .filter(exam_slot_type=CourseUser.NORMAL)
-    extended_exam_slots = exam_slots \
-            .filter(exam_slot_type=CourseUser.EXTENDED_TIME)
-
-    # Compute registered users
-    user_registrations = exam.exam_registration_set \
-            .exclude(exam_slot__isnull=True) \
-            .select_related('course_user', 'course_user__user')
 
     # Compute unregistered users
     no_reg_q = ~models.Q(exam_registration_set__exam=exam)
@@ -674,10 +665,41 @@ def exam_signups(request, course_code, exam_id):
         'course': course,
         'exam': exam,
         'time_slots': time_slots,
-        'normal_exam_slots': normal_exam_slots,
-        'extended_exam_slots': extended_exam_slots,
-        'user_registrations': user_registrations,
+        'exam_slots': exam_slots,
         'unregistered_users': unregistered_users,
+    })
+
+
+@require_safe
+@login_required
+def exam_signups_counts(request, course_code, exam_id):
+    course, _ = course_auth(request, course_code, instructor=True)
+    exam = get_object_or_404(
+        Exam,
+        pk=exam_id,
+        course=course,
+    )
+
+    # Compute time slots, exam slots
+    time_slots = exam.time_slot_set \
+            .annotate(day=TruncDay('start_time'))
+    exam_slots = exam.exam_slot_set \
+            .annotate(day=TruncDay('start_time_slot__start_time'))
+
+    # Compute unregistered users
+    num_course_users = course.course_user_set.count()
+    num_registered = exam.exam_registration_set \
+            .exclude(exam_slot__isnull=True) \
+            .count()
+    num_unregistered = num_course_users - num_registered
+
+    return render(request, 'registration/exam_signups_counts.html', {
+        'course': course,
+        'exam': exam,
+        'time_slots': time_slots,
+        'exam_slots': exam_slots,
+        'num_registered': num_registered,
+        'num_unregistered': num_unregistered,
     })
 
 

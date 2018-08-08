@@ -27,9 +27,13 @@
         <i class="fa fa-pencil" aria-hidden="true"></i>
         &nbsp;Edit exam
       </a>
-      <a class="btn btn-lg btn-success" role="button" href="{% url 'registration:exam-signups' course.code exam.pk %}" title="View signups">
+      <a class="btn btn-lg btn-success" role="button" href="{% url 'registration:exam-signups' course.code exam.pk %}" title="Signups">
         <i class="fa fa-users" aria-hidden="true"></i>
-        &nbsp;View signups
+        &nbsp;Signups
+      </a>
+      <a class="btn btn-lg btn-warning" role="button" href="{% url 'registration:exam-signups-counts' course.code exam.pk %}" title="Signup counts">
+        <i class="fa fa-info-circle" aria-hidden="true"></i>
+        &nbsp;Signup counts
       </a>
     </div>
   </div>

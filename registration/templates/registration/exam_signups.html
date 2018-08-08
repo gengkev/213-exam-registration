@@ -1,6 +1,6 @@
 {% extends "base_generic.html" %}
 
-{% block title %}View signups &mdash; {{ course.name }}{% endblock %}
+{% block title %}Signups &mdash; {{ course.name }}{% endblock %}
 
 {% block breadcrumb %}
 <li class="nav-item active">
@@ -17,184 +17,82 @@
 {% block content %}
 
 <h1>
-  View signups
+  Signups
   <small class="text-muted">{{ exam.name }}</small>
 </h1>
 
-<hr>
-
-<h2>Seats taken by time period</h2>
 <p>
-  This table shows the number of seats that are taken for each time period.
-  For any given time period, this is the number of users whose registered exam
-  slots contain that time period.
+  This section lists the available exam slots, and shows which users are
+  registered for each of them.
 </p>
-<p>
-  Time periods are non-overlapping durations of time that can each handle a
-  certain capacity. Exam slots are created by selecting multiple time periods
-  that the exam slot will encompass.
-</p>
+<div>
+  {# Group exam slots by day #}
+  {% regroup exam_slots by day as exam_day_list %}
+  {% for exam_day in exam_day_list %}
 
-<div class="row">
-  {# Group time slots by day #}
-  {% regroup time_slots by day as time_slot_day_list %}
-  {% for time_slot_day in time_slot_day_list %}
+  <div class="mt-4">
+    <h3>{{ exam_day.grouper|date:"l, F j, Y" }}</h3>
 
-  <div class="col-md-6">
-    <h3>{{ time_slot_day.grouper|date:"l, F j, Y" }}</h3>
-
-    <div class="table-responsive-md mt-4">
+    <div class="table-responsive-md">
       <table class="table table-sm table-hover">
+
         <thead class="thead-light">
           <tr>
-            <th scope="col">#</th>
-            <th scope="col">Start time</th>
-            <th scope="col">End time</th>
-            <th scope="col">Seats taken</th>
-            <th scope="col">Capacity</th>
+            <th scope="col">Slot time</th>
+            <th scope="col">Slot type</th>
+            <th scope="col">User</th>
+            <th scope="col">Check-in status</th>
+            <th scope="col">Checked-in by</th>
+            <th scope="col">Check-in room</th>
           </tr>
         </thead>
 
         <tbody>
+          {% for slot in exam_day.list %}
+          {% for exam_reg in slot.exam_registration_set.all %}
+          {% with exam_reg.course_user as course_user %}
 
-          {% for slot in time_slot_day.list %}
           <tr>
-            <th scope="row">{{ forloop.counter }}</th>
-            <td>{{ slot.start_time|time:"h:i a" }}</td>
-            <td>{{ slot.end_time|time:"h:i a" }}</td>
-            <td>{{ slot.count_num_registered }}</td>
-            <td>{{ slot.capacity }}</td>
-          </tr>
-          {% endfor %}
+            <td>{{ slot.get_start_time|time:"h:i a" }}</td>
+            <td>{{ slot.exam_slot_type_display }}</td>
 
+            <td>
+              {{ course_user.user.first_name }}
+              {{ course_user.user.last_name }}
+              <span class="text-muted">({{ course_user.user.username }})</span>
+              <a href="{% url 'registration:course-users-edit' course.code course_user.id %}" target="_blank">
+                <i class="fa fa-external-link" aria-hidden="true"></i>
+              </a>
+            </td>
+
+            <td>
+              {% if exam_reg.checkin_time_in %}
+              Checked in at {{ exam_reg.checkin_time_in|time:"h:i a" }}
+              <a href="{% url 'registration:exam-signups-detail' course.code exam.pk exam_reg.course_user.user.username %}" target="_blank">
+                <i class="fa fa-external-link" aria-hidden="true"></i>
+              </a>
+              {% else %}
+              <a class="text-danger" href="{% url 'registration:exam-signups-detail' course.code exam.pk exam_reg.course_user.user.username %}" target="_blank">
+                <strong>Check in now</strong>
+                <i class="fa fa-external-link" aria-hidden="true"></i>
+              </a>
+              {% endif %}
+            </td>
+
+            <td>{{ exam_reg.checkin_user.user.username }}</td>
+            <td>{{ exam_reg.checkin_room.name }}</td>
+          </tr>
+
+          {% endwith %}
+          {% endfor %}
+          {% endfor %}
         </tbody>
+
       </table>
     </div>
   </div>
 
   {% endfor %}
-</div>
-
-
-<hr>
-
-<h2>Registrations by exam slot <strong>(normal time)</strong></h2>
-<p>
-  This section lists the available exam slots, and shows which users are
-  registered for each of them.
-</p>
-<div class="row">
-  {# Group exam slots by day #}
-  {% regroup normal_exam_slots by day as exam_day_list %}
-  {% for exam_day in exam_day_list %}
-
-  <div class="col-lg-6">
-    <h3>{{ exam_day.grouper|date:"l, F j, Y" }}</h3>
-
-    {% for slot in exam_day.list %}
-    <h4>
-      {{ slot.get_start_time|time:"h:i a" }}
-      <small class="text-muted">
-        {{ slot.exam_registration_set.count }}
-        registered
-      </small>
-    </h4>
-    <ul>
-      {% for exam_reg in slot.exam_registration_set.all %}
-      <li>
-        <a class="" href="{% url 'registration:exam-signups-detail' course.code exam.pk exam_reg.course_user.user.username %}">
-          {{ exam_reg.course_user.user }}
-          ({{ exam_reg.course_user.user.first_name }}
-          {{ exam_reg.course_user.user.last_name }})
-        </a>
-
-      </li>
-      {% endfor %}
-    </ul>
-    {% endfor %}
-  </div>
-
-  {% endfor %}
-</div>
-
-<hr>
-
-<h2>Registrations by exam slot <strong>(extended time)</strong></h2>
-<div class="row">
-  {# Repeat for extended slots #}
-  {% regroup extended_exam_slots by day as exam_day_list %}
-  {% for exam_day in exam_day_list %}
-
-  <div class="col-lg-6">
-    <h3>{{ exam_day.grouper|date:"l, F j, Y" }}</h3>
-
-    {% for slot in exam_day.list %}
-    <h4>
-      {{ slot.get_start_time|time:"h:i a" }}
-      <small class="text-muted">
-        {{ slot.exam_registration_set.count }}
-        registered
-      </small>
-    </h4>
-    <ul>
-      {% for exam_reg in slot.exam_registration_set.all %}
-      <li>
-        {{ exam_reg.course_user.user }}
-        ({{ exam_reg.course_user.user.first_name }}
-        {{ exam_reg.course_user.user.last_name }})
-      </li>
-      {% endfor %}
-    </ul>
-    {% endfor %}
-  </div>
-
-  {% endfor %}
-</div>
-
-<hr>
-
-<h2>Registrations by user</h2>
-<p>
-  This section lists which exam slot each user is registered for. It only
-  lists the users who are registered, i.e., have selected an exam slot.
-</p>
-<div class="table-responsive-md mt-4">
-  <table class="table table-sm table-hover">
-    <thead class="thead-light">
-      <tr>
-        <th scope="col">#</th>
-        <th scope="col">Username</th>
-        <th scope="col">First name</th>
-        <th scope="col">Last name</th>
-        <th scope="col">User type</th>
-        <th scope="col">Exam type</th>
-        <th scope="col">Exam day</th>
-        <th scope="col">Exam time</th>
-      </tr>
-    </thead>
-
-    <tbody>
-      {% for exam_reg in user_registrations %}
-      {% with exam_reg.course_user as course_user %}
-      <tr>
-        <th scope="row">{{ forloop.counter }}</th>
-        <td>{{ course_user.user.username }}</td>
-        <td>{{ course_user.user.first_name }}</td>
-        <td>{{ course_user.user.last_name }}</td>
-        <td>{{ course_user.user_type_display }}</td>
-        <td>{{ course_user.exam_slot_type_display }}</td>
-        <td>
-          {{ exam_reg.exam_slot.get_start_time|date:"l, F j, Y" }}
-        </td>
-        <td>
-          {{ exam_reg.exam_slot.get_start_time|time:"h:i a" }}
-          ({{ exam_reg.exam_slot.exam_slot_type_display }})
-        </td>
-      </tr>
-      {% endwith %}
-      {% endfor %}
-    </tbody>
-  </table>
 </div>
 
 <hr>
@@ -209,11 +107,11 @@
     <thead class="thead-light">
       <tr>
         <th scope="col">#</th>
-        <th scope="col">Username</th>
-        <th scope="col">First name</th>
-        <th scope="col">Last name</th>
+        <th scope="col">User</th>
         <th scope="col">User type</th>
         <th scope="col">Exam type</th>
+        <th scope="col">Lecture</th>
+        <th scope="col">Section</th>
         <th scope="col">Dropped</th>
       </tr>
     </thead>
@@ -222,16 +120,22 @@
       {% for course_user in unregistered_users %}
       <tr>
         <th scope="row">{{ forloop.counter }}</th>
-        <td>{{ course_user.user.username }}</td>
-        <td>{{ course_user.user.first_name }}</td>
-        <td>{{ course_user.user.last_name }}</td>
+        <td>
+          {{ course_user.user.first_name }}
+          {{ course_user.user.last_name }}
+          <span class="text-muted">({{ course_user.user.username }})</span>
+          <a href="{% url 'registration:course-users-edit' course.code course_user.id %}" target="_blank">
+            <i class="fa fa-external-link" aria-hidden="true"></i>
+          </a>
+        </td>
         <td>{{ course_user.user_type_display }}</td>
         <td>{{ course_user.exam_slot_type_display }}</td>
+        <td>{{ course_user.lecture }}</td>
+        <td>{{ course_user.section }}</td>
         <td>{{ course_user.dropped|yesno }}</td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
 </div>
-
 {% endblock %}

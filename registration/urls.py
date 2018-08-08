@@ -30,6 +30,8 @@ urlpatterns = [
         views.exam_edit, name='exam-edit'),
     path('courses/<course_code>/exams/<int:exam_id>/signups/',
         views.exam_signups, name='exam-signups'),
+    path('courses/<course_code>/exams/<int:exam_id>/signups/counts/',
+        views.exam_signups_counts, name='exam-signups-counts'),
     path('courses/<course_code>/exams/<int:exam_id>/signups/<username>/',
         views.exam_signups_detail, name='exam-signups-detail'),
     path('courses/<course_code>/exams/<int:exam_id>/signups/<username>/checkin',

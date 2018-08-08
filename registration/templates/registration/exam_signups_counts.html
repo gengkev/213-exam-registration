@@ -1,0 +1,143 @@
+{% extends "base_generic.html" %}
+
+{% block title %}View signup counts &mdash; {{ course.name }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="nav-item active">
+  <a class="nav-link" href="{% url 'registration:course-detail' course.code %}">{{ course.code }}</a>
+</li>
+<li class="nav-item active" aria-current="page">
+  <a class="nav-link" href="{% url 'registration:exam-detail' course.code exam.pk %}">{{ exam.name }}</a>
+</li>
+<li class="nav-item active" aria-current="page">
+  <span class="nav-link">Signup counts</span>
+</li>
+{% endblock %}
+
+{% block content %}
+
+<h1>
+  View signup counts
+  <small class="text-muted">{{ exam.name }}</small>
+</h1>
+
+<hr>
+
+<h2>Overall stats</h2>
+<div class="border border-light p-4 bg-light rounded">
+
+  <dl class="row mb-0">
+    <dt class="col-sm-3">Registered users</dt>
+    <dd class="col-sm-9">{{ num_registered }}</dd>
+
+    <dt class="col-sm-3">Unregistered users</dt>
+    <dd class="col-sm-9">{{ num_unregistered }}</dd>
+  </dl>
+
+</div>
+
+<hr>
+
+<h2>Time slots</h2>
+<p>
+  This table shows the number of seats that are taken for each time period.
+  For any given time period, this is the number of users whose registered exam
+  slots contain that time period.
+</p>
+<p>
+  Time periods are non-overlapping durations of time that can each handle a
+  certain capacity. Exam slots are created by selecting multiple time periods
+  that the exam slot will encompass.
+</p>
+
+<div class="row">
+  {# Group time slots by day #}
+  {% regroup time_slots by day as time_slot_day_list %}
+  {% for time_slot_day in time_slot_day_list %}
+
+  <div class="col-md-6">
+    <h3>{{ time_slot_day.grouper|date:"l, F j, Y" }}</h3>
+
+    <div class="table-responsive-md">
+      <table class="table table-sm table-hover">
+        <thead class="thead-light">
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Start time</th>
+            <th scope="col">End time</th>
+            <th scope="col">Signups</th>
+            <th scope="col">Capacity</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          {% for slot in time_slot_day.list %}
+          <tr>
+            <th scope="row">{{ forloop.counter }}</th>
+            <td>{{ slot.start_time|time:"h:i a" }}</td>
+            <td>{{ slot.end_time|time:"h:i a" }}</td>
+            <td>{{ slot.count_num_registered }}</td>
+            <td>{{ slot.capacity }}</td>
+          </tr>
+          {% endfor %}
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% endfor %}
+</div>
+
+<hr>
+
+<h2>Exam slots</h2>
+<p>
+  An exam slot is a slot that a student can sign up for, consisting of
+  multiple time slots. This table shows how many students are signed up
+  for each exam slot.
+</p>
+<div class="row">
+  {# Group exam slots by day #}
+  {% regroup exam_slots by day as exam_day_list %}
+  {% for exam_day in exam_day_list %}
+
+  <div class="col-md-6">
+    <h3>{{ exam_day.grouper|date:"l, F j, Y" }}</h3>
+
+    <div class="table-responsive-md">
+      <table class="table table-sm table-hover">
+        <thead class="thead-light">
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Start time</th>
+            <th scope="col">End time</th>
+            <th scope="col">Slot type</th>
+            <th scope="col">Signups</th>
+            <th scope="col">Slots left</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          {% for slot in exam_day.list %}
+          <tr>
+            <th scope="row">{{ forloop.counter }}</th>
+            <td>{{ slot.get_start_time|time:"h:i a" }}</td>
+            <td>{{ slot.get_end_time|time:"h:i a" }}</td>
+            <td>{{ slot.exam_slot_type_display }}</td>
+            <td>{{ slot.count_num_registered }}</td>
+            <td>{{ slot.count_slots_left }}</td>
+          </tr>
+          {% endfor %}
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% endfor %}
+</div>
+
+{% endblock %}
