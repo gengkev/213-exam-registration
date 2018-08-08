@@ -180,7 +180,7 @@ class ExamRegistrationForm(forms.ModelForm):
         fields = ['exam_slot']
 
 
-class ExamInitialCheckinForm(forms.ModelForm):
+class ExamCheckinForm(forms.ModelForm):
     checkin_room = forms.ModelChoiceField(
         queryset=None,
         required=True,
@@ -225,7 +225,8 @@ class ExamEditSignupForm(forms.ModelForm):
     class Meta:
         model = ExamRegistration
         fields = [
-            'checkin_room', 'checkin_notes', 'checkin_user',
-            'checkin_time_in', 'checkin_time_out',
+            'checkin_room', 'checkin_notes',
+            'checkin_user', 'checkin_time',
+            'checkout_user', 'checkout_time',
             'exam_password',
         ]

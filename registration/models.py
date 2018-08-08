@@ -367,9 +367,15 @@ class ExamRegistration(models.Model):
         null=True,
         blank=True,
     )
+    checkout_user = models.ForeignKey(CourseUser,
+        on_delete=models.SET_NULL,
+        related_name='+',
+        null=True,
+        blank=True,
+    )
     checkin_notes = models.TextField(blank=True)
-    checkin_time_in = models.DateTimeField(null=True, blank=True)
-    checkin_time_out = models.DateTimeField(null=True, blank=True)
+    checkin_time = models.DateTimeField(null=True, blank=True)
+    checkout_time = models.DateTimeField(null=True, blank=True)
     exam_password = models.CharField(max_length=64, blank=True)
 
     def clean(self, *args, **kwargs):

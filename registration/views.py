@@ -23,7 +23,7 @@ from .forms import (
     ProfileForm, ExamRegistrationForm, CourseEditForm, CourseSudoForm,
     CourseUserEditForm, TimeSlotFormSet, ExamSlotFormSet,
     CourseUserCreateForm, CourseUserImportForm, ExamEditForm,
-    ExamInitialCheckinForm, ExamEditSignupForm,
+    ExamCheckinForm, ExamEditSignupForm,
 )
 from .models import (
     Course, CourseUser, Exam, ExamRegistration, User, ExamSlot
@@ -723,17 +723,6 @@ def exam_signups_detail(request, course_code, exam_id, username):
         exam=exam,
     )
 
-    # Force checkin form, if not checked in
-    if not exam_reg.checkin_time_in:
-        form = ExamInitialCheckinForm(instance=exam_reg)
-        return render(request, 'registration/exam_checkin.html', {
-            'course': course,
-            'course_user': course_user,
-            'exam': exam,
-            'exam_reg': exam_reg,
-            'form': form,
-        })
-
     if request.method == 'POST':
         # Populate form with request data
         form = ExamEditSignupForm(request.POST, instance=exam_reg)
@@ -759,12 +748,16 @@ def exam_signups_detail(request, course_code, exam_id, username):
         # Create default form
         form = ExamEditSignupForm(instance=exam_reg)
 
-    return render(request, 'registration/exam_checkin.html', {
+    # Create checkin form as well
+    checkin_form = ExamCheckinForm(instance=exam_reg)
+
+    return render(request, 'registration/exam_signups_detail.html', {
         'course': course,
         'course_user': course_user,
         'exam': exam,
         'exam_reg': exam_reg,
         'form': form,
+        'checkin_form': checkin_form,
     })
 
 
@@ -789,14 +782,14 @@ def exam_signups_checkin(request, course_code, exam_id, username):
     )
 
     # Populate form with request data
-    form = ExamInitialCheckinForm(request.POST, instance=exam_reg)
+    form = ExamCheckinForm(request.POST, instance=exam_reg)
 
     # Check for validity
     if form.is_valid():
-        examreg = form.save(commit=False)
-        examreg.checkin_user = my_course_user
-        examreg.checkin_time_in = timezone.now()
-        examreg.save()
+        exam_reg = form.save(commit=False)
+        exam_reg.checkin_user = my_course_user
+        exam_reg.checkin_time = timezone.now()
+        exam_reg.save()
 
         messages.success(request,
             "The user was checked in successfully.",
@@ -806,6 +799,41 @@ def exam_signups_checkin(request, course_code, exam_id, username):
         messages.error(request,
             "Please correct the error below.",
         )
+
+    return HttpResponseRedirect(reverse(
+        'registration:exam-signups-detail',
+        args=[course.code, exam.id, course_user.user.username],
+    ))
+
+
+@require_http_methods(['POST'])
+@login_required
+def exam_signups_checkout(request, course_code, exam_id, username):
+    course, my_course_user = course_auth(
+        request, course_code, instructor=True)
+    exam = get_object_or_404(
+        Exam,
+        pk=exam_id,
+        course=course,
+    )
+    course_user = get_object_or_404(
+        CourseUser,
+        course=course,
+        user__username=username,
+    )
+    exam_reg, _ = ExamRegistration.objects.get_or_create(
+        course_user=course_user,
+        exam=exam,
+    )
+
+    # Don't need an actual form; just update data
+    exam_reg.checkout_user = my_course_user
+    exam_reg.checkout_time = timezone.now()
+    exam_reg.save()
+
+    messages.success(request,
+        "The user was checked out successfully.",
+    )
 
     return HttpResponseRedirect(reverse(
         'registration:exam-signups-detail',

@@ -33,29 +33,33 @@
   <div class="mt-4">
     <h3>{{ exam_day.grouper|date:"l, F j, Y" }}</h3>
 
+    {% for slot in exam_day.list %}
+    {% if slot.exam_registration_set.count != 0 %}
+    <h4>
+      {{ slot.get_start_time|time:"h:i a" }}
+      ({{ slot.exam_slot_type_display }})
+    </h4>
     <div class="table-responsive-md">
       <table class="table table-sm table-hover">
 
         <thead class="thead-light">
           <tr>
-            <th scope="col">Slot time</th>
-            <th scope="col">Slot type</th>
+            <th scope="col">#</th>
             <th scope="col">User</th>
+            <th scope="col">Lecture</th>
+            <th scope="col">Section</th>
             <th scope="col">Check-in status</th>
-            <th scope="col">Checked-in by</th>
             <th scope="col">Check-in room</th>
+            <th scope="col">Check-out status</th>
           </tr>
         </thead>
 
         <tbody>
-          {% for slot in exam_day.list %}
           {% for exam_reg in slot.exam_registration_set.all %}
           {% with exam_reg.course_user as course_user %}
 
           <tr>
-            <td>{{ slot.get_start_time|time:"h:i a" }}</td>
-            <td>{{ slot.exam_slot_type_display }}</td>
-
+            <th scope="row">{{ forloop.counter }}</th>
             <td>
               {{ course_user.user.first_name }}
               {{ course_user.user.last_name }}
@@ -65,34 +69,56 @@
               </a>
             </td>
 
+            <td>{{ course_user.lecture }}</td>
+            <td>{{ course_user.section }}</td>
+
             <td>
-              {% if exam_reg.checkin_time_in %}
-              Checked in at {{ exam_reg.checkin_time_in|time:"h:i a" }}
+              {% if exam_reg.checkin_time %}
+              Checked in at {{ exam_reg.checkin_time|time:"h:i a" }}
+
               <a href="{% url 'registration:exam-signups-detail' course.code exam.pk exam_reg.course_user.user.username %}" target="_blank">
                 <i class="fa fa-external-link" aria-hidden="true"></i>
               </a>
               {% else %}
               <a class="text-danger" href="{% url 'registration:exam-signups-detail' course.code exam.pk exam_reg.course_user.user.username %}" target="_blank">
-                <strong>Check in now</strong>
+                <strong>Check in</strong>
                 <i class="fa fa-external-link" aria-hidden="true"></i>
               </a>
               {% endif %}
             </td>
 
-            <td>{{ exam_reg.checkin_user.user.username }}</td>
-            <td>{{ exam_reg.checkin_room.name }}</td>
+            <td>
+              {{ exam_reg.checkin_room.name }}
+            </td>
+
+            <td>
+              {% if exam_reg.checkout_time %}
+              Checked out at {{ exam_reg.checkout_time|time:"h:i a" }}
+
+              <a href="{% url 'registration:exam-signups-detail' course.code exam.pk exam_reg.course_user.user.username %}" target="_blank">
+                <i class="fa fa-external-link" aria-hidden="true"></i>
+              </a>
+              {% else %}
+              <a class="text-danger" href="{% url 'registration:exam-signups-detail' course.code exam.pk exam_reg.course_user.user.username %}" target="_blank">
+                <strong>Check out</strong>
+                <i class="fa fa-external-link" aria-hidden="true"></i>
+              </a>
+              {% endif %}
+            </td>
           </tr>
 
           {% endwith %}
-          {% endfor %}
           {% endfor %}
         </tbody>
 
       </table>
     </div>
-  </div>
+    {% endif %}
+    {% endfor %}
 
+  </div>
   {% endfor %}
+
 </div>
 
 <hr>
