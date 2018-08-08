@@ -70,28 +70,16 @@ class ExamSlotsInstanceForm(forms.ModelForm):
 
 # Declare inlines for later use
 
-class CourseUsersInstanceInline(admin.TabularInline):
-    model = CourseUser
-    extra = 0
-
-
 class ExamsInstanceInline(admin.TabularInline):
     model = Exam
     extra = 0
 
 
-class CourseUser_ExamRegistrationsInstanceInline(admin.TabularInline):
+class ExamRegistrationsInstanceInline(admin.TabularInline):
     model = ExamRegistration
     form = ExamRegistrationsInstanceForm
     extra = 0
     fk_name = 'course_user'
-
-
-class Exam_ExamRegistrationsInstanceInline(admin.TabularInline):
-    model = ExamRegistration
-    form = ExamRegistrationsInstanceForm
-    extra = 0
-    fk_name = 'exam'
 
 
 class TimeSlotsInstanceInline(admin.TabularInline):
@@ -129,7 +117,6 @@ class CourseAdmin(SimpleHistoryAdmin):
     inlines = [
         RoomsInstanceInline,
         ExamsInstanceInline,
-        CourseUsersInstanceInline,
     ]
 
 
@@ -140,7 +127,7 @@ class CourseUserAdmin(SimpleHistoryAdmin):
     )
     list_filter = ('course', 'user_type', 'dropped')
     inlines = [
-        CourseUser_ExamRegistrationsInstanceInline,
+        ExamRegistrationsInstanceInline,
     ]
 
 
@@ -151,5 +138,4 @@ class ExamAdmin(SimpleHistoryAdmin):
     inlines = [
         TimeSlotsInstanceInline,
         ExamSlotsInstanceInline,
-        Exam_ExamRegistrationsInstanceInline,
     ]
