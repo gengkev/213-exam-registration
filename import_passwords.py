@@ -20,5 +20,5 @@ with open('usernames.txt', newline='') as f:
             course_user=course_user,
             exam=exam,
         )
-        exam_reg.password = password
+        exam_reg.exam_password = password
         exam_reg.save()
