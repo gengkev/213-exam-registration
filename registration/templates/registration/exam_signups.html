@@ -35,9 +35,12 @@
 
     {% for slot in exam_day.list %}
     {% if slot.exam_registration_set.count != 0 %}
-    <h4>
+    <h4 class="mt-4">
       {{ slot.get_start_time|time:"h:i a" }}
-      ({{ slot.exam_slot_type_display }})
+      <span class="text-muted">
+        &ndash; {{ slot.get_end_time|time:"h:i a" }}
+        ({{slot.exam_slot_type_display }})
+      </span>
     </h4>
     <div class="table-responsive-md">
       <table class="table table-sm table-hover">

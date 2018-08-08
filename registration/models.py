@@ -334,7 +334,7 @@ class ExamSlot(models.Model):
         )
 
     class Meta:
-        ordering = ['exam', 'exam_slot_type', 'start_time_slot']
+        ordering = ['exam', 'start_time_slot', 'exam_slot_type']
 
 
 class ExamRegistration(models.Model):
