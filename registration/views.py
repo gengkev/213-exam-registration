@@ -61,6 +61,14 @@ def course_auth(request, course_code, instructor=False, use_sudo=True):
     except CourseUser.DoesNotExist:
         raise PermissionDenied("You are not enrolled in this course.")
 
+    # Warm if user is marked as dropped
+    if course_user.dropped:
+        messages.warning(request,
+            "You have dropped this course, so you may no longer update "
+            "your information for this course. Contact your instructor if "
+            "this is a mistake."
+        )
+
     return course, course_user
 
 

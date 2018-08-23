@@ -246,7 +246,16 @@
   {% endfor %}
   {% endif %}
 
-  <input class="btn btn-large btn-primary" type="submit" value="Submit">
+  <input class="btn btn-large btn-primary"
+      {% if my_course_user.dropped %}disabled{% endif %}
+      type="submit"
+      value="Update registration">
+
+  {% if my_course_user.dropped %}
+  <span class="ml-2 text-muted">
+  You cannot update your registration, since you have dropped this course.
+  </span>
+  {% endif %}
 
 </form>
 
