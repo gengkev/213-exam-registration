@@ -64,9 +64,9 @@ def course_auth(request, course_code, instructor=False, use_sudo=True):
     # Warm if user is marked as dropped
     if course_user.dropped:
         messages.warning(request,
-            "You have dropped this course, so you may no longer update "
-            "your information for this course. Contact your instructor if "
-            "this is a mistake."
+            "You may no longer update your information, since you have "
+            "dropped this course. "
+            "If this is a mistake, contact course staff immediately."
         )
 
     return course, course_user

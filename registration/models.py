@@ -408,11 +408,16 @@ class ExamRegistration(models.Model):
                 .select_for_update() \
                 .get(pk=exam_reg_pk)
 
-            # Don't allow checked-in users to change slot.
+            # Don't allow dropped users to change.
+            if exam_reg.course_user.dropped:
+                raise IntegrityError(
+                    "You have dropped the course."
+                )
+
+            # Don't allow checked-in users to change.
             if exam_reg.checkin_time:
                 raise IntegrityError(
-                    "You cannot change your slot, since you have already "
-                    "been checked in for this slot"
+                    "You have already been checked in for this exam."
                 )
 
             # Clear exam slot (in transaction)

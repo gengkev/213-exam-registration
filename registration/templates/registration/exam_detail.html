@@ -54,8 +54,8 @@
 <h2>Select an exam slot</h2>
 
 <div class="alert alert-warning" role="alert">
-  <strong>Caution:</strong>
-  All times below are displayed in your current timezone, which is
+  <strong><i class="fa fa-clock-o" aria-hidden="true"></i> Time zone:</strong>
+  All times below are displayed in your current timezone,
   <tt>{{ request.user.timezone }}</tt>.
   You can change this setting in your
   <a href="{% url 'registration:profile' %}">profile</a>.
@@ -79,8 +79,8 @@
   However, your currently selected exam slot is a
   "{{ exam_reg.exam_slot.exam_slot_type_display }}" slot.
   Using this form, you will only be able to select exam slots of the
-  type you are registered for. Please contact the course staff if you
-  believe this is a mistake.
+  type you are registered for.
+  If this is a mistake, contact course staff immediately.
 </div>
 {% endif %}
 
@@ -92,7 +92,7 @@
   room {{ exam_reg.checkin_room.name }}
   at {{ exam_reg.checkin_time }}
   by {{ exam_reg.checkin_user.user.username }}.
-  If you believe this is a mistake, contact course staff immediately.
+  If this is a mistake, contact course staff immediately.
 </div>
 {% endif %}
 
