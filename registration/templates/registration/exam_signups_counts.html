@@ -27,11 +27,23 @@
 <div class="border border-light p-4 bg-light rounded">
 
   <dl class="row mb-0">
-    <dt class="col-sm-3">Registered users</dt>
-    <dd class="col-sm-9">{{ num_registered }}</dd>
+    <dt class="col-sm-3">Total users</dt>
+    <dd class="col-sm-9">
+      {{ num_course_users_students }} students
+      <span class="text-muted">({{ num_course_users }} total)</span>
+    </dd>
+
+    <dt class="col-sm-3">Registrations</dt>
+    <dd class="col-sm-9">
+      {{ num_registered_students }} students
+      <span class="text-muted">({{ num_registered }} total)</span>
+    </dd>
 
     <dt class="col-sm-3">Unregistered users</dt>
-    <dd class="col-sm-9">{{ num_unregistered }}</dd>
+    <dd class="col-sm-9">
+      {{ num_unregistered_students }} students
+      <span class="text-muted">({{ num_unregistered }} total)</span>
+    </dd>
   </dl>
 
 </div>

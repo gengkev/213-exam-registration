@@ -688,19 +688,37 @@ def exam_signups_counts(request, course_code, exam_id):
             .annotate(day=TruncDay('start_time_slot__start_time'))
 
     # Compute unregistered users
-    num_course_users = course.course_user_set.count()
+    num_course_users = course.course_user_set \
+            .count()
     num_registered = exam.exam_registration_set \
             .exclude(exam_slot__isnull=True) \
             .count()
     num_unregistered = num_course_users - num_registered
+
+    # Compute unregistered students
+    num_course_users_students = course.course_user_set \
+            .filter(user_type=CourseUser.STUDENT) \
+            .count()
+    num_registered_students = exam.exam_registration_set \
+            .filter(course_user__user_type=CourseUser.STUDENT) \
+            .exclude(exam_slot__isnull=True) \
+            .count()
+    num_unregistered_students = \
+            num_course_users_students - num_registered_students
 
     return render(request, 'registration/exam_signups_counts.html', {
         'course': course,
         'exam': exam,
         'time_slots': time_slots,
         'exam_slots': exam_slots,
+
+        'num_course_users': num_course_users,
         'num_registered': num_registered,
         'num_unregistered': num_unregistered,
+
+        'num_course_users_students': num_course_users_students,
+        'num_registered_students': num_registered_students,
+        'num_unregistered_students': num_unregistered_students,
     })
 
 
