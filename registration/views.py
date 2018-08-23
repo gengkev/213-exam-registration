@@ -526,8 +526,7 @@ def exam_detail(request, course_code, exam_id):
                 ExamRegistration.update_slot(exam_reg.pk, exam_slot_pk)
             except IntegrityError as e:
                 messages.error(request, (
-                    "Error: {}. Your exam registration was not updated. "
-                    "Please contact course staff if you have concerns."
+                    "Error: Your exam registration was not updated: {}"
                 ).format(e))
             else:
                 messages.success(request,

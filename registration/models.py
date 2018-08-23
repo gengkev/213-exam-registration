@@ -411,13 +411,13 @@ class ExamRegistration(models.Model):
             # Don't allow dropped users to change.
             if exam_reg.course_user.dropped:
                 raise IntegrityError(
-                    "You have dropped the course."
+                    "You have dropped the course"
                 )
 
             # Don't allow checked-in users to change.
             if exam_reg.checkin_time:
                 raise IntegrityError(
-                    "You have already been checked in for this exam."
+                    "You have already been checked in for this exam"
                 )
 
             # Clear exam slot (in transaction)
