@@ -52,7 +52,7 @@
             <th scope="col">Lecture</th>
             <th scope="col">Section</th>
             <th scope="col">Check-in status</th>
-            <th scope="col">Check-in room</th>
+            <th scope="col">Exam password</th>
             <th scope="col">Check-out status</th>
           </tr>
         </thead>
@@ -77,13 +77,18 @@
 
             <td>
               {% if exam_reg.checkin_time %}
-              Checked in at {{ exam_reg.checkin_time|time:"h:i a" }}
-
-              <a href="{% url 'registration:exam-signups-detail' course.code exam.pk exam_reg.course_user.user.username %}" target="_blank">
-                <i class="fa fa-external-link" aria-hidden="true"></i>
+              <a class="text-success"
+                  href="{% url 'registration:exam-signups-detail' course.code exam.pk course_user.user.username %}"
+                  target="_blank"
+                  title="Checked in by {{ exam_reg.checkin_user }}">
+                <i class="fa fa-check" aria-hidden="true"></i>
+                {{ exam_reg.checkin_time|time:"h:i a" }}
+                ({{ exam_reg.checkin_room.name }})
               </a>
               {% else %}
-              <a class="text-danger" href="{% url 'registration:exam-signups-detail' course.code exam.pk exam_reg.course_user.user.username %}" target="_blank">
+              <a class="text-danger"
+                  href="{% url 'registration:exam-signups-detail' course.code exam.pk course_user.user.username %}"
+                  target="_blank">
                 <strong>Check in</strong>
                 <i class="fa fa-external-link" aria-hidden="true"></i>
               </a>
@@ -91,18 +96,25 @@
             </td>
 
             <td>
-              {{ exam_reg.checkin_room.name }}
+              {% if exam_reg.checkin_time %}
+              <tt class="text-muted">{{ exam_reg.exam_password }}</tt>
+              {% endif %}
             </td>
 
             <td>
               {% if exam_reg.checkout_time %}
-              Checked out at {{ exam_reg.checkout_time|time:"h:i a" }}
 
-              <a href="{% url 'registration:exam-signups-detail' course.code exam.pk exam_reg.course_user.user.username %}" target="_blank">
-                <i class="fa fa-external-link" aria-hidden="true"></i>
+              <a class="text-success"
+                  href="{% url 'registration:exam-signups-detail' course.code exam.pk course_user.user.username %}"
+                  target="_blank"
+                  title="Checked out by {{ exam_reg.checkout_user }}">
+                <i class="fa fa-check" aria-hidden="true"></i>
+                {{ exam_reg.checkout_time|time:"h:i a" }}
               </a>
               {% else %}
-              <a class="text-danger" href="{% url 'registration:exam-signups-detail' course.code exam.pk exam_reg.course_user.user.username %}" target="_blank">
+              <a class="text-danger"
+                  href="{% url 'registration:exam-signups-detail' course.code exam.pk course_user.user.username %}"
+                  target="_blank">
                 <strong>Check out</strong>
                 <i class="fa fa-external-link" aria-hidden="true"></i>
               </a>
