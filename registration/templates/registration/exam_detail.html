@@ -246,6 +246,16 @@
   {% endfor %}
   {% endif %}
 
+  {% if request.course_user.is_instructor %}
+  <div class="form-check mb-4">
+    <input class="form-check-input" type="checkbox" name="force_field" id="forceCheckbox">
+    <label class="form-check-label" for="forceCheckbox">
+      Force update, ignoring validity checks
+      <span class="text-muted">(instructor only)</span>
+    </label>
+  </div>
+  {% endif %}
+
   <input class="btn btn-large btn-primary"
       {% if my_course_user.dropped %}disabled{% endif %}
       type="submit"

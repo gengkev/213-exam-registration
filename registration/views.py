@@ -42,6 +42,12 @@ def course_auth(request, course_code, instructor=False, use_sudo=True):
     """
     course = get_object_or_404(Course, code=course_code)
 
+    # Get course user for request user
+    request.course_user = CourseUser.objects.get(
+        course=course,
+        user=request.user.id,
+    )
+
     # Try to use sudo
     sudo = request.session.get('sudo_user', None)
     if (use_sudo and sudo is not None and
@@ -513,6 +519,12 @@ def exam_detail(request, course_code, exam_id):
     )
 
     if request.method == 'POST':
+        # Whether to force update to exam registration
+        force_update = False
+        if (request.course_user.is_instructor() and
+                request.POST.get('force_field', False)):
+            force_update = True
+
         # Populate form with request data
         form = ExamRegistrationForm(request.POST, instance=exam_reg)
 
@@ -523,15 +535,23 @@ def exam_detail(request, course_code, exam_id):
             exam_slot_pk = exam_slot.pk if exam_slot is not None else None
 
             try:
-                ExamRegistration.update_slot(exam_reg.pk, exam_slot_pk)
+                warnings = ExamRegistration.update_slot(
+                    exam_reg.pk, exam_slot_pk, force_update)
             except IntegrityError as e:
                 messages.error(request, (
                     "Error: Your exam registration was not updated: {}"
                 ).format(e))
             else:
-                messages.success(request,
-                    "Your exam registration was updated successfully.",
-                )
+                if force_update and warnings:
+                    messages.success(request, (
+                        "Your exam registration was force-updated "
+                        "successfully, with the following warnings: {}"
+                    ).format('; '.join(warnings)))
+                else:
+                    messages.success(request,
+                        "Your exam registration was updated successfully.",
+                    )
+
                 return HttpResponseRedirect(reverse(
                     'registration:exam-detail',
                     args=[exam.course.code, exam.id],

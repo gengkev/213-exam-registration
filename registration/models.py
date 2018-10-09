@@ -402,7 +402,8 @@ class ExamRegistration(models.Model):
         ordering = ['course_user', 'exam']
 
     @classmethod
-    def update_slot(cls, exam_reg_pk, exam_slot_pk):
+    def update_slot(cls, exam_reg_pk, exam_slot_pk, force=False):
+        warnings = set()
         with transaction.atomic():
             exam_reg = ExamRegistration.objects \
                 .select_for_update() \
@@ -410,13 +411,11 @@ class ExamRegistration(models.Model):
 
             # Don't allow dropped users to change.
             if exam_reg.course_user.dropped:
-                raise IntegrityError(
-                    "You have dropped the course"
-                )
+                warnings.add("You have dropped the course")
 
             # Don't allow checked-in users to change.
             if exam_reg.checkin_time:
-                raise IntegrityError(
+                warnings.add(
                     "You have already been checked in for this exam"
                 )
 
@@ -438,14 +437,19 @@ class ExamRegistration(models.Model):
                 # Check that exam slot type is correct
                 if (exam_slot.exam_slot_type !=
                         exam_reg.course_user.exam_slot_type):
-                    raise IntegrityError("Wrong exam slot type")
+                    warnings.add("Wrong exam slot type")
 
                 # Check that all time slots have seats
                 for time_slot in time_slot_list:
                     if (time_slot.count_num_registered() >=
                             time_slot.capacity):
-                        raise IntegrityError("Not enough seats left")
+                        warnings.add("Not enough seats left")
 
                 # Update the exam registration
                 exam_reg.exam_slot = exam_slot
                 exam_reg.save(update_fields=['exam_slot'])
+
+            if warnings and not force:
+                raise IntegrityError('; '.join(warnings))
+
+        return warnings
