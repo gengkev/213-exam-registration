@@ -30,8 +30,12 @@ h1, h2, h3 {
 }
 
 /* Breadcrumbs */
+.nav-item {
+  white-space: nowrap;
+}
 .my-breadcrumb {
   margin-left: -0.5em;
+  overflow: hidden;
 }
 .my-breadcrumb .nav-item .nav-link {
   padding-left: 0;
