@@ -25,23 +25,55 @@
   This section lists the available exam slots, and shows which users are
   registered for each of them.
 </p>
-<div>
-  {# Group exam slots by day #}
-  {% regroup exam_slots by day as exam_day_list %}
-  {% for exam_day in exam_day_list %}
 
-  <div class="mt-4">
-    <h3>{{ exam_day.grouper|date:"l, F j, Y" }}</h3>
+{# Group exam slots by day #}
+{% regroup exam_slots by day as exam_day_list %}
+
+<p>
+  Jump to a specific exam slot:
+</p>
+
+<ul>
+  {% for exam_day in exam_day_list %}
+  <li>
+    <a href="#examday-{{ exam_day.grouper|date:"Ymd" }}">
+      {{ exam_day.grouper|date:"l, F j, Y" }}
+    </a>
+    <ul>
+    {% for slot in exam_day.list %}
+    {% if slot.exam_registration_set.count != 0 %}
+      <li>
+        <a href="#examslot-{{ slot.get_start_time|date:"Ymd-Hi" }}">
+          {{ slot.get_start_time|time:"h:i a" }}
+        </a>
+      </li>
+    {% endif %}
+    {% endfor %}
+    </ul>
+  </li>
+  {% endfor %}
+</ul>
+
+<div>
+  {% for exam_day in exam_day_list %}
+  <hr class="mt-4">
+
+  <div>
+    <h2 id="examday-{{ exam_day.grouper|date:"Ymd" }}">
+      <a href="#examday-{{ exam_day.grouper|date:"Ymd" }}" class="anchor-link">#</a>
+      {{ exam_day.grouper|date:"l, F j, Y" }}
+    </h2>
 
     {% for slot in exam_day.list %}
     {% if slot.exam_registration_set.count != 0 %}
-    <h4 class="mt-4">
+    <h3 class="mt-4" id="examslot-{{ slot.get_start_time|date:"Ymd-Hi" }}">
+      <a href="#examslot-{{ slot.get_start_time|date:"Ymd-Hi" }}" class="anchor-link">#</a>
       {{ slot.get_start_time|time:"h:i a" }}
       <span class="text-muted">
         &ndash; {{ slot.get_end_time|time:"h:i a" }}
         ({{slot.exam_slot_type_display }})
       </span>
-    </h4>
+    </h3>
     <div class="table-responsive-md">
       <table class="table table-sm table-hover">
 
@@ -136,9 +168,12 @@
 
 </div>
 
-<hr>
+<hr class="mt-4">
 
-<h2>Unregistered users</h2>
+<h2 id="examday-unregistered">
+  <a href="#examday-unregistered" class="anchor-link">#</a>
+  Unregistered users
+</h2>
 <p>
   This section lists the users in your course who have not yet registered
   for this exam.

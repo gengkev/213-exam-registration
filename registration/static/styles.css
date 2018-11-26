@@ -4,12 +4,17 @@ main {
   padding-bottom: 4rem;
 }
 
-h1 {
-  margin-top: 1rem;
+h1, h2, h3 {
+  padding-top: 0.5em;
 }
 
-h2, h3 {
-  margin-top: 1rem;
+/* Anchor links */
+.anchor-link {
+  position: absolute;
+  margin-left: -1em;
+  padding-right: 0.5em;
+  text-decoration: none;
+  color: #ddd;
 }
 
 /* Course list */
