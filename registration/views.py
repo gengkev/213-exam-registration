@@ -585,7 +585,10 @@ def exam_detail(request, course_code, exam_id):
     # Determine id of selected slot
     selected_slot = form['exam_slot'].value()
     if selected_slot is not None:
-        selected_slot = int(selected_slot)
+        try:
+            selected_slot = int(selected_slot)
+        except ValueError:
+            selected_slot = None
 
     return render(request, 'registration/exam_detail.html', {
         'form': form,
