@@ -129,7 +129,7 @@ class CourseSudoForm(forms.Form):
 class ExamEditForm(forms.ModelForm):
     class Meta:
         model = Exam
-        fields = ['name', 'details']
+        fields = ['name', 'details', 'lock_before', 'lock_after']
 
 
 class TimeSlotForm(forms.ModelForm):

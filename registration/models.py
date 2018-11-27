@@ -180,6 +180,8 @@ class Exam(models.Model):
         through_fields=('exam', 'course_user'),
     )
     details = models.TextField(blank=True)
+    lock_before = models.DateTimeField(null=True, blank=True)
+    lock_after = models.DateTimeField(null=True, blank=True)
     history = HistoricalRecords()
 
     def __str__(self):
@@ -402,12 +404,25 @@ class ExamRegistration(models.Model):
         ordering = ['course_user', 'exam']
 
     @classmethod
-    def update_slot(cls, exam_reg_pk, exam_slot_pk, force=False):
+    def update_slot(cls, exam_reg_pk, exam_slot_pk,
+            request_time=None, force=False):
+
         warnings = set()
         with transaction.atomic():
             exam_reg = ExamRegistration.objects \
                 .select_for_update() \
                 .get(pk=exam_reg_pk)
+
+            # Enforce lock_before and lock_after
+            exam = exam_reg.exam
+            if request_time is not None:
+                if (exam.lock_before is not None and
+                        request_time < exam.lock_before):
+                    warnings.add("Exam registration is not yet open")
+
+                if (exam.lock_after is not None and
+                        request_time >= exam.lock_after):
+                    warnings.add("Exam registration has closed")
 
             # Don't allow dropped users to change.
             if exam_reg.course_user.dropped:

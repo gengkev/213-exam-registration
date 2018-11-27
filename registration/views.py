@@ -507,6 +507,7 @@ def course_users_edit(request, course_code, course_user_id):
 @require_http_methods(['GET', 'HEAD', 'POST'])
 @login_required
 def exam_detail(request, course_code, exam_id):
+    request_time = timezone.now()
     course, my_course_user = course_auth(request, course_code)
     exam = get_object_or_404(
         Exam,
@@ -536,7 +537,8 @@ def exam_detail(request, course_code, exam_id):
 
             try:
                 warnings = ExamRegistration.update_slot(
-                    exam_reg.pk, exam_slot_pk, force_update)
+                    exam_reg.pk, exam_slot_pk,
+                    request_time=request_time, force=force_update)
             except IntegrityError as e:
                 messages.error(request, (
                     "Error: Your exam registration was not updated: {}"
@@ -594,6 +596,7 @@ def exam_detail(request, course_code, exam_id):
         'exam_slots': exam_slots,
         'selected_slot': selected_slot,
         'wrong_type_slot': wrong_type_slot,
+        'request_time': request_time,
     })
 
 

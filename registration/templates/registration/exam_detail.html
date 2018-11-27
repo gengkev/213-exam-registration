@@ -114,6 +114,23 @@
   To change your exam slot, select one of the options below.
 </p>
 
+{% if request_time < exam.lock_before %}
+<div class="alert alert-danger" role="alert">
+  <strong>Exam registration is not yet open:</strong>
+  You cannot yet register for this exam. Registration will open in
+  {{ exam.lock_before|timeuntil:request_time }}.
+</div>
+{% endif %}
+
+{% if request_time >= exam.lock_after %}
+<div class="alert alert-danger" role="alert">
+  <strong>Exam registration has closed:</strong>
+  You can no longer change your reservation at this time. Registration was
+  closed at {{ exam.lock_after }}. If you believe this is in error, please
+  contact course staff.
+</div>
+{% endif %}
+
 {% if my_course_user.exam_slot_type_display == 'Extended time' %}
 <div class="alert alert-warning" role="alert">
   <strong>Extended time:</strong>
