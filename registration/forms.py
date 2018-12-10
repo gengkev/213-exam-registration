@@ -225,7 +225,8 @@ class ExamEditSignupForm(forms.ModelForm):
         exam_reg = self.instance
         course = exam_reg.exam.course
         instructor_set = (course.course_user_set
-                .filter(user_type=CourseUser.INSTRUCTOR))
+                .filter(user_type=CourseUser.INSTRUCTOR)
+                .select_related('user'))
         self.fields['checkin_user'].queryset = instructor_set
         self.fields['checkout_user'].queryset = instructor_set
 

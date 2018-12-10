@@ -682,10 +682,19 @@ def exam_signups(request, course_code, exam_id):
     )
 
     # Compute time slots, exam slots
-    time_slots = exam.time_slot_set \
-            .annotate(day=TruncDay('start_time'))
-    exam_slots = exam.exam_slot_set \
+    #time_slots = exam.time_slot_set \
+    #        .annotate(day=TruncDay('start_time'))
+    exam_slots = (exam.exam_slot_set
             .annotate(day=TruncDay('start_time_slot__start_time'))
+            .select_related('start_time_slot')
+            .prefetch_related('time_slots')
+            .prefetch_related('exam_registration_set')
+            .prefetch_related('exam_registration_set__course_user')
+            .prefetch_related('exam_registration_set__course_user__user')
+            .prefetch_related('exam_registration_set__checkin_user')
+            .prefetch_related('exam_registration_set__checkin_user__user')
+            .prefetch_related('exam_registration_set__checkin_room')
+        )
 
     # Compute unregistered users
     no_reg_q = ~models.Q(exam_registration_set__exam=exam)
@@ -698,7 +707,7 @@ def exam_signups(request, course_code, exam_id):
     return render(request, 'registration/exam_signups.html', {
         'course': course,
         'exam': exam,
-        'time_slots': time_slots,
+        #'time_slots': time_slots,
         'exam_slots': exam_slots,
         'unregistered_users': unregistered_users,
     })
