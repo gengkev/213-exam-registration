@@ -212,6 +212,11 @@ class ExamEditSignupForm(forms.ModelForm):
         required=True,
         empty_label=None,
     )
+    checkout_user = forms.ModelChoiceField(
+        queryset=None,
+        required=True,
+        empty_label=None,
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -219,8 +224,10 @@ class ExamEditSignupForm(forms.ModelForm):
         # Filter possible check-in users
         exam_reg = self.instance
         course = exam_reg.exam.course
-        self.fields['checkin_user'].queryset = \
-            course.course_user_set.filter(user_type=CourseUser.INSTRUCTOR)
+        instructor_set = (course.course_user_set
+                .filter(user_type=CourseUser.INSTRUCTOR))
+        self.fields['checkin_user'].queryset = instructor_set
+        self.fields['checkout_user'].queryset = instructor_set
 
     class Meta:
         model = ExamRegistration
