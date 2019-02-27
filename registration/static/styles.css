@@ -52,6 +52,13 @@ h1, h2, h3 {
   color: #212529;
 }
 
+/* Separate slot with only current reservation */
+.current-reservation {
+  color: #155724;
+  border-color: #61bd76;
+  background-color: #e9f6ec !important;
+}
+
 /* Exam slot form */
 /* Credit: https://stackoverflow.com/a/48273098/689161 */
 .exam-slot-group input[type=radio] {
@@ -62,10 +69,22 @@ h1, h2, h3 {
 .exam-slot-group .list-group-item {
   user-select: none;
   cursor: pointer;
+  background-color: #f6f6f6;
 }
 .exam-slot-group .list-group-item:first-of-type {
   border-top-left-radius: .25rem;
   border-top-right-radius: .25rem;
+}
+.exam-slot-group input[type=radio].registered-slot + .list-group-item {
+  color: #155724;
+  border-color: #61bd76;
+  background-color: #e9f6ec !important;
+}
+.exam-slot-group input[type=radio].disabled-slot + .list-group-item {
+  background-color: transparent;
+  border: 0;
+  /*color: #878f97;*/
+  color: #a2a8ae;
 }
 .exam-slot-group input[type=radio]:checked + .list-group-item {
   z-index: 2;
