@@ -1,0 +1,17 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+
+[packages]
+pytz = "*"
+ldap3 = "*"
+psycopg2-binary = "*"
+django-crispy-forms = "*"
+django-simple-history = "*"
+Django = "~=2.2.9"
+
+[requires]
+python_version = "3.6"
