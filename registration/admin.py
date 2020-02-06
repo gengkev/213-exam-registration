@@ -5,7 +5,7 @@ from simple_history.admin import SimpleHistoryAdmin
 
 from .models import (
     User, Course, CourseUser, Room, Exam, TimeSlot, ExamSlot,
-    ExamRegistration,
+    ExamRegistration, GithubToken
 )
 
 
@@ -123,7 +123,7 @@ class CourseAdmin(SimpleHistoryAdmin):
 @admin.register(CourseUser)
 class CourseUserAdmin(SimpleHistoryAdmin):
     list_display = (
-        'user', 'course', 'user_type', 'lecture', 'section', 'dropped',
+        'user', 'course', 'user_type', 'lecture', 'section', 'dropped'
     )
     list_filter = ('course', 'user_type', 'dropped')
     inlines = [
@@ -139,3 +139,10 @@ class ExamAdmin(SimpleHistoryAdmin):
         TimeSlotsInstanceInline,
         ExamSlotsInstanceInline,
     ]
+
+
+@admin.register(GithubToken)
+class GithubTokenAdmin(SimpleHistoryAdmin):
+    list_display = (
+        'course_user', 'github_login', 'token_type', 'scope', 'authorize_time'
+    )

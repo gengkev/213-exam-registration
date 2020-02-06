@@ -13,6 +13,12 @@ urlpatterns = [
     path('courses/<course_code>/sudo/',
         views.course_sudo, name='course-sudo'),
 
+    # GitHub authorization
+    path('courses/<course_code>/github/authorize/',
+        views.course_github_authorize, name='course-github-authorize'),
+    path('courses/<course_code>/github/callback/',
+        views.course_github_callback, name='course-github-callback'),
+
     # Course users
     path('courses/<course_code>/users/',
         views.course_users, name='course-users'),

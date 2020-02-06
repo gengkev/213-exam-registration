@@ -15,7 +15,9 @@ from django.views.decorators.http import (
     require_http_methods, require_safe, require_POST
 )
 
+from authlib.integrations.django_client import OAuth
 from crispy_forms.helper import FormHelper
+from github import Github
 
 from examreg import settings
 
@@ -26,7 +28,19 @@ from .forms import (
     ExamCheckinForm, ExamEditSignupForm,
 )
 from .models import (
-    Course, CourseUser, Exam, ExamRegistration, User, ExamSlot
+    Course, CourseUser, Exam, ExamRegistration, GithubToken, User, ExamSlot
+)
+
+
+oauth = OAuth()
+oauth.register(
+    'github',
+    access_token_url='https://github.com/login/oauth/access_token',
+    access_token_params=None,
+    authorize_url='https://github.com/login/oauth/authorize',
+    authorize_params=None,
+    api_base_url='https://api.github.com/',
+    client_kwargs={'scope': ''},
 )
 
 
@@ -271,6 +285,62 @@ def course_sudo(request, course_code):
         'course_users': course_users,
         'form': form,
     })
+
+
+@require_safe
+@login_required
+def course_github_authorize(request, course_code):
+    course, course_user = course_auth(request, course_code)
+
+    if hasattr(course_user, 'github_token'):
+        messages.error(request,
+            "Your account is already associated with a GitHub token.",
+        )
+        return HttpResponseRedirect(reverse(
+            'registration:course-detail',
+            args=[course.code],
+        ))
+
+    redirect_uri = request.build_absolute_uri(reverse(
+        'registration:course-github-callback',
+        args=[course.code],
+    ))
+    return oauth.github.authorize_redirect(request, redirect_uri)
+
+
+@require_safe
+@login_required
+def course_github_callback(request, course_code):
+    course, course_user = course_auth(request, course_code)
+    token = oauth.github.authorize_access_token(request)
+
+    # Extract relevant fields from token
+    access_token = token['access_token']
+    token_type = token['token_type']
+    scope = token['scope']
+
+    # Try to fetch username
+    g = Github(access_token)
+    github_user = g.get_user()
+    github_login = github_user.login
+
+    # Update database (database integrity prevents duplicates)
+    github_token = GithubToken(
+        course_user=course_user,
+        access_token=access_token,
+        token_type=token_type,
+        scope=scope,
+        github_login=github_login,
+    )
+    github_token.save()
+
+    messages.success(request,
+        "Successfully authorized GitHub account {}".format(github_login),
+    )
+    return HttpResponseRedirect(reverse(
+        'registration:course-detail',
+        args=[course.code],
+    ))
 
 
 @require_safe

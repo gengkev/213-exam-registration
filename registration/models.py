@@ -152,6 +152,28 @@ class CourseUser(models.Model):
         ordering = ('user',)
 
 
+class GithubToken(models.Model):
+    course_user = models.OneToOneField(CourseUser,
+        on_delete=models.CASCADE,
+        related_name='github_token',
+    )
+    github_login = models.CharField(max_length=64)
+    token_type = models.CharField(max_length=32)
+    access_token = models.CharField(max_length=64)
+    scope = models.CharField(max_length=64, blank=True)
+    authorize_time = models.DateTimeField(auto_now_add=True)
+    history = HistoricalRecords()
+
+    def to_token(self):
+        return dict(
+            access_token=self.access_token,
+            token_type=self.token_type,
+        )
+
+    def __str__(self):
+        return self.github_login
+
+
 # TODO: consider changing to per-exam, or global
 class Room(models.Model):
     course = models.ForeignKey(Course,

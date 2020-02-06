@@ -121,6 +121,17 @@
         <dd class="col-sm-9">
         {{ my_course_user.dropped|yesno:"yes,no" }}
         </dd>
+
+        <dt class="col-sm-3">GitHub account</dt>
+        <dd class="col-sm-9">
+        {% if my_course_user.github_token %}
+        <strong>{{ my_course_user.github_token.github_login }}</strong><br>
+        {{ my_course_user.github_token.authorize_time|date:"l, F j, Y" }}
+        {% else %}
+        Not yet associated.<br>
+        <a href="{% url 'registration:course-github-authorize' course.code %}">Authorize</a>
+        {% endif %}
+        </dd>
       </dl>
 
     </div>
