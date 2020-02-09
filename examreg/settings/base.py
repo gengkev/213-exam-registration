@@ -11,21 +11,14 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 """
 
 import os
+from decouple import config
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 's=s*s#u%@+obtmh%i@%1_i9enl4dx!^p_+%6izfkimxi#*jzy_'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
-
-ALLOWED_HOSTS = ['*']
+SECRET_KEY = config('SECRET_KEY')
 
 
 # Application definition
@@ -76,19 +69,31 @@ TEMPLATES = [
 WSGI_APPLICATION = 'examreg.wsgi.application'
 
 
-# Custom User model
-AUTH_USER_MODEL = 'registration.User'
-
-
-# Database
-# https://docs.djangoproject.com/en/2.0/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+# Logging configuration
+LOGGING = {
+    'version': 1,
+    'filters': {
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        }
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
+        }
+    },
+    'loggers': {
+        'django.db.backends': {
+            'level': 'INFO',
+            'handlers': ['console'],
+        }
     }
 }
+
+# Custom User model
+AUTH_USER_MODEL = 'registration.User'
 
 
 # Authentication backends to use
@@ -134,13 +139,15 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
-STATIC_URL = '/static/'
+FORCE_SCRIPT_NAME = '/'
+STATIC_URL = FORCE_SCRIPT_NAME + 'static/'
+LOGIN_URL = FORCE_SCRIPT_NAME + 'accounts/login/'
+LOGOUT_URL = FORCE_SCRIPT_NAME + 'accounts/logout/'
 
 STATIC_ROOT = 'static/'
 
 
 # Crispy forms settings
-
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 
@@ -160,3 +167,11 @@ MESSAGE_TAGS = {
 
 # Suffix used for Andrew emails
 ANDREW_EMAIL_SUFFIX = '@andrew.cmu.edu'
+
+
+AUTHLIB_OAUTH_CLIENTS = {
+    'github': {
+        'client_id': config('GITHUB_OAUTH_CLIENT_ID'),
+        'client_secret': config('GITHUB_OAUTH_CLIENT_SECRET'),
+    },
+}

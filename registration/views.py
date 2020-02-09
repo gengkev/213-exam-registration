@@ -2,6 +2,7 @@ import codecs
 import csv
 from datetime import timedelta
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
@@ -18,8 +19,6 @@ from django.views.decorators.http import (
 from authlib.integrations.django_client import OAuth
 from crispy_forms.helper import FormHelper
 from github import Github
-
-from examreg import settings
 
 from .forms import (
     ProfileForm, ExamRegistrationForm, CourseEditForm, CourseSudoForm,

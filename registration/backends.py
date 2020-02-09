@@ -1,7 +1,6 @@
+from django.conf import settings
 from django.contrib.auth.backends import RemoteUserBackend
 from django.core.exceptions import PermissionDenied
-
-from examreg import settings
 
 
 class CustomRemoteUserBackend(RemoteUserBackend):
