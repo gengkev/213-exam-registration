@@ -3,6 +3,7 @@ ldap3
 psycopg2-binary
 django-crispy-forms
 django-simple-history
-Django~=3.0.2
+Django~=2.2
 authlib
 pygithub
+python-decouple
