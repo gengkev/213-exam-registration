@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db import transaction, IntegrityError, models
 from django.db.models.functions import TruncDay
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render, reverse
 from django.utils import timezone
 from django.views import generic
@@ -340,6 +340,35 @@ def course_github_callback(request, course_code):
         'registration:course-detail',
         args=[course.code],
     ))
+
+
+@require_safe
+def course_github_info(request, course_code, username):
+    # DANGER: manual access control code.
+    if 'authorization' not in request.headers:
+        raise PermissionDenied('Authentication failed')
+    auth_header = request.headers['authorization']
+    auth_type, auth_token = auth_header.split(maxsplit=2)
+    if auth_type != 'Bearer' or auth_token != settings.COURSE_GITHUB_INFO_TOKEN:
+        raise PermissionDenied('Authentication failed')
+
+    course = get_object_or_404(Course, code=course_code)
+    course_user = get_object_or_404(
+        CourseUser,
+        course=course,
+        user__username=username,
+    )
+
+    obj = dict(found=False, token_info=None)
+    if hasattr(course_user, 'github_token'):
+        github_token = course_user.github_token
+        obj['found'] = True
+        obj['token_info'] = dict(
+            github_login=github_token.github_login,
+            access_token=github_token.access_token,
+        )
+
+    return JsonResponse(obj)
 
 
 @require_safe

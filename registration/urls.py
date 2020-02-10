@@ -18,6 +18,8 @@ urlpatterns = [
         views.course_github_authorize, name='course-github-authorize'),
     path('courses/<course_code>/github/callback/',
         views.course_github_callback, name='course-github-callback'),
+    path('courses/<course_code>/github/info/<username>/',
+        views.course_github_info, name='course-github-info'),
 
     # Course users
     path('courses/<course_code>/users/',

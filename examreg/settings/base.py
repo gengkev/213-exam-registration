@@ -175,3 +175,7 @@ AUTHLIB_OAUTH_CLIENTS = {
         'client_secret': config('GITHUB_OAUTH_CLIENT_SECRET'),
     },
 }
+
+
+# Token used for obtaining Andrew ID to GitHub mappings
+COURSE_GITHUB_INFO_TOKEN = config('COURSE_GITHUB_INFO_TOKEN')
