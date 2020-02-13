@@ -1,0 +1,33 @@
+{% extends "base_generic.html" %}
+
+{% block title %}{{ course.name }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="nav-item active" aria-current="page">
+  <span class="nav-link">{{ course.code }}</span>
+</li>
+{% endblock %}
+
+{% block content %}
+<h1>
+  {{ course.name }}
+  <small class="text-muted">{{ course.code }}</small>
+</h1>
+
+<h2>GitHub account</h2>
+
+<p>You need to associate your GitHub account before proceeding to create your repository.</p>
+
+<div class="border border-light p-4 bg-light rounded">
+  {% if my_course_user.github_token %}
+  <strong>{{ my_course_user.github_token.github_login }}</strong><br>
+  <a href="{% url 'registration:course-github-deauthorize' course.code %}">Unlink GitHub account</a><br>
+  Authorized: {{ my_course_user.github_token.authorize_time|date:"F j, Y" }}
+  {% else %}
+  You have not yet linked a GitHub account.<br>
+  <a href="{% url 'registration:course-github-authorize' course.code %}">Link GitHub account</a>
+  {% endif %}
+</div>
+
+
+{% endblock %}

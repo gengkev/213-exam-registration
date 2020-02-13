@@ -14,6 +14,8 @@ urlpatterns = [
         views.course_sudo, name='course-sudo'),
 
     # GitHub authorization
+    path('courses/<course_code>/github/landing/',
+        views.course_github_landing, name='course-github-landing'),
     path('courses/<course_code>/github/authorize/',
         views.course_github_authorize, name='course-github-authorize'),
     path('courses/<course_code>/github/deauthorize/',

@@ -39,7 +39,7 @@ oauth.register(
     authorize_url='https://github.com/login/oauth/authorize',
     authorize_params=None,
     api_base_url='https://api.github.com/',
-    client_kwargs={'scope': ''},
+    client_kwargs={'scope': 'repo:invite'},
 )
 
 
@@ -288,6 +288,22 @@ def course_sudo(request, course_code):
 
 @require_safe
 @login_required
+def course_github_landing(request, course_code):
+    course, my_course_user = course_auth(request, course_code)
+
+    # If we already have the data: redirect directly there
+    if hasattr(my_course_user, 'github_token'):
+        dest_uri = "http://github213.cs.cmu.edu/?andrewid={}".format(my_course_user.user.username)
+        return HttpResponseRedirect(dest_uri)
+
+    return render(request, 'registration/course_github_landing.html', {
+        'course': course,
+        'my_course_user': my_course_user,
+    })
+
+
+@require_safe
+@login_required
 def course_github_authorize(request, course_code):
     course, course_user = course_auth(request, course_code)
 
@@ -371,7 +387,9 @@ def course_github_callback(request, course_code):
         "Successfully authorized GitHub account {}".format(github_login),
     )
     return HttpResponseRedirect(reverse(
-        'registration:course-detail',
+        # TODO: bad
+        #'registration:course-detail',
+        'registration:course-github-landing',
         args=[course.code],
     ))
 
