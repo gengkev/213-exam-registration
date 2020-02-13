@@ -16,6 +16,8 @@ urlpatterns = [
     # GitHub authorization
     path('courses/<course_code>/github/authorize/',
         views.course_github_authorize, name='course-github-authorize'),
+    path('courses/<course_code>/github/deauthorize/',
+        views.course_github_deauthorize, name='course-github-deauthorize'),
     path('courses/<course_code>/github/callback/',
         views.course_github_callback, name='course-github-callback'),
     path('courses/<course_code>/github/info/<username>/',

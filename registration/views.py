@@ -309,6 +309,40 @@ def course_github_authorize(request, course_code):
 
 @require_safe
 @login_required
+def course_github_deauthorize(request, course_code):
+    course, course_user = course_auth(request, course_code)
+
+    if not hasattr(course_user, 'github_token'):
+        messages.error(request,
+            "Your account is not associated with a GitHub token.",
+        )
+        return HttpResponseRedirect(reverse(
+            'registration:course-detail',
+            args=[course.code],
+        ))
+
+    # Delete from database
+    course_user.github_token.delete()
+
+    # Compute app URL on GitHub
+    github_app_url = "https://github.com/settings/connections/applications/{}".format(
+        oauth.github.client_id,
+    )
+
+    messages.success(request,
+        "Association deleted. To revoke access, visit "
+        "<a href=\"{}\" target=\"_blank\">GitHub settings</a>.".format(github_app_url),
+        extra_tags='safe',
+    )
+
+    return HttpResponseRedirect(reverse(
+        'registration:course-detail',
+        args=[course.code],
+    ))
+
+
+@require_safe
+@login_required
 def course_github_callback(request, course_code):
     course, course_user = course_auth(request, course_code)
     token = oauth.github.authorize_access_token(request)

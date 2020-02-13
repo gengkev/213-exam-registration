@@ -92,6 +92,21 @@
   </div>
 
   <div class="col-lg-6">
+    <h2>GitHub account</h2>
+
+    <div class="border border-light p-4 bg-light rounded">
+      {% if my_course_user.github_token %}
+      <strong>{{ my_course_user.github_token.github_login }}</strong><br>
+      <a href="{% url 'registration:course-github-deauthorize' course.code %}">Unlink GitHub account</a><br>
+      Authorized: {{ my_course_user.github_token.authorize_time|date:"F j, Y" }}
+      {% else %}
+      You have not yet linked a GitHub account.<br>
+      <a href="{% url 'registration:course-github-authorize' course.code %}">Link GitHub account</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="col-lg-6">
     <h2>Enrollment info</h2>
 
     <div class="border border-light p-4 bg-light rounded">
@@ -120,17 +135,6 @@
         <dt class="col-sm-3">Dropped</dt>
         <dd class="col-sm-9">
         {{ my_course_user.dropped|yesno:"yes,no" }}
-        </dd>
-
-        <dt class="col-sm-3">GitHub account</dt>
-        <dd class="col-sm-9">
-        {% if my_course_user.github_token %}
-        <strong>{{ my_course_user.github_token.github_login }}</strong><br>
-        {{ my_course_user.github_token.authorize_time|date:"l, F j, Y" }}
-        {% else %}
-        Not yet associated.<br>
-        <a href="{% url 'registration:course-github-authorize' course.code %}">Authorize</a>
-        {% endif %}
         </dd>
       </dl>
 
