@@ -14,19 +14,11 @@
   <small class="text-muted">{{ course.code }}</small>
 </h1>
 
-<h2>GitHub account</h2>
-
-<p>You need to associate your GitHub account before proceeding to create your repository.</p>
+<h3>You need to link your GitHub account before creating your repository.</h3>
 
 <div class="border border-light p-4 bg-light rounded">
-  {% if my_course_user.github_token %}
-  <strong>{{ my_course_user.github_token.github_login }}</strong><br>
-  <a href="{% url 'registration:course-github-deauthorize' course.code %}">Unlink GitHub account</a><br>
-  Authorized: {{ my_course_user.github_token.authorize_time|date:"F j, Y" }}
-  {% else %}
-  You have not yet linked a GitHub account.<br>
-  <a href="{% url 'registration:course-github-authorize' course.code %}">Link GitHub account</a>
-  {% endif %}
+  <p>You have not yet linked a GitHub account.</p>
+  <a href="{% url 'registration:course-github-authorize' course.code %}" class="btn btn-primary btn-large">Link GitHub account</a>
 </div>
 
 

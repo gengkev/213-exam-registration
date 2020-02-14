@@ -293,7 +293,10 @@ def course_github_landing(request, course_code):
 
     # If we already have the data: redirect directly there
     if hasattr(my_course_user, 'github_token'):
-        dest_uri = "http://github213.cs.cmu.edu/?andrewid={}".format(my_course_user.user.username)
+        dest_uri = "{}?andrewid={}".format(
+            settings.COURSE_GITHUB_LANDING_REDIRECT,
+            my_course_user.user.username,
+        )
         return HttpResponseRedirect(dest_uri)
 
     return render(request, 'registration/course_github_landing.html', {
