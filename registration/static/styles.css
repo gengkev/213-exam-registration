@@ -62,14 +62,15 @@ h1, h2, h3 {
 /* Exam slot form */
 /* Credit: https://stackoverflow.com/a/48273098/689161 */
 .exam-slot-group input[type=radio] {
-  width: 1px;
-  height: 1px;
+  width: 0px;
+  height: 0px;
   opacity: 0;
 }
 .exam-slot-group .list-group-item {
   user-select: none;
   cursor: pointer;
   background-color: #f6f6f6;
+  margin-bottom: -1px;  /* account for overlapping border */
 }
 .exam-slot-group .list-group-item:first-of-type {
   border-top-left-radius: .25rem;
