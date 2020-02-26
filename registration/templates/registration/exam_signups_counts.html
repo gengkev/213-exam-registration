@@ -76,7 +76,7 @@
           <tr>
             <th scope="col">#</th>
             <th scope="col">Start time</th>
-            <th scope="col">End time</th>
+            <th scope="col">Room</th>
             <th scope="col">Signups</th>
             <th scope="col">Capacity</th>
           </tr>
@@ -87,8 +87,8 @@
           {% for slot in time_slot_day.list %}
           <tr>
             <th scope="row">{{ forloop.counter }}</th>
-            <td>{{ slot.start_time|time:"h:i a" }}</td>
-            <td>{{ slot.end_time|time:"h:i a" }}</td>
+            <td title="Ends at {{ slot.end_time|time:"h:i a" }}">{{ slot.start_time|time:"h:i a" }}</td>
+            <td>{{ slot.room }}</td>
             <td>{{ slot.count_num_registered }}</td>
             <td>{{ slot.capacity }}</td>
           </tr>
@@ -124,7 +124,7 @@
           <tr>
             <th scope="col">#</th>
             <th scope="col">Start time</th>
-            <th scope="col">End time</th>
+            <th scope="col">Room</th>
             <th scope="col">Slot type</th>
             <th scope="col">Signups</th>
             <th scope="col">Slots left</th>
@@ -136,8 +136,8 @@
           {% for slot in exam_day.list %}
           <tr>
             <th scope="row">{{ forloop.counter }}</th>
-            <td>{{ slot.get_start_time|time:"h:i a" }}</td>
-            <td>{{ slot.get_end_time|time:"h:i a" }}</td>
+            <td title="Ends at {{ slot.get_end_time|time:"h:i a" }}">{{ slot.get_start_time|time:"h:i a" }}</td>
+            <td>{{ slot.get_room }}</td>
             <td>{{ slot.exam_slot_type_display }}</td>
             <td>{{ slot.count_num_registered }}</td>
             <td>{{ slot.count_slots_left }}</td>
