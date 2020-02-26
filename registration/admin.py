@@ -41,7 +41,7 @@ class TimeSlotsInstanceForm(forms.ModelForm):
         if time_slot.pk:
             # Filter selectable rooms by course
             course_rooms = Room.objects.filter(course=time_slot.exam.course)
-            self.fields['rooms'].queryset = course_rooms
+            self.fields['room'].queryset = course_rooms
 
 
 class ExamSlotsInstanceForm(forms.ModelForm):

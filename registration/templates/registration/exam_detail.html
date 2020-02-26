@@ -47,11 +47,11 @@
 </div>
 
 
-<div class="alert alert-secondary" role="alert">
+<div class="alert alert-light" role="alert">
   <strong><i class="fa fa-clock-o" aria-hidden="true"></i> Time zone:</strong>
-  All times below are displayed in your current timezone,
+  All times below are displayed in timezone
   <tt>{{ request.user.timezone }}</tt>.
-  You can change this setting in your
+  Change this setting in your
   <a href="{% url 'registration:profile' %}">profile</a>.
 </div>
 
@@ -80,6 +80,12 @@
           at
           {{ slot.get_start_time|time:"h:i a" }}
         </h5>
+
+        {% if slot.get_room %}
+        <span class="ml-3">
+          {{ slot.get_room }}
+        </span>
+        {% endif %}
 
         <span class="ml-3 text-muted" title="Ends at {{ slot.get_end_time|time:"h:i a" }}">
           {{ slot.get_end_time|timeuntil:slot.get_start_time }} long
@@ -214,8 +220,14 @@
               {{ slot.get_start_time|time:"h:i a" }}
             </h5>
 
+            {% if slot.get_room %}
+            <span class="ml-3">
+              {{ slot.get_room }}
+            </span>
+            {% endif %}
+
             <span class="ml-3 text-muted" title="Ends at {{ slot.get_end_time|time:"h:i a" }}">
-              {{ slot.get_end_time|timeuntil:slot.get_start_time }} long
+              {{ slot.get_end_time|timeuntil:slot.get_start_time }}
             </span>
 
             <span class="ml-3 text-muted float-right" title="{{ num_reg }} registered, {{ slots_left }} seat{{ slots_left|pluralize }} left">
@@ -287,8 +299,10 @@
         <!-- Slot of the wrong type -->
         {% if wrong_type_slot %}
         {% with exam_reg.exam_slot as slot %}
+        {% with slots_left=slot.count_slots_left num_reg=slot.count_num_registered %}
         <input type="radio" id="id_exam_slot_{{ slot.pk }}"
             name="exam_slot" value="{{ slot.pk }}"
+            class="{% if slots_left <= 0 and slot.pk != exam_reg.exam_slot.pk %}disabled-slot{% endif %} {% if slot.pk == exam_reg.exam_slot.pk %}registered-slot{% endif %}"
             {% if slot.pk == selected_slot %}checked{% endif %}>
 
         <label class="list-group-item list-group-item-action d-flex"
@@ -304,14 +318,23 @@
               {{ slot.get_start_time|time:"h:i a" }}
             </h5>
 
+            {% if slot.get_room %}
+            <span class="ml-3">
+              {{ slot.get_room }}
+            </span>
+            {% endif %}
+
             <span class="ml-3 text-muted" title="Ends at {{ slot.get_end_time|time:"h:i a" }}">
-              {{ slot.get_end_time|timeuntil:slot.get_start_time }} long
+              {{ slot.get_end_time|timeuntil:slot.get_start_time }}
             </span>
 
-            <span class="ml-3 text-muted float-right">
-              {{ slot.count_slots_left }} slot{{ slot.count_slots_left|pluralize }} left
+            <span class="ml-3 text-muted float-right" title="{{ num_reg }} registered, {{ slots_left }} seat{{ slots_left|pluralize }} left">
+              {% if slots_left <= 0 %}
+              No seats left
+              {% else %}
+              {{ slots_left }}&nbsp;seat{{ slots_left|pluralize }} left
+              {% endif %}
             </span>
-
             <!--
             <div>
               {% if slot.pk == exam_reg.exam_slot.pk %}
@@ -323,6 +346,7 @@
           </div>
         </label>
 
+        {% endwith %}
         {% endwith %}
         {% endif %}
 

@@ -221,7 +221,12 @@ class TimeSlot(models.Model):
     )
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
-    rooms = models.ManyToManyField(Room, blank=True)
+    room = models.ForeignKey(Room,
+        on_delete=models.CASCADE,
+        related_name='time_slot_set',
+        null=True,
+        blank=True,
+    )
     capacity = models.PositiveIntegerField()
     history = HistoricalRecords()
 
@@ -254,6 +259,7 @@ class TimeSlot(models.Model):
         # Ensure no overlapping time slots
         q = TimeSlot.objects.exclude(pk=self.pk).filter(
             exam=self.exam,
+            room=self.room,
             start_time__lt=self.end_time,
             end_time__gt=self.start_time,
         )
@@ -265,8 +271,9 @@ class TimeSlot(models.Model):
 
     def __str__(self):
         tz = timezone.get_current_timezone()
-        return "{:%Y-%m-%d %H:%M}".format(
+        return "{:%Y-%m-%d %H:%M} ({})".format(
             self.start_time.astimezone(tz),
+            self.room if self.room is not None else 'no room'
         )
 
     def __repr__(self):
@@ -275,8 +282,8 @@ class TimeSlot(models.Model):
         )
 
     class Meta:
-        unique_together = (('exam', 'start_time'),)
-        ordering = ['exam', 'start_time']
+        unique_together = (('exam', 'start_time', 'room'),)
+        ordering = ['exam', 'start_time', 'room']
 
 
 class ExamSlot(models.Model):
@@ -316,6 +323,10 @@ class ExamSlot(models.Model):
             .values('end_time') \
             .first()
         return q['end_time']
+
+    def get_room(self):
+        """Returns the room corresponding to this exam slot."""
+        return self.start_time_slot.room
 
     def count_num_registered(self):
         """Counts the number of users registered for this slot."""

@@ -135,7 +135,7 @@ class ExamEditForm(forms.ModelForm):
 class TimeSlotForm(forms.ModelForm):
     class Meta:
         model = TimeSlot
-        fields = ['start_time', 'end_time', 'capacity']
+        fields = ['start_time', 'end_time', 'room', 'capacity']
 
 
 TimeSlotFormSet = forms.inlineformset_factory(
