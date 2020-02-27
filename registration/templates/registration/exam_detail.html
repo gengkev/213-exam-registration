@@ -196,6 +196,7 @@
 
       <div class="list-group exam-slot-group mb-4">
         {% for slot in exam_day.list %}
+        {% if slot.count_capacity > 0 %}
         {% with slots_left=slot.count_slots_left num_reg=slot.count_num_registered %}
 
         <input type="radio"
@@ -204,8 +205,6 @@
             value="{{ slot.pk }}"
             class="{% if slots_left <= 0 and slot.pk != exam_reg.exam_slot.pk %}disabled-slot{% endif %} {% if slot.pk == exam_reg.exam_slot.pk %}registered-slot{% endif %}"
             {% if slot.pk == selected_slot %}checked{% endif %}>
-
-        {{ request.course_user.instructor }}
 
         <label class="list-group-item list-group-item-action d-flex"
             for="id_exam_slot_{{ slot.pk }}">
@@ -230,7 +229,7 @@
               {{ slot.get_end_time|timeuntil:slot.get_start_time }}
             </span>
 
-            <span class="ml-3 text-muted float-right" title="{{ num_reg }} registered, {{ slots_left }} seat{{ slots_left|pluralize }} left">
+            <span class="ml-3 text-muted float-right" title="{{ num_reg }} registered, {{ slots_left }} seat{{ slots_left|pluralize }} left, theoretical capacity {{ slot.count_capacity }}">
               {% if slots_left <= 0 %}
               No seats left
               {% else %}
@@ -250,6 +249,7 @@
         </label>
 
         {% endwith %}
+        {% endif %}
         {% endfor %} {# slot #}
       </div> {# .list-group #}
     </div> {# .col-lg-6 #}

@@ -339,6 +339,13 @@ class ExamSlot(models.Model):
             for time_slot in self.time_slots.all()
         )
 
+    def count_capacity(self):
+        """Returns the theoretical capacity if there were no registrations."""
+        return min(
+            time_slot.capacity
+            for time_slot in self.time_slots.all()
+        )
+
     def clean(self, *args, **kwargs):
         """Validates consistency of ExamSlot objects.
 
