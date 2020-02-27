@@ -196,7 +196,7 @@
 
       <div class="list-group exam-slot-group mb-4">
         {% for slot in exam_day.list %}
-        {% if slot.count_capacity > 0 %}
+        {% if slot.count_capacity > 0 or requrest.course_user.is_instructor %}
         {% with slots_left=slot.count_slots_left num_reg=slot.count_num_registered %}
 
         <input type="radio"
