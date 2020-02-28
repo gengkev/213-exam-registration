@@ -71,8 +71,10 @@
       {{ slot.get_start_time|time:"h:i a" }}
       <span class="text-muted">
         &ndash; {{ slot.get_end_time|time:"h:i a" }}
-        ({{slot.exam_slot_type_display }})
       </span>
+      <span class="text-muted">in</span>
+      {{ slot.get_room }}
+      <span class="text-muted">({{slot.exam_slot_type_display }})</span>
     </h3>
     <div class="table-responsive-md">
       <table class="table table-sm table-hover">
