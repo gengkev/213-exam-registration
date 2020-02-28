@@ -728,7 +728,9 @@ def exam_detail(request, course_code, exam_id):
         .filter(exam_slot_type=my_course_user.exam_slot_type) \
         .annotate(day=TruncDay('start_time_slot__start_time')) \
         .select_related('start_time_slot') \
-        .prefetch_related('time_slots')
+        .select_related('start_time_slot__room') \
+        .prefetch_related('time_slots') \
+        .prefetch_related('time_slots__exam_slot_set')
 
     # Currently selected slot is wrong type
     wrong_type_slot = (exam_reg.exam_slot and
@@ -878,9 +880,13 @@ def exam_signups_counts(request, course_code, exam_id):
 
     # Compute time slots, exam slots
     time_slots = exam.time_slot_set \
-            .annotate(day=TruncDay('start_time'))
+            .annotate(day=TruncDay('start_time')) \
+            .prefetch_related('exam_slot_set')
     exam_slots = exam.exam_slot_set \
-            .annotate(day=TruncDay('start_time_slot__start_time'))
+            .annotate(day=TruncDay('start_time_slot__start_time')) \
+            .select_related('start_time_slot') \
+            .prefetch_related('time_slots') \
+            .prefetch_related('time_slots__exam_slot_set')
 
     # Compute unregistered users
     num_course_users = course.course_user_set \

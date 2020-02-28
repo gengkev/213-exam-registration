@@ -236,9 +236,14 @@ class TimeSlot(models.Model):
         during this slot. The value of this field should not be greater
         than the capacity of this time slot, unless overridden manually.
         """
-        q = self.exam_slot_set \
-            .aggregate(overlap_count=models.Sum('reg_count'))
-        return q['overlap_count']
+        # The aggregate performs worse due to prefetching!
+        #q = self.exam_slot_set \
+        #    .aggregate(overlap_count=models.Sum('reg_count'))
+        #return q['overlap_count']
+        return sum(
+            exam_slot.reg_count
+            for exam_slot in self.exam_slot_set.all()
+        )
 
     def clean(self, *args, **kwargs):
         """Validates consistency of TimeSlot objects."""
@@ -322,11 +327,16 @@ class ExamSlot(models.Model):
 
     def get_end_time(self):
         """Returns the end time of this exam slot."""
-        q = self.time_slots \
-            .order_by('-end_time') \
-            .values('end_time') \
-            .first()
-        return q['end_time']
+        # The aggregate performs worse due to prefetching!
+        #q = self.time_slots \
+        #    .order_by('-end_time') \
+        #    .values('end_time') \
+        #    .first()
+        #return q['end_time']
+        return max(
+            time_slot.end_time
+            for time_slot in self.time_slots.all()
+        )
 
     def get_room(self):
         """Returns the room corresponding to this exam slot."""
@@ -353,6 +363,10 @@ class ExamSlot(models.Model):
 
     def count_capacity(self):
         """Returns the theoretical capacity if there were no registrations."""
+        # The aggregate performs worse due to prefetching!
+        #q = self.time_slots \
+        #    .aggregate(min_capacity=models.Min('capacity'))
+        #return q['min_capacity']
         return min(
             time_slot.capacity
             for time_slot in self.time_slots.all()
