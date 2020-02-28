@@ -139,7 +139,7 @@
             <td title="Ends at {{ slot.get_end_time|time:"h:i a" }}">{{ slot.get_start_time|time:"h:i a" }}</td>
             <td>{{ slot.get_room }}</td>
             <td>{{ slot.exam_slot_type_display }}</td>
-            <td>{{ slot.count_num_registered }}</td>
+            <td>{{ slot.reg_count }}</td>
             <td>{{ slot.count_slots_left }}</td>
           </tr>
           {% endfor %}
@@ -151,5 +151,17 @@
 
   {% endfor %}
 </div>
+
+{# Check for and fix any consistency issues with reg_count #}
+<ul class="text-danger">
+  {% for slot in exam_slots %}
+  {% if slot.reg_count != slot.exam_registration_set.count %}
+  <li>
+    <strong>Warning:</strong>
+    Exam slot count was incorrect: {{ slot }}: {{slot.update_reg_count }}
+  </li>
+  {% endif %}
+  {% endfor %}
+</ul>
 
 {% endblock %}

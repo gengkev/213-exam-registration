@@ -313,6 +313,16 @@ class SlotCountingTests(TestCase):
         make_exam_slots(self)
         make_registered_users(self)
 
+    def refresh_objects(self):
+        for time_slot in self.time_slots:
+            time_slot.refresh_from_db()
+
+        for exam_slot in self.exam_slots:
+            exam_slot.refresh_from_db()
+
+        for exam_reg in self.exam_registrations:
+            exam_reg.refresh_from_db()
+
     def test_counts_with_no_registrations(self):
         """
         Tests the results of the accessor methods in TimeSlot and ExamSlot
@@ -322,9 +332,9 @@ class SlotCountingTests(TestCase):
         self.assertEqual(self.time_slots[1].count_num_registered(), 0)
         self.assertEqual(self.time_slots[2].count_num_registered(), 0)
 
-        self.assertEqual(self.exam_slots[0].count_num_registered(), 0)
-        self.assertEqual(self.exam_slots[1].count_num_registered(), 0)
-        self.assertEqual(self.exam_slots[2].count_num_registered(), 0)
+        self.assertEqual(self.exam_slots[0].reg_count, 0)
+        self.assertEqual(self.exam_slots[1].reg_count, 0)
+        self.assertEqual(self.exam_slots[2].reg_count, 0)
 
         self.assertEqual(self.exam_slots[0].count_slots_left(), 2)
         self.assertEqual(self.exam_slots[1].count_slots_left(), 2)
@@ -335,17 +345,20 @@ class SlotCountingTests(TestCase):
         Tests the results of the accessor methods in TimeSlot and ExamSlot
         when there is one registration.
         """
-        exam_reg = self.exam_registrations[0]
-        exam_reg.exam_slot = self.exam_slots[1]
-        exam_reg.save()
+        ExamRegistration.update_slot(
+            self.exam_registrations[0].pk,
+            self.exam_slots[1].pk,
+        )
+
+        self.refresh_objects()
 
         self.assertEqual(self.time_slots[0].count_num_registered(), 0)
         self.assertEqual(self.time_slots[1].count_num_registered(), 1)
         self.assertEqual(self.time_slots[2].count_num_registered(), 1)
 
-        self.assertEqual(self.exam_slots[0].count_num_registered(), 0)
-        self.assertEqual(self.exam_slots[1].count_num_registered(), 1)
-        self.assertEqual(self.exam_slots[2].count_num_registered(), 0)
+        self.assertEqual(self.exam_slots[0].reg_count, 0)
+        self.assertEqual(self.exam_slots[1].reg_count, 1)
+        self.assertEqual(self.exam_slots[2].reg_count, 0)
 
         self.assertEqual(self.exam_slots[0].count_slots_left(), 1)
         self.assertEqual(self.exam_slots[1].count_slots_left(), 1)
@@ -356,21 +369,24 @@ class SlotCountingTests(TestCase):
         Tests the results of the accessor methods in TimeSlot and ExamSlot
         when there are two registrations in the same exam slot.
         """
-        exam_reg = self.exam_registrations[0]
-        exam_reg.exam_slot = self.exam_slots[0]
-        exam_reg.save()
+        ExamRegistration.update_slot(
+            self.exam_registrations[0].pk,
+            self.exam_slots[0].pk,
+        )
+        ExamRegistration.update_slot(
+            self.exam_registrations[1].pk,
+            self.exam_slots[0].pk,
+        )
 
-        exam_reg = self.exam_registrations[1]
-        exam_reg.exam_slot = self.exam_slots[0]
-        exam_reg.save()
+        self.refresh_objects()
 
         self.assertEqual(self.time_slots[0].count_num_registered(), 2)
         self.assertEqual(self.time_slots[1].count_num_registered(), 2)
         self.assertEqual(self.time_slots[2].count_num_registered(), 0)
 
-        self.assertEqual(self.exam_slots[0].count_num_registered(), 2)
-        self.assertEqual(self.exam_slots[1].count_num_registered(), 0)
-        self.assertEqual(self.exam_slots[2].count_num_registered(), 0)
+        self.assertEqual(self.exam_slots[0].reg_count, 2)
+        self.assertEqual(self.exam_slots[1].reg_count, 0)
+        self.assertEqual(self.exam_slots[2].reg_count, 0)
 
         self.assertEqual(self.exam_slots[0].count_slots_left(), 0)
         self.assertEqual(self.exam_slots[1].count_slots_left(), 0)
@@ -381,25 +397,28 @@ class SlotCountingTests(TestCase):
         Tests the results of the accessor methods in TimeSlot and ExamSlot
         when there are three registrations in different exam slots.
         """
-        exam_reg = self.exam_registrations[0]
-        exam_reg.exam_slot = self.exam_slots[0]
-        exam_reg.save()
+        ExamRegistration.update_slot(
+            self.exam_registrations[0].pk,
+            self.exam_slots[0].pk,
+        )
+        ExamRegistration.update_slot(
+            self.exam_registrations[1].pk,
+            self.exam_slots[1].pk,
+        )
+        ExamRegistration.update_slot(
+            self.exam_registrations[2].pk,
+            self.exam_slots[2].pk,
+        )
 
-        exam_reg = self.exam_registrations[1]
-        exam_reg.exam_slot = self.exam_slots[1]
-        exam_reg.save()
-
-        exam_reg = self.exam_registrations[2]
-        exam_reg.exam_slot = self.exam_slots[2]
-        exam_reg.save()
+        self.refresh_objects()
 
         self.assertEqual(self.time_slots[0].count_num_registered(), 1)
         self.assertEqual(self.time_slots[1].count_num_registered(), 2)
         self.assertEqual(self.time_slots[2].count_num_registered(), 2)
 
-        self.assertEqual(self.exam_slots[0].count_num_registered(), 1)
-        self.assertEqual(self.exam_slots[1].count_num_registered(), 1)
-        self.assertEqual(self.exam_slots[2].count_num_registered(), 1)
+        self.assertEqual(self.exam_slots[0].reg_count, 1)
+        self.assertEqual(self.exam_slots[1].reg_count, 1)
+        self.assertEqual(self.exam_slots[2].reg_count, 1)
 
         self.assertEqual(self.exam_slots[0].count_slots_left(), 0)
         self.assertEqual(self.exam_slots[1].count_slots_left(), 0)

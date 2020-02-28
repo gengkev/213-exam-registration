@@ -237,7 +237,6 @@ class TimeSlot(models.Model):
         than the capacity of this time slot, unless overridden manually.
         """
         q = self.exam_slot_set \
-            .annotate(reg_count=models.Count('exam_registration_set')) \
             .aggregate(overlap_count=models.Sum('reg_count'))
         return q['overlap_count']
 
@@ -298,12 +297,17 @@ class ExamSlot(models.Model):
     time_slots = models.ManyToManyField(TimeSlot,
         related_name='exam_slot_set',
     )
+    reg_count = models.PositiveIntegerField(
+        default=0,
+        editable=False,
+    )
     history = HistoricalRecords()
 
     # Type of exam slot this is
     exam_slot_type = models.CharField(
         max_length=1,
         choices=CourseUser.EXAM_SLOT_TYPE,
+        default=CourseUser.NORMAL,
     )
 
     def exam_slot_type_display(self):
@@ -328,9 +332,17 @@ class ExamSlot(models.Model):
         """Returns the room corresponding to this exam slot."""
         return self.start_time_slot.room
 
-    def count_num_registered(self):
+    def update_reg_count(self):
         """Counts the number of users registered for this slot."""
-        return self.exam_registration_set.count()
+        with transaction.atomic():
+            old_reg_count = self.reg_count
+            new_reg_count = self.exam_registration_set.count()
+
+            self.reg_count = new_reg_count
+            self.save(update_fields=['reg_count'])
+
+        return 'Updated invalid reg count from {} to {}'.format(
+                old_reg_count, new_reg_count)
 
     def count_slots_left(self):
         """Counts the number of remaining slots for this exam slot."""
@@ -363,9 +375,10 @@ class ExamSlot(models.Model):
 
     def __str__(self):
         tz = timezone.get_current_timezone()
-        return "{:%Y-%m-%d %H:%M} \u2013 {:%Y-%m-%d %H:%M} [{}]".format(
+        return "{:%Y-%m-%d %H:%M} \u2013 {:%Y-%m-%d %H:%M} [room={}] [type={}]".format(
             self.get_start_time().astimezone(tz),
             self.get_end_time().astimezone(tz),
+            self.start_time_slot.room,
             self.exam_slot_type_display(),
         )
 
@@ -387,6 +400,8 @@ class ExamRegistration(models.Model):
         on_delete=models.CASCADE,
         related_name='exam_registration_set',
     )
+    # This field should ONLY BE CHANGED by the update_slot() function.
+    # Otherwise, the database has the potential to become inconsistent.
     exam_slot = models.ForeignKey(ExamSlot,
         on_delete=models.SET_NULL,
         related_name='exam_registration_set',
@@ -447,10 +462,10 @@ class ExamRegistration(models.Model):
             request_time=None, force=False):
 
         warnings = set()
-        with transaction.atomic():
-            exam_reg = ExamRegistration.objects \
-                .select_for_update() \
-                .get(pk=exam_reg_pk)
+
+        # Check some basic facts
+        if True:
+            exam_reg = ExamRegistration.objects.get(pk=exam_reg_pk)
 
             # Enforce lock_before and lock_after
             exam = exam_reg.exam
@@ -467,41 +482,52 @@ class ExamRegistration(models.Model):
             if exam_reg.course_user.dropped:
                 warnings.add("You have dropped the course")
 
-            # Don't allow checked-in users to change.
-            if exam_reg.checkin_time:
-                warnings.add(
-                    "You have already been checked in for this exam"
-                )
 
-            # Clear exam slot (in transaction)
-            # This is so when counting registered in time slots below,
-            # we don't include ourselves in the count
-            exam_reg.exam_slot = None
-            exam_reg.save(update_fields=['exam_slot'])
+        # Begin atomic section
+        if not warnings:
+            with transaction.atomic():
+                exam_reg = ExamRegistration.objects.get(pk=exam_reg_pk)
 
-            # Try to update the slot
-            if exam_slot_pk is not None:
+                # Don't allow checked-in users to change.
+                if exam_reg.checkin_time:
+                    warnings.add(
+                        "You have already been checked in for this exam"
+                    )
 
-                # Get new exam slot, time slot list
-                exam_slot = ExamSlot.objects \
-                    .get(pk=exam_slot_pk)
-                time_slot_list = exam_slot.time_slots \
-                    .select_for_update()
+                # Clear exam slot (in transaction)
+                # This is so when counting registered in time slots below,
+                # we don't include ourselves in the count
+                if exam_reg.exam_slot is not None:
+                    old_exam_slot = exam_reg.exam_slot
+                    old_exam_slot.reg_count -= 1
+                    old_exam_slot.save(update_fields=['reg_count'])
 
-                # Check that exam slot type is correct
-                if (exam_slot.exam_slot_type !=
-                        exam_reg.course_user.exam_slot_type):
-                    warnings.add("Wrong exam slot type")
-
-                # Check that all time slots have seats
-                for time_slot in time_slot_list:
-                    if (time_slot.count_num_registered() >=
-                            time_slot.capacity):
-                        warnings.add("Not enough seats left")
-
-                # Update the exam registration
-                exam_reg.exam_slot = exam_slot
+                exam_reg.exam_slot = None
                 exam_reg.save(update_fields=['exam_slot'])
+
+                # Try to update the slot
+                if exam_slot_pk is not None:
+
+                    # Get new exam slot, time slot list
+                    exam_slot = ExamSlot.objects.get(pk=exam_slot_pk)
+
+                    # Check that exam slot type is correct
+                    if (exam_slot.exam_slot_type !=
+                            exam_reg.course_user.exam_slot_type):
+                        warnings.add("Wrong exam slot type")
+
+                    # Check that all time slots have seats
+                    for time_slot in exam_slot.time_slots.all():
+                        if (time_slot.count_num_registered() >=
+                                time_slot.capacity):
+                            warnings.add("Not enough seats left")
+
+                    # Update the exam registration
+                    exam_slot.reg_count += 1
+                    exam_slot.save(update_fields=['reg_count'])
+
+                    exam_reg.exam_slot = exam_slot
+                    exam_reg.save(update_fields=['exam_slot'])
 
             if warnings and not force:
                 raise IntegrityError('; '.join(warnings))

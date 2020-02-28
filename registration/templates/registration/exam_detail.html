@@ -197,7 +197,7 @@
       <div class="list-group exam-slot-group mb-4">
         {% for slot in exam_day.list %}
         {% if slot.count_capacity > 0 or request.course_user.is_instructor %}
-        {% with slots_left=slot.count_slots_left num_reg=slot.count_num_registered %}
+        {% with slots_left=slot.count_slots_left num_reg=slot.reg_count %}
 
         <input type="radio"
             id="id_exam_slot_{{ slot.pk }}"
@@ -299,7 +299,7 @@
         <!-- Slot of the wrong type -->
         {% if wrong_type_slot %}
         {% with exam_reg.exam_slot as slot %}
-        {% with slots_left=slot.count_slots_left num_reg=slot.count_num_registered %}
+        {% with slots_left=slot.count_slots_left num_reg=slot.reg_count %}
         <input type="radio" id="id_exam_slot_{{ slot.pk }}"
             name="exam_slot" value="{{ slot.pk }}"
             class="{% if slots_left <= 0 and slot.pk != exam_reg.exam_slot.pk %}disabled-slot{% endif %} {% if slot.pk == exam_reg.exam_slot.pk %}registered-slot{% endif %}"
