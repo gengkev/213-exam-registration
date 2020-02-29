@@ -1,6 +1,7 @@
 import codecs
 import csv
 from datetime import timedelta
+from itertools import chain
 
 from django.conf import settings
 from django.contrib import messages
@@ -8,9 +9,10 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db import transaction, IntegrityError, models
 from django.db.models.functions import TruncDay
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render, reverse
 from django.utils import timezone
+from django.utils.text import slugify
 from django.views import generic
 from django.views.decorators.http import (
     require_http_methods, require_safe, require_POST
@@ -866,6 +868,90 @@ def exam_signups(request, course_code, exam_id):
         'exam_slots': exam_slots,
         'unregistered_users': unregistered_users,
     })
+
+
+@require_safe
+@login_required
+def exam_signups_csv(request, course_code, exam_id):
+    course, _ = course_auth(request, course_code, instructor=True)
+    exam = get_object_or_404(
+        Exam,
+        pk=exam_id,
+        course=course,
+    )
+
+    # Compute registered users
+    exam_slot_query = (exam.exam_slot_set
+            .select_related('start_time_slot')
+            .prefetch_related('time_slots')
+            .prefetch_related('exam_registration_set')
+            .prefetch_related('exam_registration_set__course_user')
+            .prefetch_related('exam_registration_set__course_user__user'))
+    registered_users_rows = (
+        {
+            'user.username': exam_reg.course_user.user.username,
+            'user.first_name': exam_reg.course_user.user.first_name,
+            'user.last_name': exam_reg.course_user.user.last_name,
+            'user.slot_type': exam_reg.course_user.exam_slot_type_display(),
+            'exam_slot.slot_type': exam_slot.exam_slot_type_display(),
+            'exam_slot.start_time': exam_slot.get_start_time() \
+                    .strftime('%Y-%m-%d %H:%M:%S %Z%z'),
+            'exam_slot.end_time': exam_slot.get_end_time() \
+                    .strftime('%Y-%m-%d %H:%M:%S %Z%z'),
+            'exam_slot.room': exam_slot.start_time_slot.room,
+        }
+        for exam_slot in exam_slot_query
+        for exam_reg in exam_slot.exam_registration_set.all()
+    )
+
+    # Compute unregistered users
+    no_reg_q = ~models.Q(exam_registration_set__exam=exam)
+    null_reg_q = models.Q(exam_registration_set__exam=exam,
+            exam_registration_set__exam_slot=None)
+    unregistered_users_query = course.course_user_set \
+            .filter(no_reg_q | null_reg_q) \
+            .select_related('user')
+    unregistered_users_rows = (
+        {
+            'user.username': course_user.user.username,
+            'user.first_name': course_user.user.first_name,
+            'user.last_name': course_user.user.last_name,
+            'user.slot_type': course_user.exam_slot_type_display(),
+            'exam_slot.slot_type': None,
+            'exam_slot.start_time': None,
+            'exam_slot.end_time': None,
+            'exam_slot.room': None,
+        }
+        for course_user in unregistered_users_query
+    )
+
+    # Prepare response
+    filename = 'examreg_{}_{}_{}.csv'.format(
+        slugify(exam.course.code),
+        slugify(exam.name),
+        timezone.now().strftime('%Y%m%d-%H%M%S'),
+    )
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename=' + filename
+
+    # Write CSV rows
+    fieldnames = [
+        'user.username',
+        'user.first_name',
+        'user.last_name',
+        'user.slot_type',
+        'exam_slot.slot_type',
+        'exam_slot.start_time',
+        'exam_slot.end_time',
+        'exam_slot.room'
+    ]
+    writer = csv.DictWriter(response, fieldnames=fieldnames)
+    writer.writeheader()
+    for row in chain(registered_users_rows, unregistered_users_rows):
+        writer.writerow(row)
+
+    return response
 
 
 @require_safe

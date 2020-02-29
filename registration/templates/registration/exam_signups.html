@@ -26,6 +26,15 @@
   registered for each of them.
 </p>
 
+<div>
+  <a class="btn btn-success" role="button" href="{% url 'registration:exam-signups-csv' course.code exam.pk %}" title="Download CSV">
+    <i class="fa fa-download" aria-hidden="true"></i>
+    &nbsp;Download CSV
+  </a>
+</div>
+
+<hr class="mt-4">
+
 {# Group exam slots by day #}
 {% regroup exam_slots by day as exam_day_list %}
 
