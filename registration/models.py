@@ -513,7 +513,7 @@ class ExamRegistration(models.Model):
                 # we don't include ourselves in the count
                 if exam_reg.exam_slot is not None:
                     old_exam_slot = exam_reg.exam_slot
-                    old_exam_slot.reg_count = models.F('reg_count') - 1
+                    old_exam_slot.reg_count -= 1
                     old_exam_slot.save(update_fields=['reg_count'])
 
 
@@ -537,7 +537,7 @@ class ExamRegistration(models.Model):
                             warnings.add("Not enough seats left")
 
                     # Update the exam registration
-                    exam_slot.reg_count = models.F('reg_count') + 1
+                    exam_slot.reg_count += 1
                     exam_slot.save(update_fields=['reg_count'])
 
                     exam_reg.exam_slot = exam_slot
