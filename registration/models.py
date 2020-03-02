@@ -513,17 +513,17 @@ class ExamRegistration(models.Model):
                 # we don't include ourselves in the count
                 if exam_reg.exam_slot is not None:
                     old_exam_slot = exam_reg.exam_slot
-                    old_exam_slot.reg_count -= 1
+                    old_exam_slot.reg_count = models.F('reg_count') - 1
                     old_exam_slot.save(update_fields=['reg_count'])
 
-                exam_reg.exam_slot = None
-                exam_reg.save(update_fields=['exam_slot'])
 
                 # Try to update the slot
                 if exam_slot_pk is not None:
 
                     # Get new exam slot, time slot list
-                    exam_slot = ExamSlot.objects.get(pk=exam_slot_pk)
+                    exam_slot = ExamSlot.objects \
+                            .select_for_update() \
+                            .get(pk=exam_slot_pk)
 
                     # Check that exam slot type is correct
                     if (exam_slot.exam_slot_type !=
@@ -537,13 +537,17 @@ class ExamRegistration(models.Model):
                             warnings.add("Not enough seats left")
 
                     # Update the exam registration
-                    exam_slot.reg_count += 1
+                    exam_slot.reg_count = models.F('reg_count') + 1
                     exam_slot.save(update_fields=['reg_count'])
 
                     exam_reg.exam_slot = exam_slot
                     exam_reg.save(update_fields=['exam_slot'])
 
-            if warnings and not force:
-                raise IntegrityError('; '.join(warnings))
+                else:
+                    exam_reg.exam_slot = None
+                    exam_reg.save(update_fields=['exam_slot'])
+
+                if warnings and not force:
+                    raise IntegrityError('; '.join(warnings))
 
         return warnings
