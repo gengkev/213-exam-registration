@@ -24,7 +24,7 @@ SECRET_KEY = config('SECRET_KEY')
 # Application definition
 
 INSTALLED_APPS = [
-    'registration.apps.RegistrationConfig',
+    'project.apps.registration.apps.RegistrationConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -42,7 +42,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.auth.middleware.RemoteUserMiddleware',
-    'registration.middleware.TimezoneMiddleware',
+    'project.apps.registration.middleware.TimezoneMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'simple_history.middleware.HistoryRequestMiddleware',
@@ -53,7 +53,10 @@ ROOT_URLCONF = 'project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            # Templates that are shared across apps
+            os.path.join(BASE_DIR, 'project', 'templates'),
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -98,7 +101,7 @@ AUTH_USER_MODEL = 'registration.User'
 
 # Authentication backends to use
 AUTHENTICATION_BACKENDS = [
-    'registration.backends.CustomRemoteUserBackend',
+    'project.apps.registration.backends.CustomRemoteUserBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
 

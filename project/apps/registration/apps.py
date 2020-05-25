@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class RegistrationConfig(AppConfig):
-    name = 'registration'
+    name = 'project.apps.registration'
