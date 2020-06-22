@@ -22,11 +22,12 @@ class ProfileForm(forms.ModelForm):
         # Get timezones by country
         tz_timezones = [
             (
-                "{}: {}".format(code, pytz.country_names[code]),
+                "{} ({})".format(pytz.country_names[code], code),
                 [(tz, tz) for tz in tzlist],
             )
             for (code, tzlist) in pytz.country_timezones.items()
         ]
+        tz_timezones.sort()
 
         # Get all other timezones (ex. UTC)
         other_timezone_set = pytz.common_timezones_set
