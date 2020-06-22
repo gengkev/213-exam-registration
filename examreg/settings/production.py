@@ -1,4 +1,5 @@
 from .base import *
+import psycopg2
 
 DEBUG = False
 
@@ -27,6 +28,9 @@ DATABASES = {
         'PASSWORD': config('POSTGRES_DB_PASSWORD'),
         'HOST': 'localhost',
         'PORT': '',
+        'OPTIONS': {
+            'isolation_level': psycopg2.extensions.ISOLATION_LEVEL_SERIALIZABLE,
+        },
     }
 }
 
