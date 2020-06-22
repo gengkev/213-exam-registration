@@ -405,7 +405,7 @@ def course_github_callback(request, course_code):
     )
 
     # Compute the redirect URL
-    next_url = request.session.get('next_url', None)
+    next_url = request.session.pop('next_url', None)
     if next_url is None:
         next_url = reverse(
             'registration:course-detail',
