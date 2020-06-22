@@ -24,7 +24,7 @@ SECRET_KEY = config('SECRET_KEY')
 # Application definition
 
 INSTALLED_APPS = [
-    'project.apps.registration.apps.RegistrationConfig',
+    'registration.apps.RegistrationConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -42,21 +42,18 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.auth.middleware.RemoteUserMiddleware',
-    'project.apps.registration.middleware.TimezoneMiddleware',
+    'registration.middleware.TimezoneMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'simple_history.middleware.HistoryRequestMiddleware',
 ]
 
-ROOT_URLCONF = 'project.urls'
+ROOT_URLCONF = 'examreg.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
-            # Templates that are shared across apps
-            os.path.join(BASE_DIR, 'project', 'templates'),
-        ],
+        'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -69,7 +66,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'project.wsgi.application'
+WSGI_APPLICATION = 'examreg.wsgi.application'
 
 
 # Logging configuration
@@ -101,7 +98,7 @@ AUTH_USER_MODEL = 'registration.User'
 
 # Authentication backends to use
 AUTHENTICATION_BACKENDS = [
-    'project.apps.registration.backends.CustomRemoteUserBackend',
+    'registration.backends.CustomRemoteUserBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
 
