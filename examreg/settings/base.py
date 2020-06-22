@@ -179,6 +179,3 @@ AUTHLIB_OAUTH_CLIENTS = {
 
 # Token used for obtaining Andrew ID to GitHub mappings
 COURSE_GITHUB_INFO_TOKEN = config('COURSE_GITHUB_INFO_TOKEN')
-
-# URL to redirect to after passing the GitHub landing page
-COURSE_GITHUB_LANDING_REDIRECT = config('COURSE_GITHUB_LANDING_REDIRECT')

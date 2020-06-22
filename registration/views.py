@@ -12,6 +12,7 @@ from django.db.models.functions import TruncDay
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render, reverse
 from django.utils import timezone
+from django.utils.http import is_safe_url
 from django.utils.text import slugify
 from django.views import generic
 from django.views.decorators.http import (
@@ -293,13 +294,22 @@ def course_sudo(request, course_code):
 def course_github_landing(request, course_code):
     course, my_course_user = course_auth(request, course_code)
 
+    # Compute appropriate next_url
+    next_url = request.GET.get('next', None)
+    if not is_safe_url(next_url, settings.ALLOWED_HOSTS):
+        next_url = None
+    if next_url is None:
+        next_url = reverse(
+            'registration:course-detail',
+            args=[course.code],
+        )
+
     # If we already have the data: redirect directly there
     if hasattr(my_course_user, 'github_token'):
-        dest_uri = "{}?andrewid={}".format(
-            settings.COURSE_GITHUB_LANDING_REDIRECT,
-            my_course_user.user.username,
-        )
-        return HttpResponseRedirect(dest_uri)
+        return HttpResponseRedirect(next_url)
+
+    # Else save the next_url in the session
+    request.session['next_url'] = next_url
 
     return render(request, 'registration/course_github_landing.html', {
         'course': course,
@@ -391,12 +401,16 @@ def course_github_callback(request, course_code):
     messages.success(request,
         "Successfully authorized GitHub account {}".format(github_login),
     )
-    return HttpResponseRedirect(reverse(
-        # TODO: bad
-        #'registration:course-detail',
-        'registration:course-github-landing',
-        args=[course.code],
-    ))
+
+    # Compute the redirect URL
+    next_url = request.session.get('next_url', None)
+    if next_url is None:
+        next_url = reverse(
+            'registration:course-detail',
+            args=[course.code],
+        )
+
+    return HttpResponseRedirect(next_url)
 
 
 @require_safe
