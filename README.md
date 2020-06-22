@@ -17,3 +17,11 @@ Running development server:
 Or just:
 
     poetry run python manage.py runserver
+
+How to run assorted scripts in production:
+
+    $ ./run_script.sh import_instructors.py
+
+How to update the production server (git pull, etc):
+
+    $ ./update.sh
