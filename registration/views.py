@@ -386,6 +386,7 @@ def course_github_callback(request, course_code):
     # Try to fetch username
     g = Github(access_token)
     github_user = g.get_user()
+    github_user_id = github_user.id
     github_login = github_user.login
 
     # Update database (database integrity prevents duplicates)
@@ -394,6 +395,7 @@ def course_github_callback(request, course_code):
         access_token=access_token,
         token_type=token_type,
         scope=scope,
+        github_user_id=github_user_id,
         github_login=github_login,
     )
     github_token.save()

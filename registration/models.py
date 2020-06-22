@@ -156,6 +156,7 @@ class GithubToken(models.Model):
         on_delete=models.CASCADE,
         related_name='github_token',
     )
+    github_user_id = models.CharField(max_length=32, blank=True)
     github_login = models.CharField(max_length=64)
     token_type = models.CharField(max_length=32)
     access_token = models.CharField(max_length=64)
