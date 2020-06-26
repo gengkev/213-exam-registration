@@ -106,7 +106,7 @@
           {% for exam_reg in slot.exam_registration_set.all %}
           {% with exam_reg.course_user as course_user %}
 
-          <tr class="exam-user" data-examuser="{{ course_user.user.first_name }} {{ course_user.user.last_name }} {{ course_user.user.username }}">
+          <tr class="exam-user" data-examuser="{{ course_user.user.first_name }} {{ course_user.user.last_name }} // {{ course_user.user.username }} // lecture:{{ course_user.lecture }} section:{{ course_user.section }} // {{ exam_reg.checkin_room.name }} // {{ exam_reg.exam_password }}">
             <th scope="row">{{ forloop.counter }}</th>
             <td>
               {{ course_user.user.first_name }}
@@ -207,7 +207,7 @@
 
     <tbody>
       {% for course_user in unregistered_users %}
-      <tr class="exam-user" data-examuser="{{ course_user.user.first_name }} {{ course_user.user.last_name }} {{ course_user.user.username }}">
+      <tr class="exam-user" data-examuser="{{ course_user.user.first_name }} {{ course_user.user.last_name }} // {{ course_user.user.username }} // lecture:{{ course_user.lecture }} section:{{ course_user.section }}">
         <th scope="row">{{ forloop.counter }}</th>
         <td>
           {{ course_user.user.first_name }}
@@ -233,17 +233,17 @@
       var elts = document.getElementsByClassName('exam-user');
       var searchBox = document.getElementById('exam-user-search');
       searchBox.addEventListener('input', function () {
-        var content = searchBox.value;
+        // JavaScript doesn't have casefold, sorry German speakers
+        var content = searchBox.value.toLowerCase();
         for (var i = 0; i < elts.length; i++) {
           var elt = elts[i];
-          var s = elt.dataset.examuser;
+          var s = elt.dataset.examuser.toLowerCase();
           if (s.indexOf(content) != -1) {
             elt.style.display = '';
           } else {
             elt.style.display = 'none';
           }
         }
-        console.log('changed', content);
       });
     });
   </script>
