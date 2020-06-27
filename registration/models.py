@@ -499,7 +499,7 @@ class ExamRegistration(models.Model):
 
 
         # Begin atomic section
-        if not warnings:
+        if not warnings or force:
             with transaction.atomic():
                 exam_reg = ExamRegistration.objects.get(pk=exam_reg_pk)
 
